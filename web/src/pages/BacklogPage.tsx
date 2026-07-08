@@ -167,9 +167,6 @@ export default function BacklogPage() {
             </div>
           </div>
         </div>
-        <button onClick={() => setView(v => v === 'list' ? 'board' : 'list')} className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded hover:bg-[var(--bg-surface-raised)]">
-          {view === 'list' ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
-        </button>
       </div>
 
       <DndContext
