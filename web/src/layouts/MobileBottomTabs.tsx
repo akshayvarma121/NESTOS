@@ -4,7 +4,7 @@ import { Calendar, Lightbulb, Lock, Menu, ListTodo } from 'lucide-react';
 const tabs = [
   { name: 'Focus', path: '/focus', icon: Calendar },
   { name: 'Canvas', path: '/backlog', icon: ListTodo },
-  { name: 'Opps', path: '/opportunities', icon: Lightbulb },
+  { name: 'Dates', path: '/opportunities', icon: Lightbulb },
   { name: 'Vault', path: '/vault', icon: Lock },
   { name: 'More', path: '/settings', icon: Menu },
 ];

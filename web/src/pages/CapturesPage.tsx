@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { Inbox, Plus, Trash2 } from 'lucide-react';
 
 export default function CapturesPage() {
   const [captures, setCaptures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  
+  const [content, setContent] = useState('');
+  const [platform, setPlatform] = useState('');
 
   const fetchCaptures = async () => {
     try {
       const data = await api.get('/captures');
-      setCaptures(data);
+      setCaptures(data || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -20,68 +24,80 @@ export default function CapturesPage() {
     fetchCaptures();
   }, []);
 
-  const togglePosted = async (id: string, currentVal: boolean) => {
-    setCaptures(prev => prev.map(c => c.id === id ? { ...c, posted: !currentVal } : c));
-    try {
-      await api.patch(`/captures/${id}`, { posted: !currentVal });
-    } catch (e) {
-      console.error("Failed to toggle posted", e);
-      fetchCaptures(); // Revert
-    }
+  const handleAdd = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!content.trim()) return;
+
+    await api.post('/captures', { content, platform: platform || null });
+    setContent('');
+    setPlatform('');
+    fetchCaptures();
+  };
+
+  const handleDelete = async (id: string) => {
+    await api.delete(`/captures/${id}`);
+    fetchCaptures();
   };
 
   if (loading) return <div className="p-6 text-[var(--text-secondary)]">Loading...</div>;
 
   return (
-    <div className="p-6 md:p-8 h-[calc(100vh-80px)] flex flex-col max-w-4xl mx-auto">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold mb-1">Content Captures</h1>
-        <p className="text-[var(--text-secondary)] text-sm">Quick thoughts and milestone wins.</p>
+    <div className="p-6 md:p-8 max-w-3xl mx-auto pb-32">
+      <div className="flex items-center gap-3 mb-8">
+        <Inbox className="w-5 h-5 text-[var(--accent)]" />
+        <h1 className="text-2xl font-semibold">Captures</h1>
       </div>
 
-      <div className="flex-1 overflow-y-auto space-y-3 pb-24">
-        {captures.length === 0 ? (
-          <p className="text-center text-sm text-[var(--text-secondary)] mt-10">No captures yet. Use the FAB to add one.</p>
-        ) : (
-          captures.map(capture => {
-            let borderColor = 'border-[var(--border-hairline)]';
-            if (capture.tag === 'dsa_win') borderColor = 'border-l-[var(--accent)]';
-            else if (capture.tag === 'dev_milestone') borderColor = 'border-l-[#10b981]';
-            else if (capture.tag === 'random') borderColor = 'border-l-[#8b5cf6]';
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-4 mb-8">
+        <h2 className="text-sm font-medium mb-4">Quick Capture</h2>
+        <form onSubmit={handleAdd} className="space-y-3">
+          <textarea 
+            required placeholder="Idea or draft..."
+            value={content} onChange={e => setContent(e.target.value)}
+            className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)] min-h-[80px] resize-y"
+          />
+          <div className="flex gap-2">
+            <input 
+              placeholder="Tag (e.g. LinkedIn, Blog, Setup)"
+              value={platform} onChange={e => setPlatform(e.target.value)}
+              className="flex-1 bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
+            />
+            <button type="submit" className="bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2">
+              <Plus className="w-4 h-4" /> Save
+            </button>
+          </div>
+        </form>
+      </div>
 
-            return (
-              <div 
-                key={capture.id} 
-                className={`p-4 bg-[var(--bg-surface)] border-y border-r border-l-4 rounded-lg flex items-start justify-between gap-4 transition-colors hover:border-r-[var(--text-secondary)] ${borderColor} ${capture.posted ? 'opacity-50' : ''}`}
-              >
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-[var(--text-primary)] line-clamp-2 whitespace-pre-wrap">{capture.raw_text}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <span className="text-[10px] uppercase font-mono text-[var(--text-tertiary)] tracking-wider">
-                      {new Date(capture.created_at).toLocaleDateString()}
+      <div className="space-y-3">
+        {captures.length === 0 ? (
+          <p className="text-sm text-[var(--text-secondary)] text-center py-8">No captures saved.</p>
+        ) : (
+          captures.map(c => (
+            <div key={c.id} className="p-4 border border-[var(--border-hairline)] rounded-lg flex items-start justify-between gap-4 bg-[var(--bg-surface)]">
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-2 mb-2">
+                  {c.platform && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--accent)] text-white font-medium uppercase">
+                      {c.platform}
                     </span>
-                    {capture.linked_macro_id && capture.pos_macro_goals?.title && (
-                      <span className="text-[10px] uppercase font-mono text-[var(--text-tertiary)] tracking-wider bg-[var(--bg-surface-raised)] px-1.5 py-0.5 rounded">
-                        via {capture.pos_macro_goals.title}
-                      </span>
-                    )}
-                  </div>
+                  )}
+                  {c.creator?.username && (
+                    <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] text-[var(--text-secondary)]">
+                      {c.creator.username}
+                    </span>
+                  )}
+                  <span className="text-[10px] text-[var(--text-tertiary)] font-mono ml-auto">
+                    {new Date(c.created_at).toLocaleDateString()}
+                  </span>
                 </div>
-                
-                <div className="flex items-center gap-2 pt-1">
-                  <button 
-                    onClick={() => togglePosted(capture.id, capture.posted)}
-                    className="flex items-center gap-2 group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-surface)] focus-visible:ring-[var(--accent)] rounded"
-                  >
-                    <span className="text-xs text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors">Posted</span>
-                    <div className={`w-4 h-4 rounded border flex items-center justify-center transition-colors ${capture.posted ? 'bg-[var(--accent)] border-[var(--accent)]' : 'border-[var(--border-hairline)] bg-[var(--bg-base)]'}`}>
-                      {capture.posted && <svg className="w-3 h-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" /></svg>}
-                    </div>
-                  </button>
-                </div>
+                <p className="text-sm text-[var(--text-primary)] whitespace-pre-wrap">{c.content}</p>
               </div>
-            );
-          })
+              <button onClick={() => handleDelete(c.id)} className="p-2 text-[var(--text-secondary)] hover:text-red-500 transition-colors mt-4">
+                <Trash2 className="w-4 h-4" />
+              </button>
+            </div>
+          ))
         )}
       </div>
     </div>

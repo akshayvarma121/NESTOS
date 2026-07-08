@@ -5,7 +5,7 @@ const navItems = [
   { name: 'Focus', path: '/focus', icon: Calendar },
   { name: 'Backlog', path: '/backlog', icon: ListTodo },
   { name: 'Goals', path: '/goals', icon: Target },
-  { name: 'Opportunities', path: '/opportunities', icon: Lightbulb },
+  { name: 'Deadlines', path: '/opportunities', icon: Lightbulb },
   { name: 'Captures', path: '/captures', icon: Inbox },
   { name: 'Vault', path: '/vault', icon: Lock },
   { name: 'Partner', path: '/partner', icon: Users },

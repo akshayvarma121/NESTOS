@@ -7,20 +7,20 @@ router.use(requireAuth);
 
 router.get('/', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
-    .from('pos_simple_captures')
-    .select('*, creator:pos_user_profiles!pos_simple_captures_user_id_fkey(username)')
+    .from('pos_deadlines')
+    .select('*, creator:pos_user_profiles!pos_deadlines_user_id_fkey(username)')
     .in('user_id', req.sharedSpaceIds!)
-    .order('created_at', { ascending: false });
+    .order('deadline', { ascending: true });
     
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 router.post('/', async (req: AuthRequest, res) => {
-  const { content, platform } = req.body;
+  const { title, url, deadline } = req.body;
   const { data, error } = await supabase
-    .from('pos_simple_captures')
-    .insert([{ user_id: req.user!.id, content, platform }])
+    .from('pos_deadlines')
+    .insert([{ user_id: req.user!.id, title, url, deadline }])
     .select()
     .single();
     
@@ -31,7 +31,7 @@ router.post('/', async (req: AuthRequest, res) => {
 router.delete('/:id', async (req: AuthRequest, res) => {
   const { id } = req.params;
   const { error } = await supabase
-    .from('pos_simple_captures')
+    .from('pos_deadlines')
     .delete()
     .eq('id', id)
     .in('user_id', req.sharedSpaceIds!);

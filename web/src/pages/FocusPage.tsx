@@ -4,6 +4,7 @@ import { Check } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import CloseDayPanel from '../components/CloseDayPanel';
 import EditTimetablePanel from '../components/EditTimetablePanel';
+import CountdownTimer from '../components/CountdownTimer';
 
 const categoryColors: Record<string, string> = {
   academic: 'bg-[var(--accent)]',
@@ -43,6 +44,7 @@ export default function FocusPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [routines, setRoutines] = useState<any[]>([]);
   const [personalTodos, setPersonalTodos] = useState<any[]>([]);
+  const [deadlines, setDeadlines] = useState<any[]>([]);
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
@@ -59,17 +61,19 @@ export default function FocusPage() {
     try {
       await api.post('/scheduler/recompute');
       
-      const [taskData, membersData, routinesData, personalData] = await Promise.all([
+      const [taskData, membersData, routinesData, personalData, deadlinesData] = await Promise.all([
         api.get('/scheduler/focus'),
         api.get('/partner/space'),
         api.get(`/routines/day?day=${new Date().toLocaleDateString('en-US', { weekday: 'short' })}&date=${todayStr}`),
-        api.get('/personal-todos')
+        api.get('/personal-todos'),
+        api.get('/deadlines')
       ]);
       
       setTasks(taskData);
       setSpaceMembers(membersData);
       setRoutines(routinesData || []);
       setPersonalTodos(personalData || []);
+      setDeadlines(deadlinesData || []);
       
       if (taskData.length === 0) {
         const goalsData = await api.get('/macro-goals');
@@ -144,6 +148,8 @@ export default function FocusPage() {
       setPersonalTodos(prev => prev.filter(t => t.id !== tempId));
     }
   };
+
+  const activeDeadlines = deadlines.filter(d => new Date(d.deadline) > new Date()).slice(0, 3); // show up to 3 upcoming
 
   if (loading) return <div className="p-6 text-[var(--text-secondary)]">Recalibrating Focus...</div>;
 
