@@ -148,14 +148,6 @@ export default function AppLayout() {
         <MobileBottomTabs />
       </div>
 
-      {/* Floating Action Button (FAB) for Quick Capture */}
-      <button
-        onClick={() => setIsCaptureOpen(true)}
-        className="fixed bottom-[80px] lg:bottom-8 right-6 lg:right-8 w-14 h-14 bg-[var(--text-primary)] text-[var(--bg-base)] rounded-full shadow-[0_8px_30px_rgb(0,0,0,0.12)] flex items-center justify-center hover:scale-105 active:scale-95 transition-transform z-40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--bg-base)] focus-visible:ring-[var(--accent)]"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
-
       {/* Quick Capture Modal */}
       <QuickCapturePanel isOpen={isCaptureOpen} onClose={() => setIsCaptureOpen(false)} />
 
