@@ -6,7 +6,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.post('/', async (req: AuthRequest, res) => {
-  const { title, category, total_units, unit_label, deadline } = req.body;
+  const { title, category, total_units, unit_label, deadline, customSlices } = req.body;
   
   const { data: goal, error: goalError } = await supabase
     .from('pos_macro_goals')
@@ -16,12 +16,22 @@ router.post('/', async (req: AuthRequest, res) => {
     
   if (goalError) return res.status(500).json({ error: goalError.message });
 
-  // 2. Auto-slice Micro Tasks
-  const tasksToInsert = Array.from({ length: total_units }, (_, i) => ({
-    user_id: req.user!.id,
-    macro_id: goal.id,
-    title: `Unit ${i + 1}`,
-  }));
+  // 2. Insert Micro Tasks
+  let tasksToInsert = [];
+  if (customSlices && Array.isArray(customSlices) && customSlices.length > 0) {
+    tasksToInsert = customSlices.map((slice: any) => ({
+      user_id: req.user!.id,
+      macro_id: goal.id,
+      title: slice.title,
+      scheduled_date: slice.scheduled_date || null
+    }));
+  } else {
+    tasksToInsert = Array.from({ length: total_units }, (_, i) => ({
+      user_id: req.user!.id,
+      macro_id: goal.id,
+      title: `${unit_label} ${i + 1}`,
+    }));
+  }
 
   const { error: tasksError } = await supabase
     .from('pos_micro_tasks')
