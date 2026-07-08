@@ -113,9 +113,12 @@ export default function CalendarPage() {
         </div>
 
         {/* Calendar Grid */}
-        <div className="flex-1 grid grid-cols-7 grid-rows-5 lg:grid-rows-auto bg-[var(--border-hairline)] gap-px">
+        <div 
+          className="flex-1 grid grid-cols-7 bg-[var(--border-hairline)] gap-px"
+          style={{ gridTemplateRows: `repeat(${totalSlots / 7}, minmax(0, 1fr))` }}
+        >
           {loading ? (
-             <div className="col-span-7 row-span-5 flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-secondary)]">Loading Analytics...</div>
+             <div className="col-span-7 row-span-full flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-secondary)]">Loading Analytics...</div>
           ) : days.map((d, i) => {
             if (d === null) return <div key={`empty-${i}`} className="bg-[var(--bg-surface)]" />;
             
