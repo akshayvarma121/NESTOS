@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { supabase } from '../lib/supabase';
-import { api } from '../lib/api';
+
 
 export function LoginPage() {
   const [email, setEmail] = useState('');
@@ -63,7 +63,7 @@ export function RegisterPage() {
     setLoading(true);
     setError('');
     
-    const { error: signUpError } = await supabase.auth.signUp({ email, password });
+    const { data, error: signUpError } = await supabase.auth.signUp({ email, password });
     
     if (signUpError) {
       setError(signUpError.message);
@@ -73,9 +73,21 @@ export function RegisterPage() {
 
     // Attempt to create user profile immediately
     try {
-      await new Promise(r => setTimeout(r, 1000)); // wait briefly for session
-      await api.post('/partner/profile', { username });
-      window.location.href = '/';
+      if (data.session) {
+        // If session is returned synchronously, use it immediately
+        await fetch((import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api') + '/partner/profile', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${data.session.access_token}`
+          },
+          body: JSON.stringify({ username })
+        });
+        window.location.href = '/';
+      } else {
+        // Email confirmation required
+        setError('Registration successful! Please check your email to verify your account.');
+      }
     } catch (e: any) {
       setError('Failed to create profile: ' + e.message);
     }

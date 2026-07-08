@@ -3,6 +3,7 @@ import { api } from '../lib/api';
 import { Check } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import CloseDayPanel from '../components/CloseDayPanel';
+import EditTimetablePanel from '../components/EditTimetablePanel';
 
 const categoryColors: Record<string, string> = {
   academic: 'bg-[var(--accent)]',
@@ -40,41 +41,49 @@ function InlineEdit({ initialValue, onSave }: { initialValue: string, onSave: (v
 
 export default function FocusPage() {
   const [tasks, setTasks] = useState<any[]>([]);
+  const [routines, setRoutines] = useState<any[]>([]);
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [isCloseDayOpen, setIsCloseDayOpen] = useState(false);
+  const [isTimetableOpen, setIsTimetableOpen] = useState(false);
   
   const currentHour = new Date().getHours();
   const closeHour = parseInt(localStorage.getItem('pos_close_hour') || '21');
   const isPastClose = currentHour >= closeHour;
 
-  useEffect(() => {
-    async function init() {
-      try {
-        await api.post('/scheduler/recompute');
-        
-        const [taskData, membersData] = await Promise.all([
-          api.get('/scheduler/focus'), // Now fetches all scheduled tasks
-          api.get('/partner/space')
-        ]);
-        
-        setTasks(taskData);
-        setSpaceMembers(membersData);
-        
-        if (taskData.length === 0) {
-          const goalsData = await api.get('/macro-goals');
-          setHasGoals(goalsData.length > 0);
-        } else {
-          setHasGoals(true);
-        }
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
+  const todayStr = new Date().toISOString().split('T')[0];
+
+  const fetchFocusData = async () => {
+    try {
+      await api.post('/scheduler/recompute');
+      
+      const [taskData, membersData, routinesData] = await Promise.all([
+        api.get('/scheduler/focus'),
+        api.get('/partner/space'),
+        api.get(`/routines/day?day=${new Date().toLocaleDateString('en-US', { weekday: 'short' })}&date=${todayStr}`)
+      ]);
+      
+      setTasks(taskData);
+      setSpaceMembers(membersData);
+      setRoutines(routinesData || []);
+      
+      if (taskData.length === 0) {
+        const goalsData = await api.get('/macro-goals');
+        setHasGoals(goalsData.length > 0);
+      } else {
+        setHasGoals(true);
       }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
-    init();
+  };
+
+  useEffect(() => {
+    fetchFocusData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const toggleTask = async (id: string, currentStatus: string) => {
@@ -111,20 +120,28 @@ export default function FocusPage() {
 
   if (loading) return <div className="p-6 text-[var(--text-secondary)]">Recalibrating Focus...</div>;
 
-  if (tasks.length === 0 && hasGoals === false) {
+  if (tasks.length === 0 && routines.length === 0 && hasGoals === false) {
     return (
       <div className="p-8 flex flex-col items-center justify-center h-full max-w-md mx-auto text-center space-y-4">
-        <p className="text-[var(--text-secondary)]">No goals yet. Add one to start scheduling tasks.</p>
-        <NavLink to="/goals" className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-4 py-2 rounded-lg text-sm hover:bg-[var(--border-hairline)] transition-colors">
-          Go to Goals
-        </NavLink>
+        <p className="text-[var(--text-secondary)]">No goals or routines yet.</p>
+        <div className="flex gap-4">
+          <NavLink to="/goals" className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-4 py-2 rounded-lg text-sm hover:bg-[var(--border-hairline)] transition-colors">
+            Go to Goals
+          </NavLink>
+          <button 
+            onClick={() => setIsTimetableOpen(true)}
+            className="bg-[var(--accent)] text-[var(--bg-base)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+          >
+            Setup Timetable
+          </button>
+        </div>
+        <EditTimetablePanel isOpen={isTimetableOpen} onClose={() => setIsTimetableOpen(false)} onUpdate={fetchFocusData} />
       </div>
     );
   }
 
   // Active tasks mean they are not skipped
   const activeTasks = tasks.filter(t => t.status !== 'skipped');
-  const todayStr = new Date().toISOString().split('T')[0];
 
   const todayTasks = activeTasks.filter(t => t.scheduled_date === todayStr);
   const upcomingTasks = activeTasks.filter(t => t.scheduled_date !== todayStr && t.scheduled_date > todayStr);
@@ -207,17 +224,69 @@ export default function FocusPage() {
           <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider">{new Date().toDateString()}</p>
         </div>
         
-        <button 
-          onClick={() => setIsCloseDayOpen(true)}
-          className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border transition-colors ${
-            isPastClose 
-              ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--bg-base)] hover:bg-[var(--accent)]/90' 
-              : 'bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] text-[var(--text-primary)] hover:border-[var(--text-secondary)]'
-          }`}
-        >
-          Close Day
-        </button>
+        <div className="flex gap-2">
+          <button 
+            onClick={() => setIsTimetableOpen(true)}
+            className="px-3 py-1.5 text-sm font-medium rounded-[4px] border bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] text-[var(--text-primary)] hover:border-[var(--text-secondary)] transition-colors"
+          >
+            Timetable
+          </button>
+          <button 
+            onClick={() => setIsCloseDayOpen(true)}
+            className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border transition-colors ${
+              isPastClose 
+                ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--bg-base)] hover:bg-[var(--accent)]/90' 
+                : 'bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] text-[var(--text-primary)] hover:border-[var(--text-secondary)]'
+            }`}
+          >
+            Close Day
+          </button>
+        </div>
       </div>
+
+      {/* DAILY ROUTINE TIMETABLE */}
+      {routines.length > 0 && (
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
+            <span>Daily Routine</span>
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            {routines.map(routine => (
+              <button
+                key={routine.id}
+                onClick={async () => {
+                  // Optimistic
+                  setRoutines(prev => prev.map(r => r.id === routine.id ? { ...r, is_completed: !r.is_completed } : r));
+                  try {
+                    await api.post(`/routines/${routine.id}/toggle`, { date: todayStr });
+                  } catch (e) {
+                    fetchFocusData(); // Revert on error
+                  }
+                }}
+                className={`flex items-center gap-4 p-3 rounded-xl border text-left transition-colors ${
+                  routine.is_completed 
+                    ? 'bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-60' 
+                    : 'bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:border-[var(--text-secondary)]'
+                }`}
+              >
+                <div className={`w-5 h-5 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
+                  routine.is_completed ? 'bg-[var(--text-tertiary)] border-[var(--text-tertiary)]' : 'border-[var(--text-tertiary)]'
+                }`}>
+                  {routine.is_completed && <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />}
+                </div>
+                <div>
+                  <div className={`text-sm font-medium ${routine.is_completed ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
+                    {routine.title}
+                  </div>
+                  <div className="text-[10px] font-mono text-[var(--text-secondary)]">
+                    {routine.time_label}
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
 
       {/* OVERDUE */}
       {overdueTasks.length > 0 && (
@@ -230,43 +299,48 @@ export default function FocusPage() {
       )}
 
       {/* TODAY */}
-      <section className="space-y-4">
-        <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
-          <span>Today's Horizon</span>
-          <span className="text-xs font-mono text-[var(--text-tertiary)]">{todayTasks.length} tasks</span>
-        </h2>
-        {todayTasks.length === 0 ? (
-          <p className="text-sm text-[var(--text-secondary)] py-4 pl-3">Nothing scheduled for today. Relax, or pull something from the Backlog.</p>
-        ) : (
-          <div className="space-y-6">
-            {renderSubjectGroup(todayGrouped)}
-          </div>
-        )}
-      </section>
+      {(todayTasks.length > 0 || routines.length === 0) && (
+        <section className="space-y-4">
+          <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
+            <span>Today's Horizon</span>
+            <span className="text-xs font-mono text-[var(--text-tertiary)]">{todayTasks.length} tasks</span>
+          </h2>
+          {todayTasks.length === 0 ? (
+            <p className="text-sm text-[var(--text-secondary)] py-4 pl-3">Nothing scheduled for today. Relax, or pull something from the Backlog.</p>
+          ) : (
+            <div className="space-y-6">
+              {renderSubjectGroup(todayGrouped)}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* UPCOMING */}
-      <section className="space-y-4 pt-8">
-        <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
-          <span>Upcoming Horizon</span>
-          <span className="text-xs font-mono text-[var(--text-tertiary)]">{upcomingTasks.length} tasks</span>
-        </h2>
-        {upcomingTasks.length === 0 ? (
-          <p className="text-sm text-[var(--text-tertiary)] py-4 pl-3 italic">Nothing on the radar yet.</p>
-        ) : (
+      {upcomingTasks.length > 0 && (
+        <section className="space-y-4 pt-8">
+          <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
+            <span>Upcoming Horizon</span>
+            <span className="text-xs font-mono text-[var(--text-tertiary)]">{upcomingTasks.length} tasks</span>
+          </h2>
           <div className="space-y-6 opacity-75 hover:opacity-100 transition-opacity">
             {renderSubjectGroup(upcomingGrouped)}
           </div>
-        )}
-      </section>
+        </section>
+      )}
 
       <CloseDayPanel 
         isOpen={isCloseDayOpen} 
         onClose={() => setIsCloseDayOpen(false)} 
-        tasks={todayTasks} // Only close out today's tasks
+        tasks={todayTasks} 
         onTaskResolved={handleTaskResolved}
         onCloseDayComplete={() => {
           alert("Day closed successfully!");
         }}
+      />
+      <EditTimetablePanel 
+        isOpen={isTimetableOpen} 
+        onClose={() => setIsTimetableOpen(false)} 
+        onUpdate={fetchFocusData} 
       />
     </div>
   );
