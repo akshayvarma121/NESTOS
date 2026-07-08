@@ -29,6 +29,7 @@ Because the backend uses Express and background Cron Jobs, it needs a continuous
 4. **Start Command**: `npm start` (ensure your package.json has a start script like `"start": "node dist/index.js"` or `"start": "tsx src/index.js"`).
 5. **Environment Variables**: Add the following in the Render dashboard:
    - `PORT` = `10000` (Render defaults to 10000)
+   - `RENDER_EXTERNAL_URL` = `https://your-app-name.onrender.com` (Your Render URL to keep the app awake)
    - `SUPABASE_URL` = your_url
    - `SUPABASE_ANON_KEY` = your_anon_key
    - `SUPABASE_SERVICE_ROLE_KEY` = your_service_role_key

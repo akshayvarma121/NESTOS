@@ -154,3 +154,16 @@ cron.schedule('0 0 * * *', async () => {
     console.error('Daily Closeout Error:', err);
   }
 });
+
+// 4. Render Keep-Alive (Ping self every 4 minutes)
+cron.schedule('*/4 * * * *', async () => {
+  const pingUrl = process.env.RENDER_EXTERNAL_URL || process.env.API_URL;
+  if (pingUrl) {
+    try {
+      // Ping our own health check endpoint to prevent Render free-tier sleep
+      await fetch(`${pingUrl}/health`);
+    } catch (err) {
+      // Silently ignore ping errors
+    }
+  }
+});
