@@ -44,6 +44,7 @@ export default function FocusPage() {
   const [routines, setRoutines] = useState<any[]>([]);
   const [personalTodos, setPersonalTodos] = useState<any[]>([]);
   const [deadlines, setDeadlines] = useState<any[]>([]);
+  const [dashboardNotes, setDashboardNotes] = useState<any[]>([]);
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
@@ -55,12 +56,13 @@ export default function FocusPage() {
     try {
       await api.post('/scheduler/recompute');
       
-      const [taskData, membersData, routinesData, personalData, deadlinesData] = await Promise.all([
+      const [taskData, membersData, routinesData, personalData, deadlinesData, notesData] = await Promise.all([
         api.get('/scheduler/focus'),
         api.get('/partner/space'),
         api.get(`/routines/day?day=${new Date().toLocaleDateString('en-US', { weekday: 'short' })}&date=${todayStr}`),
         api.get('/personal-todos'),
-        api.get('/deadlines')
+        api.get('/deadlines'),
+        api.get('/notes')
       ]);
       
       setTasks(taskData);
@@ -68,6 +70,7 @@ export default function FocusPage() {
       setRoutines(routinesData || []);
       setPersonalTodos(personalData || []);
       setDeadlines(deadlinesData || []);
+      setDashboardNotes((notesData || []).filter((n: any) => n.type === 'dashboard'));
       
       if (taskData.length === 0) {
         const goalsData = await api.get('/macro-goals');
@@ -259,6 +262,29 @@ export default function FocusPage() {
           </button>
         </div>
       </div>
+
+      {/* STICKY NOTES */}
+      {dashboardNotes.length > 0 && (
+        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {dashboardNotes.map(note => {
+            const colorClass = 
+              note.color === 'yellow' ? 'bg-yellow-500/20 text-yellow-500 border-yellow-500/30' :
+              note.color === 'pink' ? 'bg-pink-500/20 text-pink-500 border-pink-500/30' :
+              note.color === 'blue' ? 'bg-blue-500/20 text-blue-500 border-blue-500/30' :
+              'bg-emerald-500/20 text-emerald-500 border-emerald-500/30';
+            
+            return (
+              <div key={note.id} className={`p-4 border rounded-xl flex flex-col gap-2 min-h-[100px] shadow-sm transform -rotate-1 hover:rotate-0 transition-transform ${colorClass}`}>
+                <div className="flex items-center justify-between opacity-50">
+                  <span className="text-[10px] font-mono uppercase">Sticky</span>
+                  <span className="text-[10px] font-mono">{note.creator?.username || 'You'}</span>
+                </div>
+                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
+              </div>
+            );
+          })}
+        </section>
+      )}
 
       {/* DAILY ROUTINE TIMETABLE */}
       {routines.length > 0 && (

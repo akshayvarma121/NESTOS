@@ -8,6 +8,7 @@ const navItems = [
   { name: 'Goals', path: '/goals', icon: BarChart2 },
   { name: 'Deadlines', path: '/opportunities', icon: Lightbulb },
   { name: 'Captures', path: '/captures', icon: Inbox },
+  { name: 'Notes', path: '/notes', icon: ListTodo },
   { name: 'Vault', path: '/vault', icon: Lock },
   { name: 'Partner', path: '/partner', icon: Users },
   { name: 'Settings', path: '/settings', icon: Settings },
