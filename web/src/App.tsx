@@ -1,6 +1,9 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import AppLayout from './layouts/AppLayout';
 
+import TodayPage from './pages/TodayPage';
+import GoalsPage from './pages/GoalsPage';
+
 // Placeholder Pages
 const Page = ({ title }: { title: string }) => (
   <div className="p-4 md:p-6 lg:p-8 text-[var(--text-primary)]">
@@ -17,9 +20,9 @@ function App() {
       <Routes>
         <Route path="/" element={<AppLayout />}>
           <Route index element={<Navigate to="/today" replace />} />
-          <Route path="today" element={<Page title="Today" />} />
+          <Route path="today" element={<TodayPage />} />
           <Route path="backlog" element={<Page title="Backlog" />} />
-          <Route path="goals" element={<Page title="Goals" />} />
+          <Route path="goals" element={<GoalsPage />} />
           <Route path="opportunities" element={<Page title="Opportunities" />} />
           <Route path="captures" element={<Page title="Captures" />} />
           <Route path="partner" element={<Page title="Partner" />} />

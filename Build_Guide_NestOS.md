@@ -232,3 +232,6 @@ Deploy and verify: set a PIN, add a real entry, lock the app by switching tabs, 
 The single biggest tell of an AI-generated dashboard is over-decoration: gradients, big rounded cards with heavy shadows, emoji in headers, bouncy spring animations on every interaction, and centered marketing-page layouts used for what should be dense utility screens. Everything in this guide pushes the opposite way — hairline borders instead of shadows, sharp 6px-max radius, mono font for anything numeric, single-accent color used only for primary actions and urgency states, and interaction patterns (slide-in panels, inline edit-on-click, optimistic drag updates) borrowed from real tools you already use daily (Linear, Notion, Things) rather than generic component-library defaults.
 
 If at any phase the agentic build starts reaching for gradient buttons, colorful badge pills, or a centered single-column "hero" layout on what should be a data screen — stop it there and re-paste the Phase 0 token constraints before continuing.
+
+
+NESTOS@ADMIN
