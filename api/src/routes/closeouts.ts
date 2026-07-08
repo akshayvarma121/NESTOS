@@ -1,34 +1,34 @@
 import { Router } from 'express';
 import { supabase } from '../supabase.js';
+import { requireAuth, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+router.use(requireAuth);
 
-// POST /api/close-day
-router.post('/', async (req, res) => {
-  const { date, tasks_planned, tasks_done, tasks_rolled_over } = req.body;
+router.post('/', async (req: AuthRequest, res) => {
+  const { total_scheduled, total_completed, rollover_count } = req.body;
+  const todayStr = new Date().toISOString().split('T')[0];
 
-  if (!date) return res.status(400).json({ error: 'date is required' });
-
-  // 1. Insert Daily Closeout summary
-  const { data: closeout, error: closeoutError } = await supabase
+  const { data, error } = await supabase
     .from('pos_daily_closeouts')
     .insert([{
-      date,
-      tasks_planned,
-      tasks_done,
-      tasks_rolled_over
+      user_id: req.user!.id,
+      date: todayStr,
+      total_scheduled,
+      total_completed,
+      rollover_count
     }])
     .select()
     .single();
 
-  if (closeoutError) {
-    if (closeoutError.code === '23505') { // Unique constraint violation (already closed)
-      return res.status(400).json({ error: 'This day is already closed.' });
+  if (error) {
+    if (error.code === '23505') {
+      return res.status(400).json({ error: 'Already closed out for today' });
     }
-    return res.status(500).json({ error: closeoutError.message });
+    return res.status(500).json({ error: error.message });
   }
 
-  res.status(201).json(closeout);
+  res.status(201).json(data);
 });
 
 export default router;

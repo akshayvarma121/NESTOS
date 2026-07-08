@@ -1,49 +1,35 @@
 import { Router } from 'express';
 import { supabase } from '../supabase.js';
+import { requireAuth, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+router.use(requireAuth);
 
-// POST /api/push/subscribe
-router.post('/subscribe', async (req, res) => {
-  const { endpoint, keys } = req.body;
-
-  if (!endpoint || !keys) {
-    return res.status(400).json({ error: 'Invalid subscription object' });
+router.post('/subscribe', async (req: AuthRequest, res) => {
+  const subscription = req.body;
+  
+  if (!subscription || !subscription.endpoint) {
+    return res.status(400).json({ error: 'Invalid subscription' });
   }
 
-  // Upsert subscription based on endpoint (avoiding duplicates)
-  // Since we don't have a unique constraint on endpoint natively, we'll try to find it first.
-  const { data: existing } = await supabase
+  // Delete existing for this user/endpoint if exists
+  await supabase
     .from('pos_push_subscriptions')
-    .select('id')
-    .eq('endpoint', endpoint)
-    .single();
+    .delete()
+    .eq('user_id', req.user!.id)
+    .eq('endpoint', subscription.endpoint);
 
-  if (existing) {
-    const { data, error } = await supabase
-      .from('pos_push_subscriptions')
-      .update({
-        keys_p256dh: keys.p256dh,
-        keys_auth: keys.auth
-      })
-      .eq('id', existing.id)
-      .select()
-      .single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json(data);
-  } else {
-    const { data, error } = await supabase
-      .from('pos_push_subscriptions')
-      .insert([{
-        endpoint,
-        keys_p256dh: keys.p256dh,
-        keys_auth: keys.auth
-      }])
-      .select()
-      .single();
-    if (error) return res.status(500).json({ error: error.message });
-    return res.status(201).json(data);
-  }
+  const { error } = await supabase
+    .from('pos_push_subscriptions')
+    .insert([{
+      user_id: req.user!.id,
+      endpoint: subscription.endpoint,
+      keys_p256dh: subscription.keys.p256dh,
+      keys_auth: subscription.keys.auth
+    }]);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.status(201).json({ success: true });
 });
 
 export default router;

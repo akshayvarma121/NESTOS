@@ -1,43 +1,54 @@
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+import { supabase } from './supabase';
 
-async function handleResponse(res: Response) {
-  if (!res.ok) {
-    const error = await res.json().catch(() => ({}));
-    throw new Error(error.error || `API Error: ${res.statusText}`);
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000/api';
+
+async function fetchWithAuth(endpoint: string, options: RequestInit = {}) {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(options.headers as Record<string, string> || {})
+  };
+
+  if (session?.access_token) {
+    headers['Authorization'] = `Bearer ${session.access_token}`;
   }
-  const data = await res.json();
+
+  const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    ...options,
+    headers
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => null);
+    throw new Error(errorData?.error || `API Error: ${response.statusText}`);
+  }
+
+  if (response.status === 204) {
+    return null;
+  }
+
+  const data = await response.json();
   
   // FR-10.1 Milestone Detection
   if (data && data.milestone_reached) {
     window.dispatchEvent(new CustomEvent('milestone_reached'));
   }
-  
+
   return data;
 }
 
 export const api = {
-  get: async (path: string) => {
-    const res = await fetch(`${API_BASE}${path}`);
-    return handleResponse(res);
-  },
-  post: async (path: string, body?: any) => {
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: body ? JSON.stringify(body) : undefined,
-    });
-    return handleResponse(res);
-  },
-  patch: async (path: string, body: any) => {
-    const res = await fetch(`${API_BASE}${path}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
-    return handleResponse(res);
-  },
-  delete: async (path: string) => {
-    const res = await fetch(`${API_BASE}${path}`, { method: 'DELETE' });
-    return handleResponse(res);
-  }
+  get: (endpoint: string) => fetchWithAuth(endpoint),
+  post: (endpoint: string, body?: any) => fetchWithAuth(endpoint, {
+    method: 'POST',
+    body: body ? JSON.stringify(body) : undefined
+  }),
+  patch: (endpoint: string, body?: any) => fetchWithAuth(endpoint, {
+    method: 'PATCH',
+    body: body ? JSON.stringify(body) : undefined
+  }),
+  delete: (endpoint: string) => fetchWithAuth(endpoint, {
+    method: 'DELETE'
+  })
 };

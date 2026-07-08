@@ -1,42 +1,41 @@
 import { Router } from 'express';
 import { supabase } from '../supabase.js';
+import { requireAuth, AuthRequest } from '../middleware/auth.js';
 
 const router = Router();
+router.use(requireAuth);
 
-// GET /api/captures
-router.get('/', async (req, res) => {
+router.get('/', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('pos_content_capture')
-    .select('*, pos_macro_goals(title)')
+    .select('*')
+    .eq('user_id', req.user!.id)
     .order('created_at', { ascending: false });
-
+    
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-// POST /api/captures
-router.post('/', async (req, res) => {
+router.post('/', async (req: AuthRequest, res) => {
   const { raw_text, tag, linked_macro_id } = req.body;
-
   const { data, error } = await supabase
     .from('pos_content_capture')
-    .insert([{ raw_text, tag, linked_macro_id }])
+    .insert([{ user_id: req.user!.id, raw_text, tag, linked_macro_id }])
     .select()
     .single();
-
+    
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
 
-// PATCH /api/captures/:id
-router.patch('/:id', async (req, res) => {
+router.patch('/:id/posted', async (req: AuthRequest, res) => {
   const { id } = req.params;
   const { posted } = req.body;
-
   const { data, error } = await supabase
     .from('pos_content_capture')
     .update({ posted })
     .eq('id', id)
+    .eq('user_id', req.user!.id)
     .select()
     .single();
 
