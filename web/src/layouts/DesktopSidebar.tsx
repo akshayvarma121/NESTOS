@@ -16,8 +16,8 @@ const navItems = [
 export default function DesktopSidebar() {
   return (
     <div className="flex flex-col h-full w-full py-4 px-3">
-      <div className="px-3 mb-6 flex items-center gap-2">
-        <img src="/logo.png" alt="NEST OS" className="w-8 h-8 rounded" />
+      <div className="px-3 mb-6">
+        <h2 className="text-sm font-semibold tracking-wide text-[var(--text-secondary)] uppercase">NestOS</h2>
       </div>
       <nav className="flex-1 space-y-1">
         {navItems.map((item) => (

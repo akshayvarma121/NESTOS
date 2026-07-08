@@ -66,11 +66,16 @@ export default function CalendarPage() {
 
   const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
+  const todayObj = new Date();
   // Helpers to get data for a specific date
   const getDateStr = (d: number) => {
     const mm = String(month + 1).padStart(2, '0');
     const dd = String(d).padStart(2, '0');
     return `${year}-${mm}-${dd}`;
+  };
+
+  const isTodayDate = (d: number) => {
+    return year === todayObj.getFullYear() && month === todayObj.getMonth() && d === todayObj.getDate();
   };
 
   const selectedCloseout = selectedDate ? closeouts.find(c => c.date === selectedDate) : null;
@@ -112,6 +117,7 @@ export default function CalendarPage() {
             const dayEvents = events.filter(e => e.date === dateStr);
             const closeout = closeouts.find(c => c.date === dateStr);
             const isSelected = selectedDate === dateStr;
+            const isToday = isTodayDate(d);
 
             // Simple visual density logic for heatmap
             let bgClass = "bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-raised)]";
@@ -127,7 +133,7 @@ export default function CalendarPage() {
                 className={`relative p-2 cursor-pointer transition-colors ${bgClass} ${isSelected ? 'ring-2 ring-inset ring-[var(--accent)] z-10' : ''}`}
               >
                 <div className="flex justify-between items-start">
-                  <span className={`text-sm font-medium ${isSelected ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]'}`}>{d}</span>
+                  <span className={`text-sm font-medium ${isToday ? 'bg-[var(--accent)] text-white w-6 h-6 flex items-center justify-center rounded-full' : (isSelected ? 'text-[var(--accent)]' : 'text-[var(--text-primary)]')}`}>{d}</span>
                   {closeout && (
                     <span className="text-[9px] font-mono text-[var(--text-secondary)] bg-[var(--bg-base)] border border-[var(--border-hairline)] px-1 rounded-sm">
                       {closeout.total_completed}/{closeout.total_scheduled}
