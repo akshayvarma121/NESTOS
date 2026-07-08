@@ -63,6 +63,12 @@ export default function CalendarPage() {
   const days = [];
   for (let i = 0; i < firstDay; i++) days.push(null);
   for (let i = 1; i <= daysInMonth; i++) days.push(i);
+  
+  // Pad with nulls to complete the last row
+  const totalSlots = Math.ceil(days.length / 7) * 7;
+  while (days.length < totalSlots) {
+    days.push(null);
+  }
 
   const monthName = currentDate.toLocaleString('default', { month: 'long', year: 'numeric' });
 
