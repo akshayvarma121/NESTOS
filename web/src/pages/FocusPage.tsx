@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Check, Info } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
-import CloseDayPanel from '../components/CloseDayPanel';
 import EditTimetablePanel from '../components/EditTimetablePanel';
 import CountdownTimer from '../components/CountdownTimer';
 
@@ -48,13 +47,8 @@ export default function FocusPage() {
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
-  const [isCloseDayOpen, setIsCloseDayOpen] = useState(false);
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
   
-  const currentHour = new Date().getHours();
-  const closeHour = parseInt(localStorage.getItem('pos_close_hour') || '21');
-  const isPastClose = currentHour >= closeHour;
-
   const todayStr = new Date().toISOString().split('T')[0];
 
   const fetchFocusData = async () => {
@@ -115,15 +109,6 @@ export default function FocusPage() {
     await api.patch(`/micro-tasks/${id}`, { assigned_to: assignee_id });
   };
 
-  const handleTaskResolved = (id: string, newStatus?: string, newDate?: string) => {
-    setTasks(prev => prev.map(t => {
-      if (t.id === id) {
-        if (newStatus) return { ...t, status: newStatus };
-        if (newDate) return { ...t, scheduled_date: newDate };
-      }
-      return t;
-    }));
-  };
 
   const togglePersonalTodo = async (id: string, currentStatus: string) => {
     const newStatus = currentStatus === 'done' ? 'pending' : 'done';
@@ -272,16 +257,6 @@ export default function FocusPage() {
           >
             Timetable
           </button>
-          <button 
-            onClick={() => setIsCloseDayOpen(true)}
-            className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border transition-colors ${
-              isPastClose 
-                ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--bg-base)] hover:bg-[var(--accent)]/90' 
-                : 'bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] text-[var(--text-primary)] hover:border-[var(--text-secondary)]'
-            }`}
-          >
-            Close Day
-          </button>
         </div>
       </div>
 
@@ -417,15 +392,7 @@ export default function FocusPage() {
         </div>
       </section>
 
-      <CloseDayPanel 
-        isOpen={isCloseDayOpen} 
-        onClose={() => setIsCloseDayOpen(false)} 
-        tasks={todayTasks} 
-        onTaskResolved={handleTaskResolved}
-        onCloseDayComplete={() => {
-          alert("Day closed successfully!");
-        }}
-      />
+
       <EditTimetablePanel 
         isOpen={isTimetableOpen} 
         onClose={() => setIsTimetableOpen(false)} 

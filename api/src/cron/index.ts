@@ -110,3 +110,47 @@ cron.schedule('*/15 * * * *', async () => {
     console.error('Deadline Alert Error:', err);
   }
 });
+
+// 3. Automated Daily Closeout & Rollover
+cron.schedule('0 0 * * *', async () => {
+  try {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const { data: users } = await supabase.from('pos_user_profiles').select('user_id');
+    if (!users) return;
+
+    for (const u of users) {
+      const { data: tasks } = await supabase
+        .from('pos_micro_tasks')
+        .select('*')
+        .eq('user_id', u.user_id)
+        .eq('scheduled_date', yesterdayStr);
+
+      if (!tasks || tasks.length === 0) continue;
+
+      const completedCount = tasks.filter(t => t.status === 'completed').length;
+      const scheduledCount = tasks.length;
+
+      // Insert analytics
+      await supabase.from('pos_daily_closeouts').upsert({
+        user_id: u.user_id,
+        date: yesterdayStr,
+        total_completed: completedCount,
+        total_scheduled: scheduledCount
+      }, { onConflict: 'user_id,date' });
+
+      // Move pending tasks back to backlog
+      const pendingTaskIds = tasks.filter(t => t.status !== 'completed').map(t => t.id);
+      if (pendingTaskIds.length > 0) {
+        await supabase
+          .from('pos_micro_tasks')
+          .update({ scheduled_date: null })
+          .in('id', pendingTaskIds);
+      }
+    }
+  } catch (err) {
+    console.error('Daily Closeout Error:', err);
+  }
+});
