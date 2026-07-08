@@ -206,8 +206,15 @@ export default function BacklogPage() {
                     <div key={task.id} className="p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg flex items-center gap-3">
                       <div className="w-[3px] h-4 bg-[var(--accent)] rounded-full" />
                       <span className="text-sm text-[var(--text-primary)]">{task.title}</span>
+                      
+                      {task.assignee && (
+                        <span className="ml-auto text-xs text-[var(--text-secondary)]">
+                          {task.assignee.username}
+                        </span>
+                      )}
+
                       {task.is_pinned && (
-                        <span className="ml-auto text-[10px] uppercase font-mono bg-[var(--accent)]/10 text-[var(--accent)] px-1.5 py-0.5 rounded">Pinned</span>
+                        <span className={`${task.assignee ? 'ml-2' : 'ml-auto'} text-[10px] uppercase font-mono bg-[var(--accent)]/10 text-[var(--accent)] px-1.5 py-0.5 rounded`}>Pinned</span>
                       )}
                     </div>
                   ))

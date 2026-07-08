@@ -23,6 +23,15 @@ router.post('/profile', requireAuth, async (req: AuthRequest, res) => {
   res.status(201).json(data);
 });
 
+router.get('/space', requireAuth, async (req: AuthRequest, res) => {
+  const { data: profiles, error } = await supabase
+    .from('pos_user_profiles')
+    .select('user_id, username')
+    .in('user_id', req.sharedSpaceIds!);
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(profiles);
+});
+
 router.get('/profile', requireAuth, async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('pos_user_profiles')

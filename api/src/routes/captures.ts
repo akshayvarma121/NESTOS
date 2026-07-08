@@ -9,7 +9,7 @@ router.get('/', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('pos_content_capture')
     .select('*')
-    .eq('user_id', req.user!.id)
+    .in('user_id', req.sharedSpaceIds!)
     .order('created_at', { ascending: false });
     
   if (error) return res.status(500).json({ error: error.message });

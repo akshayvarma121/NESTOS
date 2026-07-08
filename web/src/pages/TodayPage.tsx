@@ -40,13 +40,12 @@ function InlineEdit({ initialValue, onSave }: { initialValue: string, onSave: (v
 
 export default function TodayPage() {
   const [tasks, setTasks] = useState<any[]>([]);
+  const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [isCloseDayOpen, setIsCloseDayOpen] = useState(false);
   
-  // Basic time check for accenting the Close Day button
   const currentHour = new Date().getHours();
-  // We can read close_hour from localStorage, default 21
   const closeHour = parseInt(localStorage.getItem('pos_close_hour') || '21');
   const isPastClose = currentHour >= closeHour;
 
@@ -55,8 +54,15 @@ export default function TodayPage() {
       try {
         await api.post('/scheduler/recompute');
         const todayStr = new Date().toISOString().split('T')[0];
-        const taskData = await api.get(`/micro-tasks?date=${todayStr}`);
+        
+        const [taskData, membersData] = await Promise.all([
+          api.get(`/micro-tasks?date=${todayStr}`),
+          api.get('/partner/space')
+        ]);
+        
         setTasks(taskData);
+        setSpaceMembers(membersData);
+        
         if (taskData.length === 0) {
           const goalsData = await api.get('/macro-goals');
           setHasGoals(goalsData.length > 0);
@@ -83,6 +89,17 @@ export default function TodayPage() {
     await api.patch(`/micro-tasks/${id}`, { title: newTitle });
   };
 
+  const changeAssignee = async (id: string, assignee_id: string | null) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        const member = spaceMembers.find(m => m.user_id === assignee_id);
+        return { ...t, assigned_to: assignee_id, assignee: member ? { username: member.username } : null };
+      }
+      return t;
+    }));
+    await api.patch(`/micro-tasks/${id}`, { assigned_to: assignee_id });
+  };
+
   const handleTaskResolved = (id: string, newStatus?: string, newDate?: string) => {
     setTasks(prev => prev.map(t => {
       if (t.id === id) {
@@ -106,12 +123,11 @@ export default function TodayPage() {
     );
   }
 
-  // Filter tasks to only those scheduled for today strictly for the main view (excluding pushed to tomorrow)
   const todayStr = new Date().toISOString().split('T')[0];
   const activeTasks = tasks.filter(t => t.scheduled_date === todayStr && t.status !== 'skipped');
 
   const grouped = activeTasks.reduce((acc, task) => {
-    const cat = task.category || 'other';
+    const cat = task.category || task.macro?.category || 'other';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(task);
     return acc;
@@ -166,6 +182,19 @@ export default function TodayPage() {
                 <div className={`flex-1 text-sm ${task.status === 'done' ? 'text-[var(--text-tertiary)] line-through' : 'text-[var(--text-secondary)]'}`}>
                   <InlineEdit initialValue={task.title} onSave={(newVal) => renameTask(task.id, newVal)} />
                 </div>
+                
+                {/* Assignee Dropdown */}
+                <select 
+                  className={`ml-auto text-xs bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded px-1.5 py-0.5 outline-none hover:border-[var(--text-secondary)] transition-colors ${task.status === 'done' ? 'opacity-50 pointer-events-none' : ''}`}
+                  value={task.assigned_to || ''}
+                  onChange={e => changeAssignee(task.id, e.target.value || null)}
+                >
+                  <option value="">Anyone</option>
+                  {spaceMembers.map(m => (
+                    <option key={m.user_id} value={m.user_id}>{m.username}</option>
+                  ))}
+                </select>
+
               </div>
             ))}
           </div>

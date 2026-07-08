@@ -9,9 +9,9 @@ router.get('/today', async (req: AuthRequest, res) => {
   const todayStr = new Date().toISOString().split('T')[0];
   const { data, error } = await supabase
     .from('pos_micro_tasks')
-    .select('*, macro:pos_macro_goals(category)')
+    .select('*, macro:pos_macro_goals(category), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)')
     .eq('scheduled_date', todayStr)
-    .eq('user_id', req.user!.id);
+    .in('user_id', req.sharedSpaceIds!);
     
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
@@ -20,10 +20,10 @@ router.get('/today', async (req: AuthRequest, res) => {
 router.get('/unscheduled', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('pos_micro_tasks')
-    .select('*, macro:pos_macro_goals(title, category)')
+    .select('*, macro:pos_macro_goals(title, category), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)')
     .is('scheduled_date', null)
     .eq('status', 'pending')
-    .eq('user_id', req.user!.id);
+    .in('user_id', req.sharedSpaceIds!);
     
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);

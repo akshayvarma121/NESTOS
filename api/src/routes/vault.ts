@@ -6,12 +6,14 @@ import { requireAuth, AuthRequest } from '../middleware/auth.js';
 const router = Router();
 router.use(requireAuth);
 
-const vaultSessions = new Map<string, { aesKey: Buffer, expiresAt: number, userId: string }>();
+const vaultSessions = new Map<string, { aesKey: Buffer, expiresAt: number, spaceIds: string[] }>();
 
-function getValidSessionKey(token: string, userId: string): Buffer | null {
+function getValidSessionKey(token: string, spaceIds: string[]): Buffer | null {
   const session = vaultSessions.get(token);
   if (!session) return null;
-  if (session.userId !== userId) return null;
+  // Verify session belongs to this shared space
+  const hasOverlap = session.spaceIds.some(id => spaceIds.includes(id));
+  if (!hasOverlap) return null;
   if (Date.now() > session.expiresAt) {
     vaultSessions.delete(token);
     return null;
@@ -42,9 +44,19 @@ function deriveEncryptionKey(pin: string, salt: string): Promise<Buffer> {
   });
 }
 
+// Helper to find the active vault config for the space
+async function getSpaceVaultConfig(spaceIds: string[]) {
+  const { data, error } = await supabase
+    .from('pos_vault_security')
+    .select('*')
+    .in('user_id', spaceIds)
+    .limit(1)
+    .single();
+  return { data, error };
+}
+
 router.get('/status', async (req: AuthRequest, res) => {
-  const { data, error } = await supabase.from('pos_vault_security').select('user_id').eq('user_id', req.user!.id).limit(1).single();
-  if (error && error.code !== 'PGRST116') return res.status(500).json({ error: error.message });
+  const { data } = await getSpaceVaultConfig(req.sharedSpaceIds!);
   res.json({ isSetup: !!data });
 });
 
@@ -52,8 +64,8 @@ router.post('/setup', async (req: AuthRequest, res) => {
   const { pin } = req.body;
   if (!pin || pin.length < 4) return res.status(400).json({ error: 'Invalid PIN' });
 
-  const { data: existing } = await supabase.from('pos_vault_security').select('user_id').eq('user_id', req.user!.id).limit(1).single();
-  if (existing) return res.status(400).json({ error: 'Vault already configured' });
+  const { data: existing } = await getSpaceVaultConfig(req.sharedSpaceIds!);
+  if (existing) return res.status(400).json({ error: 'Shared Vault already configured' });
 
   const salt = crypto.randomBytes(16).toString('hex');
   const verifyHash = await deriveVerifyHash(pin, salt);
@@ -72,7 +84,7 @@ router.post('/unlock', async (req: AuthRequest, res) => {
   const { pin } = req.body;
   if (!pin) return res.status(400).json({ error: 'PIN required' });
 
-  const { data: security, error } = await supabase.from('pos_vault_security').select('*').eq('user_id', req.user!.id).limit(1).single();
+  const { data: security, error } = await getSpaceVaultConfig(req.sharedSpaceIds!);
   if (error || !security) return res.status(400).json({ error: 'Vault not setup' });
 
   if (security.locked_until && new Date(security.locked_until).getTime() > Date.now()) {
@@ -89,14 +101,14 @@ router.post('/unlock', async (req: AuthRequest, res) => {
     }
     await supabase.from('pos_vault_security')
       .update({ failed_attempts: attempts, locked_until })
-      .eq('user_id', req.user!.id);
+      .eq('user_id', security.user_id); // Update the owner's record
     
     return res.status(401).json({ error: 'Incorrect PIN' });
   }
 
   await supabase.from('pos_vault_security')
     .update({ failed_attempts: 0, locked_until: null })
-    .eq('user_id', req.user!.id);
+    .eq('user_id', security.user_id);
 
   const aesKey = await deriveEncryptionKey(pin, security.salt);
   const token = crypto.randomUUID();
@@ -104,21 +116,25 @@ router.post('/unlock', async (req: AuthRequest, res) => {
   vaultSessions.set(token, {
     aesKey,
     expiresAt: Date.now() + 5 * 60000,
-    userId: req.user!.id
+    spaceIds: req.sharedSpaceIds!
   });
 
   res.json({ token });
 });
 
 router.get('/entries', async (req: AuthRequest, res) => {
-  const { data, error } = await supabase.from('pos_vault_entries').select('id, label, category, created_at').eq('user_id', req.user!.id).order('created_at', { ascending: false });
+  const { data, error } = await supabase
+    .from('pos_vault_entries')
+    .select('id, label, category, created_at')
+    .in('user_id', req.sharedSpaceIds!)
+    .order('created_at', { ascending: false });
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
 router.post('/entries', async (req: AuthRequest, res) => {
   const token = req.headers['x-vault-token'] as string;
-  const aesKey = getValidSessionKey(token, req.user!.id);
+  const aesKey = getValidSessionKey(token, req.sharedSpaceIds!);
   if (!aesKey) return res.status(401).json({ error: 'Vault locked or session expired' });
 
   const { label, category, value } = req.body;
@@ -146,11 +162,17 @@ router.post('/entries', async (req: AuthRequest, res) => {
 
 router.get('/entries/:id/reveal', async (req: AuthRequest, res) => {
   const token = req.headers['x-vault-token'] as string;
-  const aesKey = getValidSessionKey(token, req.user!.id);
+  const aesKey = getValidSessionKey(token, req.sharedSpaceIds!);
   if (!aesKey) return res.status(401).json({ error: 'Vault locked or session expired' });
 
   const { id } = req.params;
-  const { data, error } = await supabase.from('pos_vault_entries').select('*').eq('id', id).eq('user_id', req.user!.id).single();
+  const { data, error } = await supabase
+    .from('pos_vault_entries')
+    .select('*')
+    .eq('id', id)
+    .in('user_id', req.sharedSpaceIds!)
+    .single();
+
   if (error || !data) return res.status(404).json({ error: 'Not found' });
 
   try {
@@ -171,11 +193,13 @@ router.get('/entries/:id/reveal', async (req: AuthRequest, res) => {
 });
 
 router.delete('/reset', async (req: AuthRequest, res) => {
-  await supabase.from('pos_vault_entries').delete().eq('user_id', req.user!.id);
-  await supabase.from('pos_vault_security').delete().eq('user_id', req.user!.id);
+  // Reset drops the entire shared space vault
+  await supabase.from('pos_vault_entries').delete().in('user_id', req.sharedSpaceIds!);
+  await supabase.from('pos_vault_security').delete().in('user_id', req.sharedSpaceIds!);
   
   for (const [token, session] of vaultSessions.entries()) {
-    if (session.userId === req.user!.id) {
+    const hasOverlap = session.spaceIds.some(id => req.sharedSpaceIds!.includes(id));
+    if (hasOverlap) {
       vaultSessions.delete(token);
     }
   }
