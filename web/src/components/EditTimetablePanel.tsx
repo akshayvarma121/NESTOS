@@ -12,24 +12,30 @@ const DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
 export default function EditTimetablePanel({ isOpen, onClose, onUpdate }: Props) {
   const [routines, setRoutines] = useState<any[]>([]);
+  const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
   // New Routine Form State
   const [title, setTitle] = useState('');
   const [timeLabel, setTimeLabel] = useState('');
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
+  const [assignedTo, setAssignedTo] = useState<string>('');
 
   useEffect(() => {
     if (isOpen) {
-      fetchRoutines();
+      fetchData();
     }
   }, [isOpen]);
 
-  const fetchRoutines = async () => {
+  const fetchData = async () => {
     try {
       setLoading(true);
-      const data = await api.get('/routines');
-      setRoutines(data);
+      const [routinesData, membersData] = await Promise.all([
+        api.get('/routines'),
+        api.get('/partner/space')
+      ]);
+      setRoutines(routinesData);
+      setSpaceMembers(membersData);
     } catch (e) {
       console.error(e);
     } finally {
@@ -44,19 +50,29 @@ export default function EditTimetablePanel({ isOpen, onClose, onUpdate }: Props)
     await api.post('/routines', {
       title,
       time_label: timeLabel,
-      days_of_week: selectedDays
+      days_of_week: selectedDays,
+      assigned_to: assignedTo || null
     });
     
     setTitle('');
     setTimeLabel('');
     setSelectedDays([]);
-    fetchRoutines();
+    setAssignedTo('');
+    fetchData();
     onUpdate();
   };
 
   const handleDelete = async (id: string) => {
     await api.delete(`/routines/${id}`);
-    fetchRoutines();
+    fetchData();
+    onUpdate();
+  };
+
+  const handleAssignChange = async (id: string, newAssignee: string | null) => {
+    // Optimistic update
+    setRoutines(prev => prev.map(r => r.id === id ? { ...r, assigned_to: newAssignee } : r));
+    await api.patch(`/routines/${id}`, { assigned_to: newAssignee });
+    fetchData();
     onUpdate();
   };
 
@@ -119,6 +135,17 @@ export default function EditTimetablePanel({ isOpen, onClose, onUpdate }: Props)
               ))}
             </div>
 
+            <select
+              value={assignedTo}
+              onChange={e => setAssignedTo(e.target.value)}
+              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
+            >
+              <option value="">Assign to: Anyone (Shared)</option>
+              {spaceMembers.map(m => (
+                <option key={m.user_id} value={m.user_id}>{m.username}</option>
+              ))}
+            </select>
+
             <button type="submit" className="w-full bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" /> Add
             </button>
@@ -133,7 +160,7 @@ export default function EditTimetablePanel({ isOpen, onClose, onUpdate }: Props)
               <p className="text-sm text-[var(--text-tertiary)]">No routines configured yet.</p>
             ) : (
               routines.map(routine => (
-                <div key={routine.id} className="p-3 border border-[var(--border-hairline)] rounded-lg flex items-center gap-4 bg-[var(--bg-surface)]">
+                <div key={routine.id} className="p-3 border border-[var(--border-hairline)] rounded-lg flex items-center gap-4 bg-[var(--bg-surface)] flex-wrap">
                   <div className="w-[45px] text-xs font-mono text-[var(--text-secondary)] shrink-0">
                     {routine.time_label}
                   </div>
@@ -143,6 +170,16 @@ export default function EditTimetablePanel({ isOpen, onClose, onUpdate }: Props)
                       {routine.days_of_week.join(', ')}
                     </p>
                   </div>
+                  <select 
+                    className="text-xs bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded px-1.5 py-1 outline-none max-w-[100px]"
+                    value={routine.assigned_to || ''}
+                    onChange={e => handleAssignChange(routine.id, e.target.value || null)}
+                  >
+                    <option value="">Shared</option>
+                    {spaceMembers.map(m => (
+                      <option key={m.user_id} value={m.user_id}>{m.username}</option>
+                    ))}
+                  </select>
                   <button 
                     onClick={() => handleDelete(routine.id)}
                     className="p-1.5 text-[var(--text-tertiary)] hover:text-red-500 rounded hover:bg-red-500/10 transition-colors"

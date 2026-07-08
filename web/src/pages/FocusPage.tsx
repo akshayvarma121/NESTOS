@@ -275,8 +275,13 @@ export default function FocusPage() {
                   {routine.is_completed && <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />}
                 </div>
                 <div>
-                  <div className={`text-sm font-medium ${routine.is_completed ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
+                  <div className={`text-sm font-medium flex items-center gap-2 ${routine.is_completed ? 'line-through text-[var(--text-tertiary)]' : 'text-[var(--text-primary)]'}`}>
                     {routine.title}
+                    {routine.assignee?.username && (
+                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
+                        {routine.assignee.username}
+                      </span>
+                    )}
                   </div>
                   <div className="text-[10px] font-mono text-[var(--text-secondary)]">
                     {routine.time_label}

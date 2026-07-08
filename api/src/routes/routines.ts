@@ -9,7 +9,7 @@ router.use(requireAuth);
 router.get('/', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('pos_routines')
-    .select('*')
+    .select('*, assignee:pos_user_profiles!pos_routines_assigned_to_fkey(username)')
     .in('user_id', req.sharedSpaceIds!)
     .order('time_label', { ascending: true });
     
@@ -26,7 +26,7 @@ router.get('/day', async (req: AuthRequest, res) => {
 
   const { data: routines, error } = await supabase
     .from('pos_routines')
-    .select('*')
+    .select('*, assignee:pos_user_profiles!pos_routines_assigned_to_fkey(username)')
     .in('user_id', req.sharedSpaceIds!)
     .contains('days_of_week', [dayStr])
     .order('time_label', { ascending: true });
@@ -61,10 +61,10 @@ router.get('/day', async (req: AuthRequest, res) => {
 });
 
 router.post('/', async (req: AuthRequest, res) => {
-  const { title, time_label, days_of_week } = req.body;
+  const { title, time_label, days_of_week, assigned_to } = req.body;
   const { data, error } = await supabase
     .from('pos_routines')
-    .insert([{ user_id: req.user!.id, title, time_label, days_of_week }])
+    .insert([{ user_id: req.user!.id, title, time_label, days_of_week, assigned_to }])
     .select()
     .single();
     
@@ -76,6 +76,9 @@ router.patch('/:id', async (req: AuthRequest, res) => {
   const { id } = req.params;
   const updates = req.body;
   
+  // Strip out anything we shouldn't update directly (like assignee object from join)
+  delete updates.assignee;
+
   const { data, error } = await supabase
     .from('pos_routines')
     .update(updates)
