@@ -89,7 +89,7 @@ export default function CalendarPage() {
   const selectedTasks = selectedDate ? completedTasks.filter(t => t.scheduled_date === selectedDate) : [];
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 flex flex-col h-[calc(100vh-80px)] lg:h-screen">
+    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 flex flex-col pb-32">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
           <CalendarIcon className="w-5 h-5 text-[var(--accent)]" />
@@ -102,7 +102,7 @@ export default function CalendarPage() {
         </div>
       </div>
 
-      <div className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl overflow-hidden flex flex-col">
+      <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl overflow-hidden flex flex-col shadow-sm">
         {/* Calendar Header */}
         <div className="grid grid-cols-7 border-b border-[var(--border-hairline)] bg-[var(--bg-surface-raised)]">
           {['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].map(day => (
@@ -114,8 +114,8 @@ export default function CalendarPage() {
 
         {/* Calendar Grid */}
         <div 
-          className="flex-1 grid grid-cols-7 bg-[var(--border-hairline)] gap-px"
-          style={{ gridTemplateRows: `repeat(${totalSlots / 7}, minmax(0, 1fr))` }}
+          className="grid grid-cols-7 bg-[var(--border-hairline)] gap-px"
+          style={{ gridTemplateRows: `repeat(${totalSlots / 7}, minmax(100px, 1fr))` }}
         >
           {loading ? (
              <div className="col-span-7 row-span-full flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-secondary)]">Loading Analytics...</div>
