@@ -5,6 +5,7 @@ import macroGoalsRouter from './routes/macroGoals.js';
 import microTasksRouter from './routes/microTasks.js';
 import schedulerRouter from './routes/scheduler.js';
 import closeoutsRouter from './routes/closeouts.js';
+import opportunitiesRouter from './routes/opportunities.js';
 
 dotenv.config();
 
@@ -18,6 +19,7 @@ app.use('/api/macro-goals', macroGoalsRouter);
 app.use('/api/micro-tasks', microTasksRouter);
 app.use('/api/scheduler', schedulerRouter);
 app.use('/api/close-day', closeoutsRouter);
+app.use('/api/opportunities', opportunitiesRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

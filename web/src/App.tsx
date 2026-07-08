@@ -4,6 +4,7 @@ import AppLayout from './layouts/AppLayout';
 import TodayPage from './pages/TodayPage';
 import GoalsPage from './pages/GoalsPage';
 import BacklogPage from './pages/BacklogPage';
+import OpportunitiesPage from './pages/OpportunitiesPage';
 
 // Placeholder Pages
 const Page = ({ title }: { title: string }) => (
@@ -24,7 +25,7 @@ function App() {
           <Route path="today" element={<TodayPage />} />
           <Route path="backlog" element={<BacklogPage />} />
           <Route path="goals" element={<GoalsPage />} />
-          <Route path="opportunities" element={<Page title="Opportunities" />} />
+          <Route path="opportunities" element={<OpportunitiesPage />} />
           <Route path="captures" element={<Page title="Captures" />} />
           <Route path="partner" element={<Page title="Partner" />} />
           <Route path="settings" element={<Page title="Settings" />} />
