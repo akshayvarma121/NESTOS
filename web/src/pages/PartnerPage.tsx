@@ -14,6 +14,9 @@ export default function PartnerPage() {
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState('');
 
+  const [newUsername, setNewUsername] = useState('');
+  const [creatingProfile, setCreatingProfile] = useState(false);
+
   const fetchData = async () => {
     try {
       const [profRes, partRes] = await Promise.all([
@@ -33,6 +36,20 @@ export default function PartnerPage() {
   useEffect(() => {
     fetchData();
   }, []);
+
+  const handleCreateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim()) return;
+    setCreatingProfile(true);
+    try {
+      await api.post('/partner/profile', { username: newUsername });
+      await fetchData();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setCreatingProfile(false);
+    }
+  };
 
   const handleConnect = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -88,7 +105,22 @@ export default function PartnerPage() {
               <p className="text-xs text-center text-[var(--text-tertiary)]">Logged in as {profile.username} ({user?.email})</p>
             </div>
           ) : (
-            <div className="text-sm text-[var(--text-secondary)]">No profile found. Please register properly.</div>
+            <div className="space-y-4">
+              <p className="text-sm text-[var(--text-secondary)] text-orange-400">Your profile is missing a display name due to an incomplete registration.</p>
+              <form onSubmit={handleCreateProfile} className="space-y-3">
+                <input 
+                  type="text" required placeholder="Choose a Display Name"
+                  value={newUsername} onChange={e => setNewUsername(e.target.value)}
+                  className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-4 py-2 outline-none focus:border-[var(--accent)]"
+                />
+                <button 
+                  type="submit" disabled={creatingProfile}
+                  className="w-full bg-[var(--accent)] text-[var(--bg-base)] px-4 py-2 rounded-md font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
+                >
+                  {creatingProfile ? 'Creating...' : 'Complete Profile'}
+                </button>
+              </form>
+            </div>
           )}
         </div>
 
