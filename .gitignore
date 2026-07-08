@@ -2,3 +2,5 @@ node_modules
 dist
 .env
 .DS_Store
+Build_Guide_NestOS.md
+SRS_NestOS.md
