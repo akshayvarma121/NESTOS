@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Lightbulb, Plus, Trash2, ExternalLink } from 'lucide-react';
+import { Lightbulb, Plus, Trash2, ExternalLink, Info } from 'lucide-react';
 
 export default function DeadlinesPage() {
   const [deadlines, setDeadlines] = useState<any[]>([]);
@@ -54,6 +54,12 @@ export default function DeadlinesPage() {
       <div className="flex items-center gap-3 mb-8">
         <Lightbulb className="w-5 h-5 text-[var(--accent)]" />
         <h1 className="text-2xl font-semibold">Important Deadlines</h1>
+        <div className="relative group cursor-help ml-2 mt-1">
+          <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+          <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
+            Track important dates or links. Any deadline scheduled for the future will automatically appear on your Focus Dashboard with a live countdown timer.
+          </div>
+        </div>
       </div>
 
       <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-4 mb-8">

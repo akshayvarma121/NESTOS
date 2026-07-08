@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import CreateGoalPanel from '../components/CreateGoalPanel';
-import { Plus } from 'lucide-react';
+import { Target, Plus, Info } from 'lucide-react';
 
 const categoryColors: Record<string, string> = {
   academic: 'bg-[var(--accent)]',
@@ -48,7 +48,16 @@ export default function GoalsPage() {
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold">Macro Goals</h1>
+        <div className="flex items-center gap-3">
+          <Target className="w-5 h-5 text-[var(--accent)]" />
+          <h1 className="text-2xl font-semibold">Macro Goals</h1>
+          <div className="relative group cursor-help ml-2 mt-1">
+            <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+            <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
+              Define your high-level macro goals. Break them down into small units (e.g. 50 chapters). The progress bar fills up as you complete scheduled tasks linked to this goal.
+            </div>
+          </div>
+        </div>
         <button 
           onClick={() => setIsPanelOpen(true)}
           className="bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:bg-white transition-colors"

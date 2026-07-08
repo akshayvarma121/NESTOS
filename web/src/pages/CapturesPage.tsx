@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Inbox, Plus, Trash2 } from 'lucide-react';
+import { Inbox, Plus, Trash2, Info } from 'lucide-react';
 
 export default function CapturesPage() {
   const [captures, setCaptures] = useState<any[]>([]);
@@ -46,6 +46,12 @@ export default function CapturesPage() {
       <div className="flex items-center gap-3 mb-8">
         <Inbox className="w-5 h-5 text-[var(--accent)]" />
         <h1 className="text-2xl font-semibold">Captures</h1>
+        <div className="relative group cursor-help ml-2 mt-1">
+          <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+          <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
+            A quick inbox for unstructured thoughts, ideas, or social media drafts. Shared with your partner.
+          </div>
+        </div>
       </div>
 
       <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-4 mb-8">

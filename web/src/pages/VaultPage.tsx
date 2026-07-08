@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../lib/api';
-import { X, Lock, Unlock, Plus } from 'lucide-react';
+import { Lock, Plus, Trash2, KeyRound, Eye, EyeOff, Copy, Info, X } from 'lucide-react';
 
 export default function VaultPage() {
   const [isSetup, setIsSetup] = useState<boolean | null>(null);
@@ -218,9 +218,15 @@ export default function VaultPage() {
     <div className="p-6 md:p-8 max-w-4xl mx-auto h-[calc(100vh-80px)] lg:h-screen flex flex-col relative">
       <div className="flex justify-between items-start mb-8">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Unlock className="w-5 h-5 text-[#10b981]" />
+          <div className="flex items-center gap-3 mb-8">
+            <Lock className="w-5 h-5 text-[var(--accent)]" />
             <h1 className="text-2xl font-semibold">Vault</h1>
+            <div className="relative group cursor-help ml-2 mt-1">
+              <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+              <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
+                A strictly encrypted local store. Data stored here is decrypted in-browser and requires your PIN to view.
+              </div>
+            </div>
           </div>
           <p className="text-[var(--text-secondary)] text-sm">Encrypted storage. Auto-locks in 2 mins or on exit.</p>
         </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
-import { Check } from 'lucide-react';
+import { Check, Info } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
 import CloseDayPanel from '../components/CloseDayPanel';
 import EditTimetablePanel from '../components/EditTimetablePanel';
@@ -253,7 +253,15 @@ export default function FocusPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold mb-1">Focus Dashboard</h1>
+          <div className="flex items-center gap-2 mb-1">
+            <h1 className="text-2xl font-semibold">Focus Dashboard</h1>
+            <div className="relative group cursor-help">
+              <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+              <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)]">
+                This page shows your daily tasks, timetable, and upcoming deadlines. Tasks are automatically pulled from your Goals or Backlog. Private tasks are strictly hidden from partners.
+              </div>
+            </div>
+          </div>
           <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider">{new Date().toDateString()}</p>
         </div>
         

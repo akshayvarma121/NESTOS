@@ -14,7 +14,7 @@ import type { DragStartEvent, DragEndEvent } from '@dnd-kit/core';
 import { sortableKeyboardCoordinates } from '@dnd-kit/sortable';
 import { useDroppable } from '@dnd-kit/core';
 import { useDraggable } from '@dnd-kit/core';
-import { GripVertical } from 'lucide-react';
+import { GripVertical, ListTodo, Plus, Trash2, Calendar, Folder, LayoutGrid, List, CheckCircle2, Circle, AlertCircle, Info } from 'lucide-react';
 
 const dropAnimation = {
   sideEffects: defaultDropAnimationSideEffects({
@@ -156,9 +156,20 @@ export default function BacklogPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-6xl mx-auto h-[calc(100vh-80px)] flex flex-col">
-      <div className="mb-6">
-        <h1 className="text-2xl font-semibold mb-1">Canvas</h1>
-        <p className="text-[var(--text-secondary)] text-sm">Drag tasks from the backlog into Today.</p>
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-2">
+          <ListTodo className="w-5 h-5 text-[var(--accent)]" />
+          <h1 className="text-2xl font-semibold">Canvas Backlog</h1>
+          <div className="relative group cursor-help ml-2 mt-1">
+            <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+            <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
+              A brain dump for micro-tasks. Items here are not scheduled yet. You can pick tasks from here during your morning planning or assign them to a macro goal later.
+            </div>
+          </div>
+        </div>
+        <button onClick={() => setView(v => v === 'list' ? 'board' : 'list')} className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors rounded hover:bg-[var(--bg-surface-raised)]">
+          {view === 'list' ? <LayoutGrid className="w-5 h-5" /> : <List className="w-5 h-5" />}
+        </button>
       </div>
 
       <DndContext
