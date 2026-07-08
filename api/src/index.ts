@@ -12,6 +12,7 @@ import nudgesRouter from './routes/nudges.js';
 import pushRouter from './routes/push.js';
 import vaultRouter from './routes/vault.js';
 import routinesRouter from './routes/routines.js';
+import personalRouter from './routes/personal.js';
 import './cron/index.js'; // Start cron jobs
 
 dotenv.config();
@@ -33,6 +34,7 @@ app.use('/api/nudges', nudgesRouter);
 app.use('/api/push', pushRouter);
 app.use('/api/vault', vaultRouter);
 app.use('/api/routines', routinesRouter);
+app.use('/api/personal-todos', personalRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });

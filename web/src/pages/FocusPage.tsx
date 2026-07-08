@@ -42,6 +42,7 @@ function InlineEdit({ initialValue, onSave }: { initialValue: string, onSave: (v
 export default function FocusPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [routines, setRoutines] = useState<any[]>([]);
+  const [personalTodos, setPersonalTodos] = useState<any[]>([]);
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
@@ -58,15 +59,17 @@ export default function FocusPage() {
     try {
       await api.post('/scheduler/recompute');
       
-      const [taskData, membersData, routinesData] = await Promise.all([
+      const [taskData, membersData, routinesData, personalData] = await Promise.all([
         api.get('/scheduler/focus'),
         api.get('/partner/space'),
-        api.get(`/routines/day?day=${new Date().toLocaleDateString('en-US', { weekday: 'short' })}&date=${todayStr}`)
+        api.get(`/routines/day?day=${new Date().toLocaleDateString('en-US', { weekday: 'short' })}&date=${todayStr}`),
+        api.get('/personal-todos')
       ]);
       
       setTasks(taskData);
       setSpaceMembers(membersData);
       setRoutines(routinesData || []);
+      setPersonalTodos(personalData || []);
       
       if (taskData.length === 0) {
         const goalsData = await api.get('/macro-goals');
@@ -116,6 +119,30 @@ export default function FocusPage() {
       }
       return t;
     }));
+  };
+
+  const togglePersonalTodo = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'done' ? 'pending' : 'done';
+    setPersonalTodos(prev => prev.map(t => t.id === id ? { ...t, status: newStatus } : t));
+    await api.patch(`/personal-todos/${id}`, { status: newStatus });
+  };
+
+  const deletePersonalTodo = async (id: string) => {
+    setPersonalTodos(prev => prev.filter(t => t.id !== id));
+    await api.delete(`/personal-todos/${id}`);
+  };
+
+  const addPersonalTodo = async (title: string) => {
+    if (!title.trim()) return;
+    const tempId = `temp-${Date.now()}`;
+    setPersonalTodos(prev => [...prev, { id: tempId, title, status: 'pending' }]);
+    
+    try {
+      const data = await api.post('/personal-todos', { title });
+      setPersonalTodos(prev => prev.map(t => t.id === tempId ? data : t));
+    } catch (e) {
+      setPersonalTodos(prev => prev.filter(t => t.id !== tempId));
+    }
   };
 
   if (loading) return <div className="p-6 text-[var(--text-secondary)]">Recalibrating Focus...</div>;
@@ -332,6 +359,49 @@ export default function FocusPage() {
           </div>
         </section>
       )}
+
+      {/* PRIVATE FOCUS */}
+      <section className="space-y-4 pt-12">
+        <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
+          <span className="flex items-center gap-2">Private Focus <span className="text-[10px] bg-[var(--text-secondary)] text-[var(--bg-base)] px-1.5 py-0.5 rounded font-mono uppercase">Only You</span></span>
+        </h2>
+        <div className="space-y-2 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-xl p-4">
+          {personalTodos.map(todo => (
+            <div key={todo.id} className="flex items-center gap-3 group">
+              <button 
+                onClick={() => togglePersonalTodo(todo.id, todo.status)}
+                className={`w-4 h-4 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
+                  todo.status === 'done' 
+                    ? 'bg-[var(--text-tertiary)] border-[var(--text-tertiary)]' 
+                    : 'border-[var(--text-secondary)] hover:border-[var(--text-primary)]'
+                }`}
+              >
+                {todo.status === 'done' && <Check className="w-3 h-3 text-[var(--bg-base)]" />}
+              </button>
+              <div className={`flex-1 text-sm ${todo.status === 'done' ? 'text-[var(--text-tertiary)] line-through' : 'text-[var(--text-primary)]'}`}>
+                {todo.title}
+              </div>
+              <button 
+                onClick={() => deletePersonalTodo(todo.id)}
+                className="opacity-0 group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-red-500 text-xs transition-all"
+              >
+                Delete
+              </button>
+            </div>
+          ))}
+          <input 
+            type="text" 
+            placeholder="Add a private to-do... (Press Enter)"
+            className="w-full bg-transparent outline-none text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] pt-2 border-t border-[var(--border-hairline)] mt-2"
+            onKeyDown={e => {
+              if (e.key === 'Enter') {
+                addPersonalTodo(e.currentTarget.value);
+                e.currentTarget.value = '';
+              }
+            }}
+          />
+        </div>
+      </section>
 
       <CloseDayPanel 
         isOpen={isCloseDayOpen} 
