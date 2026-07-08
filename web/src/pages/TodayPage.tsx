@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { api } from '../lib/api';
 import { Check } from 'lucide-react';
 import { NavLink } from 'react-router-dom';
+import CloseDayPanel from '../components/CloseDayPanel';
 
 const categoryColors: Record<string, string> = {
   academic: 'bg-[var(--accent)]',
@@ -41,17 +42,21 @@ export default function TodayPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
+  const [isCloseDayOpen, setIsCloseDayOpen] = useState(false);
+  
+  // Basic time check for accenting the Close Day button
+  const currentHour = new Date().getHours();
+  // We can read close_hour from localStorage, default 21
+  const closeHour = parseInt(localStorage.getItem('pos_close_hour') || '21');
+  const isPastClose = currentHour >= closeHour;
 
   useEffect(() => {
     async function init() {
       try {
-        // 1. Recompute schedule
         await api.post('/scheduler/recompute');
-        // 2. Fetch today's tasks
         const todayStr = new Date().toISOString().split('T')[0];
         const taskData = await api.get(`/micro-tasks?date=${todayStr}`);
         setTasks(taskData);
-        // 3. Check if there are any goals (for empty state)
         if (taskData.length === 0) {
           const goalsData = await api.get('/macro-goals');
           setHasGoals(goalsData.length > 0);
@@ -78,6 +83,16 @@ export default function TodayPage() {
     await api.patch(`/micro-tasks/${id}`, { title: newTitle });
   };
 
+  const handleTaskResolved = (id: string, newStatus?: string, newDate?: string) => {
+    setTasks(prev => prev.map(t => {
+      if (t.id === id) {
+        if (newStatus) return { ...t, status: newStatus };
+        if (newDate) return { ...t, scheduled_date: newDate };
+      }
+      return t;
+    }));
+  };
+
   if (loading) return <div className="p-6 text-[var(--text-secondary)]">Recalibrating...</div>;
 
   if (tasks.length === 0 && hasGoals === false) {
@@ -91,8 +106,11 @@ export default function TodayPage() {
     );
   }
 
-  // Group by category
-  const grouped = tasks.reduce((acc, task) => {
+  // Filter tasks to only those scheduled for today strictly for the main view (excluding pushed to tomorrow)
+  const todayStr = new Date().toISOString().split('T')[0];
+  const activeTasks = tasks.filter(t => t.scheduled_date === todayStr && t.status !== 'skipped');
+
+  const grouped = activeTasks.reduce((acc, task) => {
     const cat = task.category || 'other';
     if (!acc[cat]) acc[cat] = [];
     acc[cat].push(task);
@@ -100,13 +118,26 @@ export default function TodayPage() {
   }, {} as Record<string, any[]>);
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-2xl font-semibold mb-1">Today</h1>
-        <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider">{new Date().toDateString()}</p>
+    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-8 relative">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold mb-1">Today</h1>
+          <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider">{new Date().toDateString()}</p>
+        </div>
+        
+        <button 
+          onClick={() => setIsCloseDayOpen(true)}
+          className={`px-3 py-1.5 text-sm font-medium rounded-[4px] border transition-colors ${
+            isPastClose 
+              ? 'bg-[var(--accent)] border-[var(--accent)] text-[var(--bg-base)] hover:bg-[var(--accent)]/90' 
+              : 'bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] text-[var(--text-primary)] hover:border-[var(--text-secondary)]'
+          }`}
+        >
+          Close Day
+        </button>
       </div>
 
-      {tasks.length === 0 && hasGoals === true && (
+      {activeTasks.length === 0 && hasGoals === true && (
         <p className="text-[var(--text-secondary)]">All done for today! Take a break.</p>
       )}
 
@@ -119,7 +150,6 @@ export default function TodayPage() {
                 key={task.id} 
                 className="flex items-center gap-3 group relative pl-3"
               >
-                {/* Left color strip */}
                 <div className={`absolute left-0 top-0 bottom-0 w-[3px] rounded-full ${categoryColors[category] || categoryColors.other}`} />
                 
                 <button 
@@ -141,6 +171,16 @@ export default function TodayPage() {
           </div>
         </div>
       ))}
+
+      <CloseDayPanel 
+        isOpen={isCloseDayOpen} 
+        onClose={() => setIsCloseDayOpen(false)} 
+        tasks={activeTasks}
+        onTaskResolved={handleTaskResolved}
+        onCloseDayComplete={() => {
+          alert("Day closed successfully!");
+        }}
+      />
     </div>
   );
 }
