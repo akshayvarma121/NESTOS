@@ -51,15 +51,20 @@ router.patch('/:id', async (req, res) => {
   const { status, scheduled_date, title, is_pinned } = req.body;
 
   const updates: any = {};
+  let isJustCompleted = false;
+
   if (status !== undefined) {
     updates.status = status;
-    if (status === 'done') updates.completed_at = new Date().toISOString();
+    if (status === 'done') {
+      updates.completed_at = new Date().toISOString();
+      isJustCompleted = true; // We only check milestones if transitioning to 'done'
+    }
   }
   if (scheduled_date !== undefined) updates.scheduled_date = scheduled_date;
   if (title !== undefined) updates.title = title;
   if (is_pinned !== undefined) updates.is_pinned = is_pinned;
 
-  const { data, error } = await supabase
+  const { data: updatedTask, error } = await supabase
     .from('pos_micro_tasks')
     .update(updates)
     .eq('id', id)
@@ -67,7 +72,57 @@ router.patch('/:id', async (req, res) => {
     .single();
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  // Milestone Detection (FR-10)
+  let milestone_reached = false;
+
+  if (isJustCompleted && updatedTask.macro_id) {
+    // 1. Fetch macro goal
+    const { data: goal } = await supabase
+      .from('pos_macro_goals')
+      .select('*')
+      .eq('id', updatedTask.macro_id)
+      .single();
+
+    if (goal) {
+      // 2. Count done tasks
+      const { count: doneCount } = await supabase
+        .from('pos_micro_tasks')
+        .select('*', { count: 'exact', head: true })
+        .eq('macro_id', goal.id)
+        .eq('status', 'done');
+
+      if (doneCount !== null) {
+        const total = goal.total_units;
+        const half = Math.floor(total * 0.5);
+        const threeQuarters = Math.floor(total * 0.75);
+
+        let milestoneText = null;
+
+        if (doneCount === total) {
+          milestoneText = `Just finished ${goal.title} — ${total} ${goal.unit_label} down.`;
+        } else if (doneCount === threeQuarters) {
+          milestoneText = `Crossed 75% on ${goal.title} — almost at the finish line!`;
+        } else if (doneCount === half) {
+          milestoneText = `Hit the halfway mark (50%) on ${goal.title}!`;
+        }
+
+        if (milestoneText) {
+          const tag = goal.category === 'dsa' ? 'dsa_win' : 'dev_milestone';
+          
+          await supabase.from('pos_content_capture').insert([{
+            raw_text: milestoneText,
+            tag,
+            linked_macro_id: goal.id
+          }]);
+
+          milestone_reached = true;
+        }
+      }
+    }
+  }
+
+  res.json({ ...updatedTask, milestone_reached });
 });
 
 // POST /api/micro-tasks/:id/split
