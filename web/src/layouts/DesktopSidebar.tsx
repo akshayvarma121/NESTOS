@@ -1,10 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { Calendar, ListTodo, Target, Lightbulb, Inbox, Users, Settings, Lock } from 'lucide-react';
+import { Calendar as CalendarIcon, ListTodo, Target, Lightbulb, Inbox, Users, Settings, Lock, BarChart2 } from 'lucide-react';
 
 const navItems = [
-  { name: 'Focus', path: '/focus', icon: Calendar },
+  { name: 'Focus', path: '/focus', icon: Target },
+  { name: 'Calendar', path: '/calendar', icon: CalendarIcon },
   { name: 'Backlog', path: '/backlog', icon: ListTodo },
-  { name: 'Goals', path: '/goals', icon: Target },
+  { name: 'Goals', path: '/goals', icon: BarChart2 },
   { name: 'Deadlines', path: '/opportunities', icon: Lightbulb },
   { name: 'Captures', path: '/captures', icon: Inbox },
   { name: 'Vault', path: '/vault', icon: Lock },

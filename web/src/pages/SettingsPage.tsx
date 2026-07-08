@@ -28,6 +28,27 @@ export default function SettingsPage() {
 
       <div className="space-y-8">
         <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
+          <h2 className="text-lg font-medium mb-4">Appearance</h2>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg">
+              <div>
+                <h3 className="text-sm font-medium">Light Mode</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">Toggle brutalist light mode theme.</p>
+              </div>
+              <button 
+                onClick={() => {
+                  const isLight = document.documentElement.classList.toggle('light');
+                  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+                }}
+                className="px-3 py-1.5 bg-[var(--text-primary)] text-[var(--bg-base)] text-xs font-medium rounded hover:opacity-90 transition-opacity"
+              >
+                Toggle Theme
+              </button>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4">Account</h2>
           <div className="space-y-4">
             <a href="/partner" className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-[var(--text-primary)] transition-colors">

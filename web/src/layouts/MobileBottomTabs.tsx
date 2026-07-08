@@ -1,12 +1,12 @@
 import { NavLink } from 'react-router-dom';
-import { Calendar, Lightbulb, Lock, Menu, ListTodo } from 'lucide-react';
+import { Calendar as CalendarIcon, ListTodo, Target, Lightbulb, Inbox } from 'lucide-react';
 
 const tabs = [
-  { name: 'Focus', path: '/focus', icon: Calendar },
-  { name: 'Canvas', path: '/backlog', icon: ListTodo },
+  { name: 'Focus', path: '/focus', icon: Target },
+  { name: 'Calendar', path: '/calendar', icon: CalendarIcon },
+  { name: 'Backlog', path: '/backlog', icon: ListTodo },
   { name: 'Dates', path: '/opportunities', icon: Lightbulb },
-  { name: 'Vault', path: '/vault', icon: Lock },
-  { name: 'More', path: '/settings', icon: Menu },
+  { name: 'Inbox', path: '/captures', icon: Inbox },
 ];
 
 export default function MobileBottomTabs() {

@@ -11,6 +11,7 @@ import VaultPage from './pages/VaultPage';
 import PartnerPage from './pages/PartnerPage';
 import SettingsPage from './pages/SettingsPage';
 import SharedPartnerPage from './pages/SharedPartnerPage';
+import CalendarPage from './pages/CalendarPage';
 
 import type { ReactNode } from 'react';
 
@@ -41,6 +42,7 @@ export default function App() {
             <Route path="goals" element={<GoalsPage />} />
             <Route path="opportunities" element={<OpportunitiesPage />} />
             <Route path="captures" element={<CapturesPage />} />
+            <Route path="calendar" element={<CalendarPage />} />
             <Route path="vault" element={<VaultPage />} />
             <Route path="partner" element={<PartnerPage />} />
             <Route path="settings" element={<SettingsPage />} />

@@ -36,17 +36,33 @@
 
 @layer base {
   :root {
-    --bg-base: #0E0F11;
-    --bg-surface: #17181B;
-    --bg-surface-raised: #1F2023;
-    --border-hairline: #2A2B2F;
-    --text-primary: #EDEDED;
-    --text-secondary: #9A9A9E;
-    --text-tertiary: #5C5C60;
-    --accent: #4B7BFF;
-    --danger: #E5484D;
-    --warning: #E5A445;
-    --success: #3DD68C;
+    --bg-base: #000000;
+    --bg-surface: #0a0a0a;
+    --bg-surface-raised: #141414;
+    --border-hairline: #333333;
+    --text-primary: #ffffff;
+    --text-secondary: #a3a3a3;
+    --text-tertiary: #525252;
+    --accent: #ff00ff;
+    --danger: #ff003c;
+    --warning: #ccff00;
+    --success: #00ff66;
+    color-scheme: dark;
+  }
+
+  :root.light {
+    --bg-base: #ffffff;
+    --bg-surface: #f5f5f5;
+    --bg-surface-raised: #e5e5e5;
+    --border-hairline: #000000;
+    --text-primary: #000000;
+    --text-secondary: #525252;
+    --text-tertiary: #a3a3a3;
+    --accent: #ff00ff;
+    --danger: #ff003c;
+    --warning: #b3d900;
+    --success: #00cc52;
+    color-scheme: light;
   }
 
   html, body {
@@ -59,6 +75,11 @@
     html, body {
       font-size: 15px;
     }
+  }
+
+  /* Fix for input date/time icons on dark backgrounds if color-scheme isn't respected by some browsers */
+  input[type="date"], input[type="time"] {
+    color: var(--text-primary);
   }
 
   /* No shadows, just hairline border */

@@ -14,6 +14,7 @@ import vaultRouter from './routes/vault.js';
 import routinesRouter from './routes/routines.js';
 import personalRouter from './routes/personal.js';
 import deadlinesRouter from './routes/deadlines.js';
+import calendarRouter from './routes/calendar.js';
 
 import './cron/index.js'; // Start cron jobs
 
@@ -38,6 +39,7 @@ app.use('/api/vault', vaultRouter);
 app.use('/api/routines', routinesRouter);
 app.use('/api/personal-todos', personalRouter);
 app.use('/api/deadlines', deadlinesRouter);
+app.use('/api/calendar', calendarRouter);
 
 app.get('/health', (req, res) => {
   res.status(200).json({ status: 'ok', timestamp: new Date().toISOString() });
