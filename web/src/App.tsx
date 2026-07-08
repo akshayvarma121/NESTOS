@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import { LoginPage, RegisterPage } from './pages/AuthPages';
 import AppLayout from './layouts/AppLayout';
-import TodayPage from './pages/TodayPage';
+import FocusPage from './pages/FocusPage';
 import GoalsPage from './pages/GoalsPage';
 import BacklogPage from './pages/BacklogPage';
 import OpportunitiesPage from './pages/OpportunitiesPage';
@@ -35,8 +35,8 @@ export default function App() {
           
           {/* Protected App Routes */}
           <Route path="/" element={<ProtectedRoute><AppLayout /></ProtectedRoute>}>
-            <Route index element={<Navigate to="/today" replace />} />
-            <Route path="today" element={<TodayPage />} />
+            <Route index element={<Navigate to="/focus" replace />} />
+            <Route path="focus" element={<FocusPage />} />
             <Route path="backlog" element={<BacklogPage />} />
             <Route path="goals" element={<GoalsPage />} />
             <Route path="opportunities" element={<OpportunitiesPage />} />

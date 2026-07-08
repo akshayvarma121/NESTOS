@@ -1,9 +1,9 @@
 import { NavLink } from 'react-router-dom';
-import { Calendar, Target, Lightbulb, Lock, Menu } from 'lucide-react';
+import { Calendar, Lightbulb, Lock, Menu, ListTodo } from 'lucide-react';
 
 const tabs = [
-  { name: 'Today', path: '/today', icon: Calendar },
-  { name: 'Goals', path: '/goals', icon: Target },
+  { name: 'Focus', path: '/focus', icon: Calendar },
+  { name: 'Canvas', path: '/backlog', icon: ListTodo },
   { name: 'Opps', path: '/opportunities', icon: Lightbulb },
   { name: 'Vault', path: '/vault', icon: Lock },
   { name: 'More', path: '/settings', icon: Menu },

@@ -5,12 +5,11 @@ import { requireAuth, AuthRequest } from '../middleware/auth.js';
 const router = Router();
 router.use(requireAuth);
 
-router.get('/today', async (req: AuthRequest, res) => {
-  const todayStr = new Date().toISOString().split('T')[0];
+router.get('/focus', async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from('pos_micro_tasks')
     .select('*, macro:pos_macro_goals(category), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)')
-    .eq('scheduled_date', todayStr)
+    .not('scheduled_date', 'is', null)
     .in('user_id', req.sharedSpaceIds!);
     
   if (error) return res.status(500).json({ error: error.message });
