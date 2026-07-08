@@ -1,11 +1,11 @@
 import { NavLink } from 'react-router-dom';
-import { Calendar, Target, Lightbulb, Inbox, Menu } from 'lucide-react';
+import { Calendar, Target, Lightbulb, Lock, Menu } from 'lucide-react';
 
 const tabs = [
   { name: 'Today', path: '/today', icon: Calendar },
   { name: 'Goals', path: '/goals', icon: Target },
   { name: 'Opps', path: '/opportunities', icon: Lightbulb },
-  { name: 'Capture', path: '/captures', icon: Inbox },
+  { name: 'Vault', path: '/vault', icon: Lock },
   { name: 'More', path: '/settings', icon: Menu },
 ];
 

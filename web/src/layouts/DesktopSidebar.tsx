@@ -1,5 +1,5 @@
 import { NavLink } from 'react-router-dom';
-import { Calendar, ListTodo, Target, Lightbulb, Inbox, Users, Settings } from 'lucide-react';
+import { Calendar, ListTodo, Target, Lightbulb, Inbox, Users, Settings, Lock } from 'lucide-react';
 
 const navItems = [
   { name: 'Today', path: '/today', icon: Calendar },
@@ -7,6 +7,7 @@ const navItems = [
   { name: 'Goals', path: '/goals', icon: Target },
   { name: 'Opportunities', path: '/opportunities', icon: Lightbulb },
   { name: 'Captures', path: '/captures', icon: Inbox },
+  { name: 'Vault', path: '/vault', icon: Lock },
   { name: 'Partner', path: '/partner', icon: Users },
   { name: 'Settings', path: '/settings', icon: Settings },
 ];

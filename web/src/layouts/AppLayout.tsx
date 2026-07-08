@@ -44,6 +44,15 @@ export default function AppLayout() {
     };
     window.addEventListener('milestone_reached', handleMilestone);
 
+    // Vault Copy Listener
+    const handleVaultCopy = (e: any) => {
+      // Re-use milestone toast but without the view button for simplicity, 
+      // or we can just use alert. Let's just alert for simplicity since it's an edge feature,
+      // or implement a quick native toast.
+      alert(e.detail || 'Copied to clipboard');
+    };
+    window.addEventListener('vault_copy', handleVaultCopy);
+
     // Contextual Push check - only show if supported, not denied, and not already dismissed
     if ('Notification' in window && 'serviceWorker' in navigator) {
       if (Notification.permission === 'default' && !localStorage.getItem('push_dismissed')) {

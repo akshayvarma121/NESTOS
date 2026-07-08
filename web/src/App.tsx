@@ -6,6 +6,7 @@ import GoalsPage from './pages/GoalsPage';
 import BacklogPage from './pages/BacklogPage';
 import OpportunitiesPage from './pages/OpportunitiesPage';
 import CapturesPage from './pages/CapturesPage';
+import VaultPage from './pages/VaultPage';
 import PartnerPage from './pages/PartnerPage';
 import SettingsPage from './pages/SettingsPage';
 import SharedPartnerPage from './pages/SharedPartnerPage';
@@ -25,6 +26,7 @@ function App() {
           <Route path="goals" element={<GoalsPage />} />
           <Route path="opportunities" element={<OpportunitiesPage />} />
           <Route path="captures" element={<CapturesPage />} />
+          <Route path="vault" element={<VaultPage />} />
           <Route path="partner" element={<PartnerPage />} />
           <Route path="settings" element={<SettingsPage />} />
         </Route>
