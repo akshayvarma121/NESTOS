@@ -14,8 +14,12 @@ export function LoginPage() {
     setError('');
     
     const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setError(error.message);
-    setLoading(false);
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+    } else {
+      window.location.href = '/';
+    }
   };
 
   return (
