@@ -27,6 +27,18 @@ export default function SettingsPage() {
       </div>
 
       <div className="space-y-8">
+        <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
+          <h2 className="text-lg font-medium mb-4">Account</h2>
+          <div className="space-y-4">
+            <a href="/partner" className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-[var(--text-primary)] transition-colors">
+              <div>
+                <h3 className="text-sm font-medium">Partner Network</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">View your invite code or link a partner.</p>
+              </div>
+              <span className="text-[var(--text-tertiary)]">→</span>
+            </a>
+          </div>
+        </section>
         <section className="bg-[var(--bg-surface)] border border-red-900/30 rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4 text-red-500">Danger Zone</h2>
           <div className="space-y-4">
