@@ -9,10 +9,12 @@ import {
   Settings,
   Lock,
   BarChart2,
+  Timer,
 } from "lucide-react";
 
 const navItems = [
   { name: "Focus", path: "/focus", icon: Target },
+  { name: "Pomodoro", path: "/pomodoro", icon: Timer },
   { name: "Calendar", path: "/calendar", icon: CalendarIcon },
   { name: "Backlog", path: "/backlog", icon: ListTodo },
   { name: "Goals", path: "/goals", icon: BarChart2 },
