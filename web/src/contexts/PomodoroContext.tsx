@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import { createContext, useContext, useState, useEffect, type ReactNode } from "react";
 import { useLocation } from "react-router-dom";
 
 type Phase = "work" | "break";
@@ -44,7 +44,7 @@ export function PomodoroProvider({ children }: { children: ReactNode }) {
 
   // Main Timer Logic
   useEffect(() => {
-    let interval: NodeJS.Timeout;
+    let interval: ReturnType<typeof setInterval>;
     if (isRunning && timeRemaining > 0) {
       interval = setInterval(() => {
         setTimeRemaining((prev) => prev - 1);
