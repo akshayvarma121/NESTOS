@@ -1,41 +1,43 @@
-import { Router } from 'express';
-import { supabase } from '../supabase.js';
-import { requireAuth, AuthRequest } from '../middleware/auth.js';
+import { Router } from "express";
+import { supabase } from "../supabase.js";
+import { requireAuth, AuthRequest } from "../middleware/auth.js";
 
 const router = Router();
 router.use(requireAuth);
 
-router.get('/', async (req: AuthRequest, res) => {
+router.get("/", async (req: AuthRequest, res) => {
   const { data, error } = await supabase
-    .from('pos_simple_captures')
-    .select('*, creator:pos_user_profiles!pos_simple_captures_user_id_fkey(username)')
-    .in('user_id', req.sharedSpaceIds!)
-    .order('created_at', { ascending: false });
-    
+    .from("pos_simple_captures")
+    .select(
+      "*, creator:pos_user_profiles!pos_simple_captures_user_id_fkey(username)",
+    )
+    .in("user_id", req.sharedSpaceIds!)
+    .order("created_at", { ascending: false });
+
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
 });
 
-router.post('/', async (req: AuthRequest, res) => {
+router.post("/", async (req: AuthRequest, res) => {
   const { content, platform } = req.body;
   const { data, error } = await supabase
-    .from('pos_simple_captures')
+    .from("pos_simple_captures")
     .insert([{ user_id: req.user!.id, content, platform }])
     .select()
     .single();
-    
+
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json(data);
 });
 
-router.delete('/:id', async (req: AuthRequest, res) => {
+router.delete("/:id", async (req: AuthRequest, res) => {
   const { id } = req.params;
   const { error } = await supabase
-    .from('pos_simple_captures')
+    .from("pos_simple_captures")
     .delete()
-    .eq('id', id)
-    .in('user_id', req.sharedSpaceIds!);
-    
+    .eq("id", id)
+    .in("user_id", req.sharedSpaceIds!);
+
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });
 });

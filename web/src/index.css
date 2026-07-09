@@ -1,29 +1,29 @@
 @import "tailwindcss";
 
 @theme {
-  --color-bg-base: #0E0F11;
-  --color-bg-surface: #17181B;
-  --color-bg-surface-raised: #1F2023;
-  --color-border-hairline: #2A2B2F;
-  --color-text-primary: #EDEDED;
-  --color-text-secondary: #9A9A9E;
-  --color-text-tertiary: #5C5C60;
-  --color-accent: #4B7BFF;
-  --color-danger: #E5484D;
-  --color-warning: #E5A445;
-  --color-success: #3DD68C;
+  --color-bg-base: #0e0f11;
+  --color-bg-surface: #17181b;
+  --color-bg-surface-raised: #1f2023;
+  --color-border-hairline: #2a2b2f;
+  --color-text-primary: #ededed;
+  --color-text-secondary: #9a9a9e;
+  --color-text-tertiary: #5c5c60;
+  --color-accent: #4b7bff;
+  --color-danger: #e5484d;
+  --color-warning: #e5a445;
+  --color-success: #3dd68c;
 
   --font-sans: "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   /* Spacing scale: 4px base unit */
   --spacing-1: 0.25rem; /* 4px */
-  --spacing-2: 0.5rem;  /* 8px */
+  --spacing-2: 0.5rem; /* 8px */
   --spacing-3: 0.75rem; /* 12px */
-  --spacing-4: 1rem;    /* 16px */
-  --spacing-6: 1.5rem;  /* 24px */
-  --spacing-8: 2rem;    /* 32px */
-  --spacing-12: 3rem;   /* 48px */
+  --spacing-4: 1rem; /* 16px */
+  --spacing-6: 1.5rem; /* 24px */
+  --spacing-8: 2rem; /* 32px */
+  --spacing-12: 3rem; /* 48px */
 
   --radius-sm: 2px;
   --radius-md: 4px;
@@ -43,10 +43,10 @@
     --text-primary: #ffffff;
     --text-secondary: #a3a3a3;
     --text-tertiary: #525252;
-    --accent: #4B7BFF;
-    --danger: #E5484D;
-    --warning: #E5A445;
-    --success: #3DD68C;
+    --accent: #4b7bff;
+    --danger: #e5484d;
+    --warning: #e5a445;
+    --success: #3dd68c;
     color-scheme: dark;
   }
 
@@ -58,27 +58,30 @@
     --text-primary: #000000;
     --text-secondary: #525252;
     --text-tertiary: #a3a3a3;
-    --accent: #4B7BFF;
-    --danger: #E5484D;
-    --warning: #E5A445;
-    --success: #3DD68C;
+    --accent: #4b7bff;
+    --danger: #e5484d;
+    --warning: #e5a445;
+    --success: #3dd68c;
     color-scheme: light;
   }
 
-  html, body {
+  html,
+  body {
     @apply bg-[var(--bg-base)] text-[var(--text-primary)] font-sans antialiased;
     font-size: 14px;
     line-height: 1.4;
   }
 
   @media (max-width: 1023px) {
-    html, body {
+    html,
+    body {
       font-size: 15px;
     }
   }
 
   /* Fix for input date/time icons on dark backgrounds if color-scheme isn't respected by some browsers */
-  input[type="date"], input[type="time"] {
+  input[type="date"],
+  input[type="time"] {
     color: var(--text-primary);
   }
 

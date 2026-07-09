@@ -2,7 +2,7 @@ export interface Task {
   id: string;
   macro_id: string;
   scheduled_date: string | null;
-  status: 'pending' | 'done' | 'skipped';
+  status: "pending" | "done" | "skipped";
   is_pinned: boolean;
 }
 
@@ -13,7 +13,11 @@ export interface MacroGoal {
 }
 
 export interface RecomputeResult {
-  tasksToUpdate: { id: string; scheduled_date: string | null; is_pinned?: boolean }[];
+  tasksToUpdate: {
+    id: string;
+    scheduled_date: string | null;
+    is_pinned?: boolean;
+  }[];
 }
 
 /**
@@ -21,8 +25,15 @@ export interface RecomputeResult {
  * @param goals Array of active macro goals with their tasks.
  * @param todayDateStr String representation of today's date (YYYY-MM-DD).
  */
-export function recomputeSchedule(goals: MacroGoal[], todayDateStr: string): RecomputeResult {
-  const tasksToUpdate: { id: string; scheduled_date: string | null; is_pinned?: boolean }[] = [];
+export function recomputeSchedule(
+  goals: MacroGoal[],
+  todayDateStr: string,
+): RecomputeResult {
+  const tasksToUpdate: {
+    id: string;
+    scheduled_date: string | null;
+    is_pinned?: boolean;
+  }[] = [];
   const today = new Date(todayDateStr);
   today.setHours(0, 0, 0, 0);
 
@@ -37,7 +48,7 @@ export function recomputeSchedule(goals: MacroGoal[], todayDateStr: string): Rec
     const unscheduledTasks: Task[] = [];
 
     for (const task of goal.tasks) {
-      if (task.status !== 'pending') continue;
+      if (task.status !== "pending") continue;
 
       if (task.scheduled_date) {
         const schedDate = new Date(task.scheduled_date);
@@ -46,7 +57,11 @@ export function recomputeSchedule(goals: MacroGoal[], todayDateStr: string): Rec
         if (schedDate.getTime() < today.getTime()) {
           // Missed task, recalibrate. If it was pinned, unpin it per FR-3.3 self-healing.
           unscheduledTasks.push(task);
-          tasksToUpdate.push({ id: task.id, scheduled_date: null, is_pinned: false });
+          tasksToUpdate.push({
+            id: task.id,
+            scheduled_date: null,
+            is_pinned: false,
+          });
         } else if (schedDate.getTime() >= today.getTime()) {
           // If it's pinned to today or future, respect it and skip auto-scheduling.
           if (!task.is_pinned) {
@@ -63,16 +78,24 @@ export function recomputeSchedule(goals: MacroGoal[], todayDateStr: string): Rec
     const tasks_per_day = Math.ceil(unscheduledTasks.length / remaining_days);
 
     let currentTaskIndex = 0;
-    
-    for (let dayOffset = 0; currentTaskIndex < unscheduledTasks.length; dayOffset++) {
+
+    for (
+      let dayOffset = 0;
+      currentTaskIndex < unscheduledTasks.length;
+      dayOffset++
+    ) {
       const assignDate = new Date(today);
       assignDate.setDate(today.getDate() + dayOffset);
-      const assignDateStr = assignDate.toISOString().split('T')[0];
+      const assignDateStr = assignDate.toISOString().split("T")[0];
 
-      for (let i = 0; i < tasks_per_day && currentTaskIndex < unscheduledTasks.length; i++) {
+      for (
+        let i = 0;
+        i < tasks_per_day && currentTaskIndex < unscheduledTasks.length;
+        i++
+      ) {
         const task = unscheduledTasks[currentTaskIndex];
         // Only push to tasksToUpdate if we didn't already push an unpin update for this task above
-        const existingUpdate = tasksToUpdate.find(u => u.id === task.id);
+        const existingUpdate = tasksToUpdate.find((u) => u.id === task.id);
         if (existingUpdate) {
           existingUpdate.scheduled_date = assignDateStr;
         } else {
