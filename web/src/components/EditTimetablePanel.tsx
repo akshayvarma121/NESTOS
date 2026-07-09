@@ -112,7 +112,7 @@ export default function EditTimetablePanel({ isOpen, onClose, onUpdate }: Props)
                 className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
               />
               <input 
-                required placeholder="Time (e.g. 06:00)"
+                placeholder="Time (optional, HH:MM)"
                 value={timeLabel} onChange={e => setTimeLabel(e.target.value)}
                 className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)] font-mono"
               />
