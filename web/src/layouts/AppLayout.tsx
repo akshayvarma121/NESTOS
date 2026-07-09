@@ -96,7 +96,7 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-[var(--bg-base)] overflow-hidden">
+    <div className="flex h-[100dvh] w-full bg-[var(--bg-base)] overflow-hidden">
       
       {/* Offline Banner */}
       {isOffline && (

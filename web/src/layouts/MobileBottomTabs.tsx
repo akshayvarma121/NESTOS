@@ -17,7 +17,7 @@ export default function MobileBottomTabs() {
           key={tab.name}
           to={tab.path}
           className={({ isActive }) =>
-            `flex flex-col items-center justify-center w-full h-full min-h-[44px] min-w-[44px] ${
+            `flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ${
               isActive ? 'text-[var(--accent)]' : 'text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]'
             }`
           }

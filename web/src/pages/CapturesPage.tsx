@@ -68,7 +68,7 @@ export default function CapturesPage() {
               value={platform} onChange={e => setPlatform(e.target.value)}
               className="flex-1 bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
             />
-            <button type="submit" className="bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2">
+            <button type="submit" className="shrink-0 bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2">
               <Plus className="w-4 h-4" /> Save
             </button>
           </div>
