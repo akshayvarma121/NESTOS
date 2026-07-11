@@ -4,6 +4,8 @@ import { api } from "../lib/api";
 export default function SettingsPage() {
   const [resetConfirm, setResetConfirm] = useState("");
   const [resettingVault, setResettingVault] = useState(false);
+  const [clearDataConfirm, setClearDataConfirm] = useState("");
+  const [clearingData, setClearingData] = useState(false);
 
   const handleVaultReset = async () => {
     if (resetConfirm !== "DELETE") return;
@@ -16,6 +18,21 @@ export default function SettingsPage() {
       alert("Failed to reset vault: " + e.message);
     } finally {
       setResettingVault(false);
+    }
+  };
+
+  const handleClearData = async () => {
+    if (clearDataConfirm !== "CLEAR") return;
+    setClearingData(true);
+    try {
+      await api.delete("/account/clear-data");
+      setClearDataConfirm("");
+      alert("All your data has been permanently deleted.");
+      window.location.href = "/";
+    } catch (e: any) {
+      alert("Failed to clear data: " + e.message);
+    } finally {
+      setClearingData(false);
     }
   };
 
@@ -94,6 +111,30 @@ export default function SettingsPage() {
                   className="bg-red-500 text-white font-medium px-4 py-2 rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 text-sm"
                 >
                   {resettingVault ? "Resetting..." : "Factory Reset Vault"}
+                </button>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-red-900/30">
+              <h3 className="text-sm font-medium">Clear All Data (Factory Reset)</h3>
+              <p className="text-xs text-[var(--text-secondary)] mt-1 mb-3">
+                This will permanently delete all your goals, tasks, routines, notes, captures, and vault entries.
+                Your account and partner connection will remain intact. Type{" "}
+                <span className="font-mono text-red-400">CLEAR</span> to confirm.
+              </p>
+              <div className="flex gap-3">
+                <input
+                  value={clearDataConfirm}
+                  onChange={(e) => setClearDataConfirm(e.target.value)}
+                  placeholder="Type CLEAR"
+                  className="flex-1 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-red-500"
+                />
+                <button
+                  onClick={handleClearData}
+                  disabled={clearDataConfirm !== "CLEAR" || clearingData}
+                  className="bg-red-500 text-white font-medium px-4 py-2 rounded-md hover:bg-red-600 transition-colors disabled:opacity-50 text-sm whitespace-nowrap"
+                >
+                  {clearingData ? "Wiping Data..." : "Wipe All Data"}
                 </button>
               </div>
             </div>
