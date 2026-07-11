@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import { Check, Info } from "lucide-react";
+import { Check, Info, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import EditTimetablePanel from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
