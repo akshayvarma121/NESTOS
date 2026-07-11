@@ -14,7 +14,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
   const [form, setForm] = useState({
     title: "",
     category: "dev",
-    total_units: 10,
+    total_units: 10 as number | string,
     unit_label: "chapters",
     deadline: new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0],
   });
@@ -25,8 +25,9 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
+    const units = typeof form.total_units === "number" ? form.total_units : (parseInt(form.total_units) || 0);
     // Generate initial slices
-    const initialSlices = Array.from({ length: form.total_units }, (_, i) => ({
+    const initialSlices = Array.from({ length: units }, (_, i) => ({
       id: `temp-${i}`,
       title: `${form.unit_label} ${i + 1}`,
       scheduled_date: "", // Optional date assignment
@@ -132,7 +133,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      total_units: e.target.value === "" ? 0 : parseInt(e.target.value),
+                      total_units: e.target.value === "" ? "" : parseInt(e.target.value) || 0,
                     })
                   }
                   className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)] font-mono"
@@ -143,7 +144,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                   Unit Label
                 </label>
                 <input
-                  required={form.total_units > 0}
+                  required={(typeof form.total_units === "number" ? form.total_units : parseInt(form.total_units || "0")) > 0}
                   value={form.unit_label}
                   onChange={(e) =>
                     setForm({ ...form, unit_label: e.target.value })

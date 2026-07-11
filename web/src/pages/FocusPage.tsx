@@ -386,58 +386,90 @@ export default function FocusPage() {
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {routines.map((routine) => (
-              <button
+              <div
                 key={routine.id}
-                onClick={async () => {
-                  // Optimistic
-                  setRoutines((prev) =>
-                    prev.map((r) =>
-                      r.id === routine.id
-                        ? { ...r, is_completed: !r.is_completed }
-                        : r,
-                    ),
-                  );
-                  try {
-                    await api.post(`/routines/${routine.id}/toggle`, {
-                      date: todayStr,
-                    });
-                  } catch (e) {
-                    fetchFocusData(); // Revert on error
-                  }
-                }}
-                className={`flex items-center gap-4 p-3 rounded-xl border text-left transition-colors ${
+                className={`flex flex-col p-3 rounded-xl border transition-colors ${
                   routine.is_completed
-                    ? "bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-60"
+                    ? "bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-80"
                     : "bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:border-[var(--text-secondary)]"
                 }`}
               >
-                <div
-                  className={`w-5 h-5 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
-                    routine.is_completed
-                      ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
-                      : "border-[var(--text-tertiary)]"
-                  }`}
-                >
-                  {routine.is_completed && (
-                    <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />
-                  )}
-                </div>
-                <div>
-                  <div
-                    className={`text-sm font-medium flex items-center gap-2 ${routine.is_completed ? "line-through text-[var(--text-tertiary)]" : "text-[var(--text-primary)]"}`}
+                <div className="flex items-center gap-4">
+                  <button
+                    onClick={async () => {
+                      // Optimistic
+                      setRoutines((prev) =>
+                        prev.map((r) =>
+                          r.id === routine.id
+                            ? { ...r, is_completed: !r.is_completed, note: "" }
+                            : r,
+                        ),
+                      );
+                      try {
+                        await api.post(`/routines/${routine.id}/toggle`, {
+                          date: todayStr,
+                        });
+                      } catch (e) {
+                        fetchFocusData(); // Revert on error
+                      }
+                    }}
+                    className={`w-5 h-5 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
+                      routine.is_completed
+                        ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
+                        : "border-[var(--text-tertiary)] hover:border-[var(--text-secondary)]"
+                    }`}
                   >
-                    {routine.title}
-                    {routine.assignee?.username && (
-                      <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
-                        {routine.assignee.username}
-                      </span>
+                    {routine.is_completed && (
+                      <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />
                     )}
-                  </div>
-                  <div className="text-[10px] font-mono text-[var(--text-secondary)]">
-                    {routine.time_label}
+                  </button>
+                  <div className="flex-1 text-left">
+                    <div
+                      className={`text-sm font-medium flex items-center gap-2 ${routine.is_completed ? "line-through text-[var(--text-tertiary)]" : "text-[var(--text-primary)]"}`}
+                    >
+                      {routine.title}
+                      {routine.assignee?.username && (
+                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
+                          {routine.assignee.username}
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-[10px] font-mono text-[var(--text-secondary)] mt-0.5">
+                      {routine.time_label}
+                    </div>
                   </div>
                 </div>
-              </button>
+                {routine.is_completed && (
+                  <div className="pl-9 mt-2">
+                    <input
+                      type="text"
+                      placeholder="Add a note (optional)..."
+                      className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1"
+                      defaultValue={routine.note || ""}
+                      onBlur={async (e) => {
+                        const val = e.target.value;
+                        if (val !== (routine.note || "")) {
+                          try {
+                            await api.patch(`/routines/${routine.id}/log`, { date: todayStr, note: val });
+                            setRoutines((prev) =>
+                              prev.map((r) =>
+                                r.id === routine.id ? { ...r, note: val } : r,
+                              ),
+                            );
+                          } catch (err) {
+                            console.error(err);
+                          }
+                        }
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          e.currentTarget.blur();
+                        }
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
             ))}
           </div>
         </section>

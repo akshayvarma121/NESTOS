@@ -44,7 +44,7 @@ router.get("/day", async (req: AuthRequest, res) => {
   if (routineIds.length > 0) {
     const { data: logsData } = await supabase
       .from("pos_routine_logs")
-      .select("routine_id, completed_at, user_id")
+      .select("routine_id, completed_at, user_id, note")
       .in("routine_id", routineIds)
       .eq("date", dateStr);
 
@@ -59,6 +59,7 @@ router.get("/day", async (req: AuthRequest, res) => {
       is_completed: !!log,
       completed_at: log?.completed_at,
       completed_by: log?.user_id,
+      note: log?.note || "",
     };
   });
 
@@ -96,6 +97,16 @@ router.patch("/:id", async (req: AuthRequest, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   res.json(data);
+});
+
+router.delete("/all", async (req: AuthRequest, res) => {
+  const { error } = await supabase
+    .from("pos_routines")
+    .delete()
+    .in("user_id", req.sharedSpaceIds!);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
 });
 
 router.delete("/:id", async (req: AuthRequest, res) => {
@@ -142,6 +153,22 @@ router.post("/:id/toggle", async (req: AuthRequest, res) => {
     if (error) return res.status(500).json({ error: error.message });
     return res.json({ is_completed: true });
   }
+});
+
+router.patch("/:id/log", async (req: AuthRequest, res) => {
+  const { id } = req.params;
+  const { date, note } = req.body;
+
+  const { data, error } = await supabase
+    .from("pos_routine_logs")
+    .update({ note })
+    .eq("routine_id", id)
+    .eq("date", date)
+    .select()
+    .single();
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
 });
 
 export default router;

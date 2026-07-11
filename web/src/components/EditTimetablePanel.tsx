@@ -252,9 +252,27 @@ export default function EditTimetablePanel({
 
           {/* List */}
           <div className="space-y-3">
-            <h3 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2">
-              Active Routines
-            </h3>
+            <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-2">
+              <h3 className="text-sm font-medium">Active Routines</h3>
+              {routines.length > 0 && (
+                <button
+                  onClick={async () => {
+                    if (confirm("Are you sure you want to delete ALL routines? This cannot be undone.")) {
+                      try {
+                        await api.delete("/routines/all");
+                        fetchData();
+                        onUpdate();
+                      } catch (e) {
+                        console.error(e);
+                      }
+                    }
+                  }}
+                  className="text-xs text-red-500 hover:text-red-400 font-medium transition-colors"
+                >
+                  Reset Timetable
+                </button>
+              )}
+            </div>
             {loading ? (
               <p className="text-sm text-[var(--text-tertiary)]">Loading...</p>
             ) : routines.length === 0 ? (
