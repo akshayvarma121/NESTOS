@@ -81,7 +81,14 @@ export default function EditTimetablePanel({
   const handleBulkCreate = async () => {
     try {
       setIsSubmitting(true);
-      const parsed = JSON.parse(jsonInput);
+      
+      let parsed;
+      try {
+        parsed = JSON.parse(jsonInput);
+      } catch (err: any) {
+        throw new Error("Failed to parse JSON: " + err.message);
+      }
+      
       if (!Array.isArray(parsed)) throw new Error("Input must be a JSON array");
 
       for (const item of parsed) {
@@ -98,7 +105,7 @@ export default function EditTimetablePanel({
       fetchData();
       onUpdate();
     } catch (e: any) {
-      alert("Failed to parse JSON: " + e.message);
+      alert(e.message);
     } finally {
       setIsSubmitting(false);
     }
