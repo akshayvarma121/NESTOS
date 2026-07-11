@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { X, ArrowLeft } from "lucide-react";
+import { X, ArrowLeft, Plus, Trash2 } from "lucide-react";
 
 interface Props {
   isOpen: boolean;
@@ -39,6 +39,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
     setLoading(true);
     await onSubmit({
       ...form,
+      total_units: slices.length,
       customSlices: slices,
     });
     setLoading(false);
@@ -125,13 +126,13 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                 <input
                   required
                   type="number"
-                  min="1"
+                  min="0"
                   max="500"
                   value={form.total_units}
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      total_units: parseInt(e.target.value) || 1,
+                      total_units: e.target.value === "" ? 0 : parseInt(e.target.value),
                     })
                   }
                   className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)] font-mono"
@@ -142,7 +143,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                   Unit Label
                 </label>
                 <input
-                  required
+                  required={form.total_units > 0}
                   value={form.unit_label}
                   onChange={(e) =>
                     setForm({ ...form, unit_label: e.target.value })
@@ -199,6 +200,13 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                       placeholder="Task Title"
                       className="flex-1 bg-transparent border-b border-transparent focus:border-[var(--accent)] outline-none text-sm text-[var(--text-primary)] px-1 py-0.5 transition-colors"
                     />
+                    <button
+                      type="button"
+                      onClick={() => setSlices(slices.filter(s => s.id !== slice.id))}
+                      className="p-1 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
                   <div className="flex items-center gap-2 pl-8">
                     <input
@@ -215,6 +223,15 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                   </div>
                 </div>
               ))}
+
+              <button
+                type="button"
+                onClick={() => setSlices([...slices, { id: `manual-${Date.now()}`, title: `${form.unit_label} ${slices.length + 1}`, scheduled_date: "" }])}
+                className="w-full py-2 flex items-center justify-center gap-2 border border-dashed border-[var(--border-hairline)] rounded-lg text-sm text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors mt-2"
+              >
+                <Plus className="w-4 h-4" />
+                Add Sub-Slice
+              </button>
             </div>
 
             <button
