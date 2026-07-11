@@ -25,6 +25,11 @@ export default function EditTimetablePanel({
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [assignedTo, setAssignedTo] = useState<string>("");
 
+  // JSON Import State
+  const [isJSONMode, setIsJSONMode] = useState(false);
+  const [jsonInput, setJsonInput] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   useEffect(() => {
     if (isOpen) {
       fetchData();
@@ -51,19 +56,52 @@ export default function EditTimetablePanel({
     e.preventDefault();
     if (selectedDays.length === 0) return alert("Select at least one day");
 
-    await api.post("/routines", {
-      title,
-      time_label: timeLabel,
-      days_of_week: selectedDays,
-      assigned_to: assignedTo || null,
-    });
+    setIsSubmitting(true);
+    try {
+      await api.post("/routines", {
+        title,
+        time_label: timeLabel,
+        days_of_week: selectedDays,
+        assigned_to: assignedTo || null,
+      });
 
-    setTitle("");
-    setTimeLabel("");
-    setSelectedDays([]);
-    setAssignedTo("");
-    fetchData();
-    onUpdate();
+      setTitle("");
+      setTimeLabel("");
+      setSelectedDays([]);
+      setAssignedTo("");
+      fetchData();
+      onUpdate();
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleBulkCreate = async () => {
+    try {
+      setIsSubmitting(true);
+      const parsed = JSON.parse(jsonInput);
+      if (!Array.isArray(parsed)) throw new Error("Input must be a JSON array");
+
+      for (const item of parsed) {
+        if (!item.title || !Array.isArray(item.days_of_week) || item.days_of_week.length === 0) continue;
+        await api.post("/routines", {
+          title: item.title,
+          time_label: item.time_label || "",
+          days_of_week: item.days_of_week,
+          assigned_to: item.assigned_to || null,
+        });
+      }
+      setJsonInput("");
+      setIsJSONMode(false);
+      fetchData();
+      onUpdate();
+    } catch (e: any) {
+      alert("Failed to parse JSON: " + e.message);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleDelete = async (id: string) => {
@@ -111,13 +149,44 @@ export default function EditTimetablePanel({
 
         <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-8">
           {/* Create Form */}
-          <form
-            onSubmit={handleCreate}
-            className="space-y-4 p-4 border border-[var(--border-hairline)] rounded-lg bg-[var(--bg-surface)]"
-          >
-            <h3 className="text-sm font-medium">Add Routine Block</h3>
+          <div className="space-y-4 p-4 border border-[var(--border-hairline)] rounded-lg bg-[var(--bg-surface)]">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium">Add Routine Block</h3>
+              <button
+                type="button"
+                onClick={() => setIsJSONMode(!isJSONMode)}
+                className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
+              >
+                {isJSONMode ? "Manual Entry" : "Bulk Paste JSON"}
+              </button>
+            </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            {isJSONMode ? (
+              <div className="space-y-3">
+                <p className="text-xs text-[var(--text-tertiary)]">
+                  Paste a JSON array of routines. Format: <br />
+                  <code className="bg-[var(--bg-base)] px-1 rounded">
+                    {`[{"title": "Wake up", "time_label": "07:00", "days_of_week": ["Mon", "Tue"]}]`}
+                  </code>
+                </p>
+                <textarea
+                  rows={6}
+                  value={jsonInput}
+                  onChange={(e) => setJsonInput(e.target.value)}
+                  placeholder="Paste JSON here..."
+                  className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)] font-mono resize-none"
+                />
+                <button
+                  onClick={handleBulkCreate}
+                  disabled={isSubmitting || !jsonInput.trim()}
+                  className="w-full bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 disabled:opacity-50"
+                >
+                  {isSubmitting ? "Importing..." : "Import JSON"}
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleCreate} className="space-y-4">
+                <div className="grid grid-cols-2 gap-3">
               <input
                 required
                 placeholder="Title (e.g. Wake up)"
@@ -165,11 +234,14 @@ export default function EditTimetablePanel({
 
             <button
               type="submit"
-              className="w-full bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2"
+              disabled={isSubmitting}
+              className="w-full bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
             >
               <Plus className="w-4 h-4" /> Add
             </button>
-          </form>
+              </form>
+            )}
+          </div>
 
           {/* List */}
           <div className="space-y-3">
