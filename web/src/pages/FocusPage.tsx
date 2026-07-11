@@ -395,9 +395,17 @@ export default function FocusPage() {
       <section className="space-y-4">
           <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
             <span>Daily Routine</span>
-            <span className="text-xs font-mono text-[var(--text-tertiary)]">
-              Timeline
-            </span>
+            <div className="flex items-center gap-3">
+              <NavLink 
+                to="/routines-history" 
+                className="text-[10px] uppercase font-mono bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-2 py-0.5 rounded text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors"
+              >
+                History
+              </NavLink>
+              <span className="text-xs font-mono text-[var(--text-tertiary)]">
+                Timeline
+              </span>
+            </div>
           </h2>
           {routines.length === 0 ? (
             <div className="py-6 px-4 border border-dashed border-[var(--border-hairline)] rounded-xl flex flex-col items-center justify-center text-center space-y-3">
@@ -448,44 +456,80 @@ export default function FocusPage() {
                       className={`flex flex-col p-3 rounded-xl border transition-colors ${
                         isCurrent
                           ? "border-[var(--accent)] bg-[var(--accent)]/5"
-                          : routine.is_completed
+                          : routine.status !== "pending"
                           ? "bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-80"
                           : "bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:border-[var(--text-secondary)]"
                       }`}
                     >
                       <div className="flex items-center gap-4">
-                        <button
-                          onClick={async () => {
-                            setRoutines((prev) =>
-                              prev.map((r) =>
-                                r.id === routine.id
-                                  ? { ...r, is_completed: !r.is_completed, note: "" }
-                                  : r,
-                              ),
-                            );
-                            try {
-                              await api.post(`/routines/${routine.id}/toggle`, {
-                                date: todayStr,
-                              });
-                            } catch (e) {
-                              fetchFocusData();
-                            }
-                          }}
-                          className={`w-5 h-5 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
-                            routine.is_completed
-                              ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
-                              : "border-[var(--text-tertiary)] hover:border-[var(--text-secondary)]"
-                          }`}
-                        >
-                          {routine.is_completed && (
-                            <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />
-                          )}
-                        </button>
+                        <div className="flex flex-col gap-1.5 flex-shrink-0">
+                          {/* Done Button */}
+                          <button
+                            onClick={async () => {
+                              const newStatus = routine.status === "done" ? "pending" : "done";
+                              setRoutines((prev) =>
+                                prev.map((r) =>
+                                  r.id === routine.id
+                                    ? { ...r, status: newStatus, note: newStatus === "pending" ? "" : r.note }
+                                    : r,
+                                ),
+                              );
+                              try {
+                                await api.post(`/routines/${routine.id}/toggle`, {
+                                  date: todayStr,
+                                  status: newStatus
+                                });
+                              } catch (e) {
+                                fetchFocusData();
+                              }
+                            }}
+                            className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
+                              routine.status === "done"
+                                ? "bg-[var(--accent)] border-[var(--accent)]"
+                                : "border-[var(--border-hairline)] hover:border-[var(--accent)] text-transparent hover:text-[var(--accent)]"
+                            }`}
+                            title="Mark as Done"
+                          >
+                            <Check className={`w-3.5 h-3.5 ${routine.status === "done" ? "text-[var(--bg-base)]" : "text-inherit"}`} strokeWidth={3} />
+                          </button>
+                          
+                          {/* Skipped Button */}
+                          <button
+                            onClick={async () => {
+                              const newStatus = routine.status === "skipped" ? "pending" : "skipped";
+                              setRoutines((prev) =>
+                                prev.map((r) =>
+                                  r.id === routine.id
+                                    ? { ...r, status: newStatus, note: newStatus === "pending" ? "" : r.note }
+                                    : r,
+                                ),
+                              );
+                              try {
+                                await api.post(`/routines/${routine.id}/toggle`, {
+                                  date: todayStr,
+                                  status: newStatus
+                                });
+                              } catch (e) {
+                                fetchFocusData();
+                              }
+                            }}
+                            className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
+                              routine.status === "skipped"
+                                ? "bg-[var(--warning)] border-[var(--warning)]"
+                                : "border-[var(--border-hairline)] hover:border-[var(--warning)] text-transparent hover:text-[var(--warning)]"
+                            }`}
+                            title="Mark as Skipped/Failed"
+                          >
+                            <X className={`w-3 h-3 ${routine.status === "skipped" ? "text-[var(--bg-base)]" : "text-inherit"}`} strokeWidth={3} />
+                          </button>
+                        </div>
                         <div className="flex-1 text-left">
                           <div
                             className={`text-sm font-medium flex items-center gap-2 ${
-                              routine.is_completed
+                              routine.status === "done"
                                 ? "line-through text-[var(--text-tertiary)]"
+                                : routine.status === "skipped"
+                                ? "text-[var(--warning)]"
                                 : isCurrent
                                 ? "text-[var(--accent)]"
                                 : "text-[var(--text-primary)]"
@@ -497,7 +541,7 @@ export default function FocusPage() {
                                 {routine.assignee.username}
                               </span>
                             )}
-                            {isCurrent && !routine.is_completed && (
+                            {isCurrent && routine.status === "pending" && (
                               <span className="text-[10px] font-mono uppercase bg-[var(--accent)] text-[var(--bg-base)] px-1.5 py-0.5 rounded">
                                 Current
                               </span>
@@ -508,11 +552,11 @@ export default function FocusPage() {
                           </div>
                         </div>
                       </div>
-                      {routine.is_completed && (
+                      {routine.status !== "pending" && (
                         <div className="pl-9 mt-2">
                           <input
                             type="text"
-                            placeholder="Add a note (optional)..."
+                            placeholder={routine.status === "skipped" ? "Why did you skip/miss this?" : "Add a note (optional)..."}
                             className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1"
                             defaultValue={routine.note || ""}
                             onBlur={async (e) => {

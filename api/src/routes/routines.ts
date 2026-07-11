@@ -19,6 +19,24 @@ router.get("/", async (req: AuthRequest, res) => {
   res.json(data);
 });
 
+// Get routines history (past N days)
+router.get("/history", async (req: AuthRequest, res) => {
+  const days = parseInt(req.query.days as string) || 7;
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - days);
+  const cutoffStr = cutoffDate.toISOString().split("T")[0];
+
+  const { data, error } = await supabase
+    .from("pos_routine_logs")
+    .select("*, routine:pos_routines!inner(title, time_label)")
+    .eq("user_id", req.user!.id)
+    .gte("date", cutoffStr)
+    .order("date", { ascending: false });
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json(data);
+});
+
 // Get routines strictly scheduled for a specific day of the week, with their completion log
 router.get("/day", async (req: AuthRequest, res) => {
   const dayStr = req.query.day as string; // 'Mon', 'Tue', etc.
@@ -44,7 +62,7 @@ router.get("/day", async (req: AuthRequest, res) => {
   if (routineIds.length > 0) {
     const { data: logsData } = await supabase
       .from("pos_routine_logs")
-      .select("routine_id, completed_at, user_id, note")
+      .select("routine_id, completed_at, user_id, note, status")
       .in("routine_id", routineIds)
       .eq("date", dateStr);
 
@@ -57,9 +75,8 @@ router.get("/day", async (req: AuthRequest, res) => {
     return {
       ...r,
       is_completed: !!log,
-      completed_at: log?.completed_at,
-      completed_by: log?.user_id,
-      note: log?.note || "",
+      status: log?.status || "pending",
+      note: log?.note || null,
     };
   });
 
@@ -123,9 +140,17 @@ router.delete("/:id", async (req: AuthRequest, res) => {
 
 router.post("/:id/toggle", async (req: AuthRequest, res) => {
   const { id } = req.params;
-  const { date } = req.body; // 'YYYY-MM-DD'
+  const { date, status } = req.body; // "done", "skipped", "pending"
 
-  // Check if log exists
+  if (status === "pending" || !status) {
+    await supabase
+      .from("pos_routine_logs")
+      .delete()
+      .eq("routine_id", id)
+      .eq("date", date);
+    return res.json({ status: "unmarked" });
+  }
+
   const { data: existing } = await supabase
     .from("pos_routine_logs")
     .select("id")
@@ -134,24 +159,13 @@ router.post("/:id/toggle", async (req: AuthRequest, res) => {
     .single();
 
   if (existing) {
-    // Uncheck
-    const { error } = await supabase
-      .from("pos_routine_logs")
-      .delete()
-      .eq("id", existing.id);
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ is_completed: false });
+    await supabase.from("pos_routine_logs").update({ status }).eq("id", existing.id);
+    return res.json({ status: "updated" });
   } else {
-    // Check
-    const { error } = await supabase.from("pos_routine_logs").insert([
-      {
-        routine_id: id,
-        user_id: req.user!.id,
-        date,
-      },
+    await supabase.from("pos_routine_logs").insert([
+      { routine_id: id, user_id: req.user!.id, date, status },
     ]);
-    if (error) return res.status(500).json({ error: error.message });
-    return res.json({ is_completed: true });
+    return res.json({ status: "marked" });
   }
 });
 
