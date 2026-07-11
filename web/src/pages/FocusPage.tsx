@@ -60,6 +60,19 @@ export default function FocusPage() {
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
+  const [currentTimeStr, setCurrentTimeStr] = useState("");
+
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTimeStr(
+        `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
+      );
+    };
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, []);
 
   const todayStr = new Date().toISOString().split("T")[0];
 
@@ -383,94 +396,140 @@ export default function FocusPage() {
         <section className="space-y-4">
           <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
             <span>Daily Routine</span>
+            <span className="text-xs font-mono text-[var(--text-tertiary)]">
+              Timeline
+            </span>
           </h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            {routines.map((routine) => (
-              <div
-                key={routine.id}
-                className={`flex flex-col p-3 rounded-xl border transition-colors ${
-                  routine.is_completed
-                    ? "bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-80"
-                    : "bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:border-[var(--text-secondary)]"
-                }`}
-              >
-                <div className="flex items-center gap-4">
-                  <button
-                    onClick={async () => {
-                      // Optimistic
-                      setRoutines((prev) =>
-                        prev.map((r) =>
-                          r.id === routine.id
-                            ? { ...r, is_completed: !r.is_completed, note: "" }
-                            : r,
-                        ),
-                      );
-                      try {
-                        await api.post(`/routines/${routine.id}/toggle`, {
-                          date: todayStr,
-                        });
-                      } catch (e) {
-                        fetchFocusData(); // Revert on error
-                      }
-                    }}
-                    className={`w-5 h-5 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
-                      routine.is_completed
-                        ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
-                        : "border-[var(--text-tertiary)] hover:border-[var(--text-secondary)]"
-                    }`}
-                  >
-                    {routine.is_completed && (
-                      <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />
-                    )}
-                  </button>
-                  <div className="flex-1 text-left">
+          <div className="relative pl-6 space-y-6 pt-2">
+            <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[var(--border-hairline)] rounded-full" />
+            
+            {[...routines]
+              .sort((a, b) => (a.time_label || "").localeCompare(b.time_label || ""))
+              .map((routine, i, arr) => {
+                // Find current routine index
+                let currentIdx = -1;
+                for (let j = 0; j < arr.length; j++) {
+                  if ((arr[j].time_label || "") <= currentTimeStr) {
+                    currentIdx = j;
+                  } else {
+                    break;
+                  }
+                }
+                
+                const isCurrent = i === currentIdx;
+                const isPast = i < currentIdx;
+
+                return (
+                  <div key={routine.id} className="relative">
+                    {/* Timeline Dot */}
                     <div
-                      className={`text-sm font-medium flex items-center gap-2 ${routine.is_completed ? "line-through text-[var(--text-tertiary)]" : "text-[var(--text-primary)]"}`}
+                      className={`absolute -left-[29px] top-4 w-3 h-3 rounded-full border-2 z-10 transition-colors ${
+                        isCurrent
+                          ? "bg-[var(--accent)] border-[var(--accent)] shadow-[0_0_10px_var(--accent)]"
+                          : isPast
+                          ? "bg-[var(--text-tertiary)] border-[var(--bg-base)]"
+                          : "bg-[var(--bg-base)] border-[var(--border-hairline)]"
+                      }`}
+                    />
+
+                    <div
+                      className={`flex flex-col p-3 rounded-xl border transition-colors ${
+                        isCurrent
+                          ? "border-[var(--accent)] bg-[var(--accent)]/5"
+                          : routine.is_completed
+                          ? "bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-80"
+                          : "bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:border-[var(--text-secondary)]"
+                      }`}
                     >
-                      {routine.title}
-                      {routine.assignee?.username && (
-                        <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
-                          {routine.assignee.username}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-[10px] font-mono text-[var(--text-secondary)] mt-0.5">
-                      {routine.time_label}
-                    </div>
-                  </div>
-                </div>
-                {routine.is_completed && (
-                  <div className="pl-9 mt-2">
-                    <input
-                      type="text"
-                      placeholder="Add a note (optional)..."
-                      className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1"
-                      defaultValue={routine.note || ""}
-                      onBlur={async (e) => {
-                        const val = e.target.value;
-                        if (val !== (routine.note || "")) {
-                          try {
-                            await api.patch(`/routines/${routine.id}/log`, { date: todayStr, note: val });
+                      <div className="flex items-center gap-4">
+                        <button
+                          onClick={async () => {
                             setRoutines((prev) =>
                               prev.map((r) =>
-                                r.id === routine.id ? { ...r, note: val } : r,
+                                r.id === routine.id
+                                  ? { ...r, is_completed: !r.is_completed, note: "" }
+                                  : r,
                               ),
                             );
-                          } catch (err) {
-                            console.error(err);
-                          }
-                        }
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.currentTarget.blur();
-                        }
-                      }}
-                    />
+                            try {
+                              await api.post(`/routines/${routine.id}/toggle`, {
+                                date: todayStr,
+                              });
+                            } catch (e) {
+                              fetchFocusData();
+                            }
+                          }}
+                          className={`w-5 h-5 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
+                            routine.is_completed
+                              ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
+                              : "border-[var(--text-tertiary)] hover:border-[var(--text-secondary)]"
+                          }`}
+                        >
+                          {routine.is_completed && (
+                            <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />
+                          )}
+                        </button>
+                        <div className="flex-1 text-left">
+                          <div
+                            className={`text-sm font-medium flex items-center gap-2 ${
+                              routine.is_completed
+                                ? "line-through text-[var(--text-tertiary)]"
+                                : isCurrent
+                                ? "text-[var(--accent)]"
+                                : "text-[var(--text-primary)]"
+                            }`}
+                          >
+                            {routine.title}
+                            {routine.assignee?.username && (
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
+                                {routine.assignee.username}
+                              </span>
+                            )}
+                            {isCurrent && !routine.is_completed && (
+                              <span className="text-[10px] font-mono uppercase bg-[var(--accent)] text-[var(--bg-base)] px-1.5 py-0.5 rounded">
+                                Current
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[10px] font-mono text-[var(--text-secondary)] mt-0.5">
+                            {routine.time_label || "Anytime"}
+                          </div>
+                        </div>
+                      </div>
+                      {routine.is_completed && (
+                        <div className="pl-9 mt-2">
+                          <input
+                            type="text"
+                            placeholder="Add a note (optional)..."
+                            className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1"
+                            defaultValue={routine.note || ""}
+                            onBlur={async (e) => {
+                              const val = e.target.value;
+                              if (val !== (routine.note || "")) {
+                                try {
+                                  await api.patch(`/routines/${routine.id}/log`, { date: todayStr, note: val });
+                                  setRoutines((prev) =>
+                                    prev.map((r) =>
+                                      r.id === routine.id ? { ...r, note: val } : r,
+                                    ),
+                                  );
+                                } catch (err) {
+                                  console.error(err);
+                                }
+                              }
+                            }}
+                            onKeyDown={(e) => {
+                              if (e.key === "Enter") {
+                                e.currentTarget.blur();
+                              }
+                            }}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
-                )}
-              </div>
-            ))}
+                );
+              })}
           </div>
         </section>
       )}
