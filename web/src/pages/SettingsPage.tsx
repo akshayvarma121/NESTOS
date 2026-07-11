@@ -1,11 +1,15 @@
 import { useState } from "react";
 import { api } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
+import { LogOut } from "lucide-react";
 
 export default function SettingsPage() {
   const [resetConfirm, setResetConfirm] = useState("");
   const [resettingVault, setResettingVault] = useState(false);
   const [clearDataConfirm, setClearDataConfirm] = useState("");
   const [clearingData, setClearingData] = useState(false);
+  
+  const { signOut } = useAuth();
 
   const handleVaultReset = async () => {
     if (resetConfirm !== "DELETE") return;
@@ -85,6 +89,19 @@ export default function SettingsPage() {
               </div>
               <span className="text-[var(--text-tertiary)]">→</span>
             </a>
+            
+            <button
+              onClick={() => signOut()}
+              className="w-full flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-red-500/50 hover:bg-red-500/5 transition-colors group"
+            >
+              <div className="text-left">
+                <h3 className="text-sm font-medium text-red-500">Log Out</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Sign out of your account on this device.
+                </p>
+              </div>
+              <LogOut className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-red-500 transition-colors" />
+            </button>
           </div>
         </section>
         <section className="bg-[var(--bg-surface)] border border-red-900/30 rounded-xl p-6">
