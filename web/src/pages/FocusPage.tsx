@@ -60,6 +60,7 @@ export default function FocusPage() {
   const [loading, setLoading] = useState(true);
   const [hasGoals, setHasGoals] = useState<boolean | null>(null);
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
+  const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
 
   useEffect(() => {
@@ -87,6 +88,7 @@ export default function FocusPage() {
         personalData,
         deadlinesData,
         notesData,
+        lockData,
       ] = await Promise.all([
         api.get("/scheduler/focus"),
         api.get("/partner/space"),
@@ -96,6 +98,7 @@ export default function FocusPage() {
         api.get("/personal-todos"),
         api.get("/deadlines"),
         api.get("/notes"),
+        api.get(`/routines/day/lock-status?date=${todayStr}`),
       ]);
 
       setTasks(taskData);
@@ -106,6 +109,7 @@ export default function FocusPage() {
       setDashboardNotes(
         (notesData || []).filter((n: any) => n.type === "dashboard"),
       );
+      setIsRoutineLocked(lockData?.isLocked || false);
 
       if (taskData.length === 0) {
         const goalsData = await api.get("/macro-goals");
@@ -465,6 +469,7 @@ export default function FocusPage() {
                         <div className="flex flex-col gap-1.5 flex-shrink-0">
                           {/* Done Button */}
                           <button
+                            disabled={isRoutineLocked}
                             onClick={async () => {
                               const newStatus = routine.status === "done" ? "pending" : "done";
                               setRoutines((prev) =>
@@ -487,7 +492,7 @@ export default function FocusPage() {
                               routine.status === "done"
                                 ? "bg-[var(--accent)] border-[var(--accent)]"
                                 : "border-[var(--border-hairline)] hover:border-[var(--accent)] text-transparent hover:text-[var(--accent)]"
-                            }`}
+                            } ${isRoutineLocked ? "opacity-50 cursor-not-allowed" : ""}`}
                             title="Mark as Done"
                           >
                             <Check className={`w-3.5 h-3.5 ${routine.status === "done" ? "text-[var(--bg-base)]" : "text-inherit"}`} strokeWidth={3} />
@@ -495,6 +500,7 @@ export default function FocusPage() {
                           
                           {/* Skipped Button */}
                           <button
+                            disabled={isRoutineLocked}
                             onClick={async () => {
                               const newStatus = routine.status === "skipped" ? "pending" : "skipped";
                               setRoutines((prev) =>
@@ -517,7 +523,7 @@ export default function FocusPage() {
                               routine.status === "skipped"
                                 ? "bg-[var(--warning)] border-[var(--warning)]"
                                 : "border-[var(--border-hairline)] hover:border-[var(--warning)] text-transparent hover:text-[var(--warning)]"
-                            }`}
+                            } ${isRoutineLocked ? "opacity-50 cursor-not-allowed" : ""}`}
                             title="Mark as Skipped/Failed"
                           >
                             <X className={`w-3 h-3 ${routine.status === "skipped" ? "text-[var(--bg-base)]" : "text-inherit"}`} strokeWidth={3} />
@@ -556,8 +562,9 @@ export default function FocusPage() {
                         <div className="pl-9 mt-2">
                           <input
                             type="text"
+                            disabled={isRoutineLocked}
                             placeholder={routine.status === "skipped" ? "Why did you skip/miss this?" : "Add a note (optional)..."}
-                            className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1"
+                            className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1 disabled:opacity-50 disabled:border-transparent"
                             defaultValue={routine.note || ""}
                             onBlur={async (e) => {
                               const val = e.target.value;
@@ -586,6 +593,31 @@ export default function FocusPage() {
                   </div>
                 );
               })}
+              
+              {!isRoutineLocked ? (
+                <div className="pt-4 pl-6 relative">
+                  <button
+                    onClick={async () => {
+                      if (!confirm("Are you sure? You cannot edit today's routines after saving.")) return;
+                      try {
+                        await api.post("/routines/day/lock", { date: todayStr });
+                        setIsRoutineLocked(true);
+                      } catch (err) {
+                        console.error(err);
+                      }
+                    }}
+                    className="w-full py-2.5 text-xs font-medium uppercase tracking-wider bg-[var(--text-primary)] text-[var(--bg-base)] rounded-xl hover:opacity-90 transition-opacity"
+                  >
+                    Save & Lock Timeline
+                  </button>
+                </div>
+              ) : (
+                <div className="pt-4 pl-6 relative">
+                  <div className="w-full py-2.5 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] text-center border border-dashed border-[var(--border-hairline)] rounded-xl">
+                    Timeline Locked for Today
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </section>

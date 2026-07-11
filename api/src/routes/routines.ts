@@ -83,6 +83,36 @@ router.get("/day", async (req: AuthRequest, res) => {
   res.json(enriched);
 });
 
+router.get("/day/lock-status", async (req: AuthRequest, res) => {
+  const dateStr = req.query.date as string;
+  if (!dateStr) return res.status(400).json({ error: "Missing date" });
+
+  const { data } = await supabase
+    .from("pos_routine_locks")
+    .select("date")
+    .eq("user_id", req.user!.id)
+    .eq("date", dateStr)
+    .single();
+
+  res.json({ isLocked: !!data });
+});
+
+router.post("/day/lock", async (req: AuthRequest, res) => {
+  const { date } = req.body;
+  if (!date) return res.status(400).json({ error: "Missing date" });
+
+  const { error } = await supabase
+    .from("pos_routine_locks")
+    .insert([{ user_id: req.user!.id, date }]);
+
+  // If it already exists, it will throw an error due to primary key, which is fine
+  if (error && error.code !== "23505") { // 23505 is unique violation
+    return res.status(500).json({ error: error.message });
+  }
+
+  res.json({ success: true });
+});
+
 router.post("/", async (req: AuthRequest, res) => {
   const { title, time_label, days_of_week, assigned_to } = req.body;
   const { data, error } = await supabase
@@ -142,6 +172,18 @@ router.post("/:id/toggle", async (req: AuthRequest, res) => {
   const { id } = req.params;
   const { date, status } = req.body; // "done", "skipped", "pending"
 
+  // Check lock
+  const { data: lock } = await supabase
+    .from("pos_routine_locks")
+    .select("date")
+    .eq("user_id", req.user!.id)
+    .eq("date", date)
+    .single();
+    
+  if (lock) {
+    return res.status(403).json({ error: "Timeline is locked for this date." });
+  }
+
   if (status === "pending" || !status) {
     await supabase
       .from("pos_routine_logs")
@@ -172,6 +214,18 @@ router.post("/:id/toggle", async (req: AuthRequest, res) => {
 router.patch("/:id/log", async (req: AuthRequest, res) => {
   const { id } = req.params;
   const { date, note } = req.body;
+
+  // Check lock
+  const { data: lock } = await supabase
+    .from("pos_routine_locks")
+    .select("date")
+    .eq("user_id", req.user!.id)
+    .eq("date", date)
+    .single();
+    
+  if (lock) {
+    return res.status(403).json({ error: "Timeline is locked for this date." });
+  }
 
   const { data, error } = await supabase
     .from("pos_routine_logs")
