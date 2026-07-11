@@ -392,16 +392,28 @@ export default function FocusPage() {
       )}
 
       {/* DAILY ROUTINE TIMETABLE */}
-      {routines.length > 0 && (
-        <section className="space-y-4">
+      <section className="space-y-4">
           <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
             <span>Daily Routine</span>
             <span className="text-xs font-mono text-[var(--text-tertiary)]">
               Timeline
             </span>
           </h2>
-          <div className="relative pl-6 space-y-6 pt-2">
-            <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[var(--border-hairline)] rounded-full" />
+          {routines.length === 0 ? (
+            <div className="py-6 px-4 border border-dashed border-[var(--border-hairline)] rounded-xl flex flex-col items-center justify-center text-center space-y-3">
+              <p className="text-sm text-[var(--text-secondary)]">
+                No active routines scheduled for today.
+              </p>
+              <button
+                onClick={() => setIsTimetableOpen(true)}
+                className="text-xs bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-[4px] hover:border-[var(--text-secondary)] transition-colors"
+              >
+                Open Timetable Editor
+              </button>
+            </div>
+          ) : (
+            <div className="relative pl-6 space-y-6 pt-2">
+              <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[var(--border-hairline)] rounded-full" />
             
             {[...routines]
               .sort((a, b) => (a.time_label || "").localeCompare(b.time_label || ""))
@@ -530,9 +542,9 @@ export default function FocusPage() {
                   </div>
                 );
               })}
-          </div>
+            </div>
+          )}
         </section>
-      )}
 
       {/* OVERDUE */}
       {overdueTasks.length > 0 && (
