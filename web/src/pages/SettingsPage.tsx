@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { api } from "../lib/api";
-import { useAuth } from "../contexts/AuthContext";
+import { supabase } from "../lib/supabase";
 import { LogOut } from "lucide-react";
 
 export default function SettingsPage() {
@@ -8,8 +8,6 @@ export default function SettingsPage() {
   const [resettingVault, setResettingVault] = useState(false);
   const [clearDataConfirm, setClearDataConfirm] = useState("");
   const [clearingData, setClearingData] = useState(false);
-  
-  const { signOut } = useAuth();
 
   const handleVaultReset = async () => {
     if (resetConfirm !== "DELETE") return;
@@ -91,7 +89,7 @@ export default function SettingsPage() {
             </a>
             
             <button
-              onClick={() => signOut()}
+              onClick={() => supabase.auth.signOut()}
               className="w-full flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-red-500/50 hover:bg-red-500/5 transition-colors group"
             >
               <div className="text-left">
