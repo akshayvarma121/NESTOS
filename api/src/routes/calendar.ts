@@ -23,15 +23,15 @@ router.get("/", async (req: AuthRequest, res) => {
         .in("user_id", req.sharedSpaceIds!),
       supabase
         .from("pos_micro_tasks")
-        .select("id, title, scheduled_date, status")
+        .select("id, title, scheduled_date, status, description")
         .in("user_id", req.sharedSpaceIds!)
-        .eq("status", "done"),
+        .not("scheduled_date", "is", null),
     ]);
 
     res.json({
       events: eventsRes.data || [],
       closeouts: closeoutsRes.data || [],
-      completedTasks: tasksRes.data || [],
+      scheduledTasks: tasksRes.data || [],
     });
   } catch (e: any) {
     res.status(500).json({ error: e.message });
