@@ -101,6 +101,14 @@ The primary entry point designed to answer: *"What do I need to do right now?"*
   - **Clear All Data**: Wipes all goals, tasks, routines, captures, and notes from the database, effectively factory-resetting the workspace while keeping the user account and partner link intact. Requires typing `CLEAR`.
 - **Authentication**: Secure logout and session destruction.
 
+### 3.10 Recent Feature Iterations (New)
+*The following features were developed as enhancements beyond the initial specifications:*
+- **Productivity Analytics Dashboard**: Transformed the basic routine history into a full Recharts-powered dashboard displaying KPI summary cards (Adherence %, Total Routines, Total Macro Slices Done), Stacked Bar Charts for routine execution, and Area Charts for goal slice completion over 7/14/30-day timeframes.
+- **Collaborative Calendar Slices**: Micro-tasks (slices) and Deadlines are now visually rendered side-by-side on the Calendar monthly grid, allowing for unified viewing of all actionable items on a given day.
+- **Bulk JSON Import Capabilities**: Users can now instantly populate their Timetable and Goal Backlogs via strict JSON imports, dramatically reducing the friction of initial setup.
+- **Non-Destructive Slice Skipping**: Clicking "Skip" on a scheduled micro-task in the Focus Dashboard no longer marks it as permanently skipped/hidden. Instead, it strips the `scheduled_date` and resets the status to `pending`, effectively moving it back to the Backlog for rescheduling.
+- **Pomodoro Contextual Milestones**: The Pomodoro system now automatically triggers UI toast notifications when specific milestones (e.g. 3 sessions completed) are reached, enhancing the gamification of focus.
+
 ---
 
 ## 4. UI/UX & Design Philosophy
