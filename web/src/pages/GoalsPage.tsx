@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import CreateGoalPanel from "../components/CreateGoalPanel";
 import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
-import { Target, Plus, Info, UploadCloud } from "lucide-react";
+import { Target, Plus, Info, UploadCloud, Trash2 } from "lucide-react";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -35,6 +35,17 @@ export default function GoalsPage() {
   const handleCreate = async (goalData: any) => {
     await api.post("/macro-goals", goalData);
     await fetchGoals();
+  };
+
+  const handleDeleteGoal = async (id: string) => {
+    if (!confirm("Are you sure you want to delete this goal and all its tasks?")) return;
+    try {
+      await api.delete(`/macro-goals/${id}`);
+      await fetchGoals();
+    } catch (err) {
+      console.error(err);
+      alert("Failed to delete goal.");
+    }
   };
 
   if (loading)
@@ -105,14 +116,23 @@ export default function GoalsPage() {
                     key={goal.id}
                     className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] space-y-3"
                   >
-                    <div className="flex justify-between items-start">
-                      <h3 className="font-medium text-sm text-[var(--text-primary)]">
-                        {goal.title}
-                      </h3>
-                      <span className="font-mono text-xs text-[var(--text-tertiary)]">
-                        {goal.completed_units}/{goal.total_units}{" "}
-                        {goal.unit_label}
-                      </span>
+                    <div className="flex justify-between items-start gap-3">
+                      <div>
+                        <h3 className="font-medium text-sm text-[var(--text-primary)]">
+                          {goal.title}
+                        </h3>
+                        <span className="font-mono text-xs text-[var(--text-tertiary)]">
+                          {goal.completed_units}/{goal.total_units}{" "}
+                          {goal.unit_label}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteGoal(goal.id)}
+                        className="p-1.5 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors flex-shrink-0"
+                        title="Delete Goal"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
 
                     {/* Thin Progress Bar */}

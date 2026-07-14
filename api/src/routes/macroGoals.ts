@@ -79,4 +79,31 @@ router.get("/", async (req: AuthRequest, res) => {
   res.json(enriched);
 });
 
+router.delete("/:id", async (req: AuthRequest, res) => {
+  const { id } = req.params;
+
+  // Verify ownership
+  const { data: existing } = await supabase
+    .from("pos_macro_goals")
+    .select("user_id")
+    .eq("id", id)
+    .single();
+
+  if (!existing || !req.sharedSpaceIds!.includes(existing.user_id)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // Delete associated micro tasks
+  await supabase.from("pos_micro_tasks").delete().eq("macro_id", id);
+  
+  // Unlink any captures
+  await supabase.from("pos_content_capture").update({ linked_macro_id: null }).eq("linked_macro_id", id);
+
+  // Delete macro goal
+  const { error } = await supabase.from("pos_macro_goals").delete().eq("id", id);
+
+  if (error) return res.status(500).json({ error: error.message });
+  res.json({ success: true });
+});
+
 export default router;
