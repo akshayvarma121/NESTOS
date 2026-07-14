@@ -5,6 +5,7 @@ import { Play, Pause, RotateCcw, SkipForward, Home, ListTodo, Settings, Check, X
 import { NavLink } from "react-router-dom";
 import { api } from "../lib/api";
 import ExpandableDescription from "../components/ExpandableDescription";
+import { getLocalDateString } from "../lib/dateUtils";
 
 export default function PomodoroPage() {
   const {
@@ -28,7 +29,7 @@ export default function PomodoroPage() {
     // Fetch focus tasks, personal todos, and routines
     const fetchTasks = async () => {
       try {
-        const todayStr = new Date().toISOString().split("T")[0];
+        const todayStr = getLocalDateString();
         const [taskData, personalData, routinesData] = await Promise.all([
           api.get("/scheduler/focus"),
           api.get("/personal-todos"),

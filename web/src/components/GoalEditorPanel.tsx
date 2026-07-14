@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { X, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { getLocalDateString } from "../lib/dateUtils";
 
 interface Props {
   isOpen: boolean;
@@ -17,7 +18,7 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
     category: "dev",
     total_units: 10 as number | string,
     unit_label: "chapters",
-    deadline: new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0],
+    deadline: getLocalDateString(new Date(Date.now() + 86400000 * 30)),
   });
 
   const [slices, setSlices] = useState<any[]>([]);
@@ -42,7 +43,7 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
           category: "dev",
           total_units: 10,
           unit_label: "chapters",
-          deadline: new Date(Date.now() + 86400000 * 30).toISOString().split("T")[0],
+          deadline: getLocalDateString(new Date(Date.now() + 86400000 * 30)),
         });
         setSlices([]);
         setStep(1);

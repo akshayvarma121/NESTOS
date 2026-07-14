@@ -5,6 +5,7 @@ import { NavLink } from "react-router-dom";
 import EditTimetablePanel, { calculateDuration } from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
 import ExpandableDescription from "../components/ExpandableDescription";
+import { getLocalDateString } from "../lib/dateUtils";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -65,7 +66,7 @@ export default function FocusPage() {
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
 
-  const [todayStr, setTodayStr] = useState(new Date().toISOString().split("T")[0]);
+  const [todayStr, setTodayStr] = useState(getLocalDateString());
 
   useEffect(() => {
     const updateTime = () => {
@@ -73,7 +74,7 @@ export default function FocusPage() {
       setCurrentTimeStr(
         `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
       );
-      const newDateStr = now.toISOString().split("T")[0];
+      const newDateStr = getLocalDateString(now);
       setTodayStr((prev) => {
         if (prev !== newDateStr) {
           return newDateStr;

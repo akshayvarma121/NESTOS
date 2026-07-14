@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
+import { getLocalDateString } from "../lib/dateUtils";
 import {
   DndContext,
   DragOverlay,
@@ -100,7 +101,7 @@ export default function BacklogPage() {
 
   const fetchTasks = async () => {
     try {
-      const todayStr = new Date().toISOString().split("T")[0];
+      const todayStr = getLocalDateString();
 
       // Fetch both backlog and today's tasks
       const allPending = await api.get("/micro-tasks?backlog=true");
@@ -156,13 +157,13 @@ export default function BacklogPage() {
           ...prev,
           {
             ...draggedTask,
-            scheduled_date: new Date().toISOString().split("T")[0],
+            scheduled_date: getLocalDateString(),
             is_pinned: true,
           },
         ]);
 
         try {
-          const todayStr = new Date().toISOString().split("T")[0];
+          const todayStr = getLocalDateString();
           await api.patch(`/micro-tasks/${draggedTask.id}`, {
             scheduled_date: todayStr,
             is_pinned: true,
