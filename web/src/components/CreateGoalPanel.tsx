@@ -30,6 +30,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
     const initialSlices = Array.from({ length: units }, (_, i) => ({
       id: `temp-${i}`,
       title: `${form.unit_label} ${i + 1}`,
+      description: "",
       scheduled_date: "", // Optional date assignment
     }));
     setSlices(initialSlices);
@@ -213,18 +214,29 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
                       <Trash2 className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="flex items-center gap-2 pl-8">
+                  <div className="flex flex-col gap-2 pl-8">
                     <input
-                      type="date"
-                      value={slice.scheduled_date || ""}
+                      type="text"
+                      value={slice.description || ""}
                       onChange={(e) =>
-                        updateSlice(slice.id, "scheduled_date", e.target.value)
+                        updateSlice(slice.id, "description", e.target.value)
                       }
-                      className="bg-transparent border border-[var(--border-hairline)] rounded px-1.5 py-0.5 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--text-primary)] font-mono"
+                      placeholder="What to do (optional notes)"
+                      className="w-full bg-transparent border border-[var(--border-hairline)] rounded px-2 py-1 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--text-primary)]"
                     />
-                    <span className="text-[10px] text-[var(--text-tertiary)]">
-                      Optional Date
-                    </span>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="date"
+                        value={slice.scheduled_date || ""}
+                        onChange={(e) =>
+                          updateSlice(slice.id, "scheduled_date", e.target.value)
+                        }
+                        className="bg-transparent border border-[var(--border-hairline)] rounded px-1.5 py-0.5 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--text-primary)] font-mono"
+                      />
+                      <span className="text-[10px] text-[var(--text-tertiary)]">
+                        Optional Date
+                      </span>
+                    </div>
                   </div>
                 </div>
               ))}

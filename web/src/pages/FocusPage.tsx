@@ -295,13 +295,20 @@ export default function FocusPage() {
               </button>
 
               <div
-                className={`flex-1 text-sm ${task.status === "done" ? "text-[var(--text-tertiary)] line-through" : "text-[var(--text-secondary)]"}`}
+                className={`flex-1 flex flex-col ${task.status === "done" ? "text-[var(--text-tertiary)] line-through" : "text-[var(--text-secondary)]"}`}
               >
-                <InlineEdit
-                  initialValue={task.title}
-                  onSave={(newVal) => renameTask(task.id, newVal)}
-                  disabled={isRoutineLocked}
-                />
+                <div className="text-sm">
+                  <InlineEdit
+                    initialValue={task.title}
+                    onSave={(newVal) => renameTask(task.id, newVal)}
+                    disabled={isRoutineLocked}
+                  />
+                </div>
+                {task.description && (
+                  <p className="text-[11px] text-[var(--text-tertiary)] italic -mt-0.5 mb-1 pr-4 line-clamp-2">
+                    {task.description}
+                  </p>
+                )}
               </div>
 
               <button

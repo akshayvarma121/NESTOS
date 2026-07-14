@@ -33,6 +33,7 @@ router.post("/", async (req: AuthRequest, res) => {
       user_id: req.user!.id,
       macro_id: goal.id,
       title: slice.title,
+      description: slice.description || null,
       scheduled_date: slice.scheduled_date || null,
     }));
   } else {

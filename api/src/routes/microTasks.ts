@@ -6,10 +6,10 @@ const router = Router();
 router.use(requireAuth);
 
 router.post("/", async (req: AuthRequest, res) => {
-  const { macro_id, title, urgency, assigned_to } = req.body;
+  const { macro_id, title, description, urgency, assigned_to } = req.body;
   const { data, error } = await supabase
     .from("pos_micro_tasks")
-    .insert([{ user_id: req.user!.id, macro_id, title, urgency, assigned_to }])
+    .insert([{ user_id: req.user!.id, macro_id, title, description, urgency, assigned_to }])
     .select()
     .single();
 

@@ -68,7 +68,7 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
 
         <div className="p-4 space-y-4">
           <p className="text-sm text-[var(--text-secondary)]">
-            Paste a JSON array of goals. Each goal should have <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">title</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">category</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">deadline</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">total_units</code>, and <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">unit_label</code>. You can optionally provide a <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">customSlices</code> array.
+            Paste a JSON array of goals. Each goal should have <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">title</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">category</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">deadline</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">total_units</code>, and <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">unit_label</code>. You can optionally provide a <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">customSlices</code> array (with optional <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">description</code> or <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">scheduled_date</code>).
           </p>
           
           <textarea
@@ -82,7 +82,7 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
     "total_units": 3,
     "unit_label": "Part",
     "customSlices": [
-      { "title": "Part 1" }
+      { "title": "Part 1", "description": "What exactly to do" }
     ]
   }
 ]`}

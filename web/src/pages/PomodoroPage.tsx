@@ -197,9 +197,16 @@ export default function PomodoroPage() {
                     >
                       {task.status === "done" && <Check className="w-3.5 h-3.5 text-black" />}
                     </button>
-                    <span className={`text-sm leading-relaxed flex-1 ${task.status === "done" ? "text-gray-600 line-through" : "text-gray-300"}`}>
-                      {task.title}
-                    </span>
+                    <div className={`flex-1 flex flex-col ${task.status === "done" ? "text-gray-600 line-through" : "text-gray-300"}`}>
+                      <span className="text-sm leading-relaxed">
+                        {task.title}
+                      </span>
+                      {task.description && (
+                        <p className="text-[11px] text-gray-500 italic mt-0.5 pr-2 line-clamp-2">
+                          {task.description}
+                        </p>
+                      )}
+                    </div>
                     <button
                       onClick={() => updateTaskStatus(task.id, "skipped")}
                       className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
