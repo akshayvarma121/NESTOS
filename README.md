@@ -2,6 +2,9 @@
 
 NestOS is a high-performance, strictly designed brutalist operating system built for absolute focus. Designed for individuals and accountability partners, it streamlines task management, routine building, and personal growth.
 
+🌍 **Live Application**: [https://nestos-kappa.vercel.app](https://nestos-kappa.vercel.app)  
+*(No local setup required! Simply visit the link, log in, and start focusing instantly.)*
+
 ## Core Philosophy
 
 - **Zero Friction**: Clean, brutalist aesthetics with no distractions. Dark mode standard.
@@ -78,7 +81,9 @@ Use this in the Goals Page -> Import JSON to instantly create goals and custom m
 - **Database**: PostgreSQL (Supabase) + Row Level Security
 - **Auth**: Supabase Auth (Magic Links)
 
-## Running Locally
+## For Developers: Running Locally
+
+*(If you just want to use the app, visit the live link at the top. The following steps are for developers who want to run the code locally.)*
 
 1. Clone the repository.
 2. Initialize the Supabase database using the scripts in `api/scripts/`.
