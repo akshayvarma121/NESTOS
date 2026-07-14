@@ -283,6 +283,7 @@ export default function EditTimetablePanel({
                   <option value="Nap" />
                   <option value="Exercise" />
                   <option value="Deep Work" />
+                  <option value="Gaming" />
                 </datalist>
                 
                 <div className="grid grid-cols-2 gap-3">
