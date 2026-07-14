@@ -542,6 +542,11 @@ export default function FocusPage() {
                             }`}
                           >
                             {routine.title}
+                            {routine.description && (
+                              <span className="text-[11px] font-normal text-[var(--text-secondary)] ml-1">
+                                - {routine.description}
+                              </span>
+                            )}
                             {routine.assignee?.username && (
                               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
                                 {routine.assignee.username}

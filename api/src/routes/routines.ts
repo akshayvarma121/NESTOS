@@ -114,11 +114,11 @@ router.post("/day/lock", async (req: AuthRequest, res) => {
 });
 
 router.post("/", async (req: AuthRequest, res) => {
-  const { title, time_label, days_of_week, assigned_to } = req.body;
+  const { title, time_label, days_of_week, assigned_to, description } = req.body;
   const { data, error } = await supabase
     .from("pos_routines")
     .insert([
-      { user_id: req.user!.id, title, time_label, days_of_week, assigned_to },
+      { user_id: req.user!.id, title, time_label, days_of_week, assigned_to, description },
     ])
     .select()
     .single();

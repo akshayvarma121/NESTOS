@@ -49,6 +49,7 @@ export default function EditTimetablePanel({
   // New / Edit Routine Form State
   const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
+  const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
   const [endTime, setEndTime] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
@@ -92,6 +93,7 @@ export default function EditTimetablePanel({
       if (editingId) {
         await api.patch(`/routines/${editingId}`, {
           title,
+          description: description || null,
           time_label,
           days_of_week: selectedDays,
           assigned_to: assignedTo || null,
@@ -99,6 +101,7 @@ export default function EditTimetablePanel({
       } else {
         await api.post("/routines", {
           title,
+          description: description || null,
           time_label,
           days_of_week: selectedDays,
           assigned_to: assignedTo || null,
@@ -107,6 +110,7 @@ export default function EditTimetablePanel({
 
       setEditingId(null);
       setTitle("");
+      setDescription("");
       setStartTime("");
       setEndTime("");
       setSelectedDays([]);
@@ -123,6 +127,7 @@ export default function EditTimetablePanel({
   const handleEditClick = (routine: any) => {
     setEditingId(routine.id);
     setTitle(routine.title);
+    setDescription(routine.description || "");
     setSelectedDays(routine.days_of_week);
     setAssignedTo(routine.assigned_to || "");
     
@@ -142,6 +147,7 @@ export default function EditTimetablePanel({
   const cancelEdit = () => {
     setEditingId(null);
     setTitle("");
+    setDescription("");
     setStartTime("");
     setEndTime("");
     setSelectedDays([]);
@@ -165,6 +171,7 @@ export default function EditTimetablePanel({
         if (!item.title || !Array.isArray(item.days_of_week) || item.days_of_week.length === 0) continue;
         await api.post("/routines", {
           title: item.title,
+          description: item.description || null,
           time_label: item.time_label || "",
           days_of_week: item.days_of_week,
           assigned_to: item.assigned_to || null,
@@ -271,9 +278,7 @@ export default function EditTimetablePanel({
                   <option value="Dinner" />
                   <option value="Lunch" />
                   <option value="Breakfast" />
-                  <option value="Study session 1" />
-                  <option value="Study session 2" />
-                  <option value="Study session 3" />
+                  <option value="Study" />
                   <option value="Break" />
                   <option value="Nap" />
                   <option value="Exercise" />
@@ -305,6 +310,13 @@ export default function EditTimetablePanel({
                 />
               </div>
             </div>
+
+            <input
+              placeholder={title === "Study" ? "What to study? (e.g. Math Chapter 4)" : "Custom note (optional)"}
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
+            />
 
             <div className="flex gap-1.5 justify-between">
               {DAYS.map((day) => (
@@ -408,6 +420,11 @@ export default function EditTimetablePanel({
                     <p className="text-sm text-[var(--text-primary)] truncate">
                       {routine.title}
                     </p>
+                    {routine.description && (
+                      <p className="text-xs text-[var(--text-secondary)] truncate">
+                        {routine.description}
+                      </p>
+                    )}
                     <p className="text-[10px] text-[var(--text-tertiary)] font-mono uppercase truncate mt-0.5">
                       {routine.days_of_week.join(", ")}
                     </p>
