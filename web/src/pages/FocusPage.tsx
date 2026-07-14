@@ -444,7 +444,7 @@ export default function FocusPage() {
                 const t = routine.time_label || "";
                 if (!t) return { routine, bucket: "anytime" };
                 
-                const parts = t.split("-").map(s => s.trim());
+                const parts = t.split("-").map((s: string) => s.trim());
                 const start = parts[0];
                 const end = parts[1]; // might be undefined
 
