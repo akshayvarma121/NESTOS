@@ -35,13 +35,16 @@ router.post("/", async (req: AuthRequest, res) => {
       title: slice.title,
       description: slice.description || null,
       scheduled_date: slice.scheduled_date || null,
+      pinned: slice.scheduled_date ? true : false,
     }));
   } else {
     tasksToInsert = Array.from({ length: total_units }, (_, i) => ({
       user_id: req.user!.id,
       macro_id: goal.id,
       title: `${unit_label} ${i + 1}`,
+      description: null,
       scheduled_date: null,
+      pinned: false,
     }));
   }
 

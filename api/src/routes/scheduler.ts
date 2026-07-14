@@ -23,10 +23,9 @@ router.post("/recompute", async (req: AuthRequest, res) => {
     const result = recomputeSchedule(goalsData as unknown as MacroGoal[], todayStr);
 
     if (result.tasksToUpdate.length > 0) {
-      // Bulk update using Promise.all for simplicity
       const promises = result.tasksToUpdate.map(t => {
         const updateData: any = { scheduled_date: t.scheduled_date };
-        if (t.is_pinned !== undefined) updateData.is_pinned = t.is_pinned;
+        if (t.pinned !== undefined) updateData.pinned = t.pinned;
         return supabase.from("pos_micro_tasks").update(updateData).eq("id", t.id);
       });
       
@@ -40,12 +39,13 @@ router.post("/recompute", async (req: AuthRequest, res) => {
 });
 
 router.get("/focus", async (req: AuthRequest, res) => {
+  const todayStr = new Date().toISOString().split("T")[0];
   const { data, error } = await supabase
     .from("pos_micro_tasks")
     .select(
       "*, macro:pos_macro_goals(category), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)",
     )
-    .not("scheduled_date", "is", null)
+    .eq("scheduled_date", todayStr)
     .in("user_id", req.sharedSpaceIds!);
 
   if (error) return res.status(500).json({ error: error.message });
