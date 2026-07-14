@@ -77,6 +77,20 @@ export function recomputeSchedule(
 
     if (unscheduledTasks.length === 0) continue;
 
+    // Overdue macro goals should dump their unscheduled tasks to the backlog
+    // per user request: "the goal even if the deadline reached it should be sahown in backlog"
+    if (diffTime < 0) {
+      for (const task of unscheduledTasks) {
+        const existingUpdate = tasksToUpdate.find((u) => u.id === task.id);
+        if (existingUpdate) {
+          existingUpdate.scheduled_date = null;
+        } else {
+          tasksToUpdate.push({ id: task.id, scheduled_date: null });
+        }
+      }
+      continue;
+    }
+
     const tasks_per_day = Math.ceil(unscheduledTasks.length / remaining_days);
 
     let currentTaskIndex = 0;
