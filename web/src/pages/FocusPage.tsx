@@ -427,21 +427,51 @@ export default function FocusPage() {
             <div className="relative pl-6 space-y-6 pt-2">
               <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[var(--border-hairline)] rounded-full" />
             
-            {[...routines]
-              .sort((a, b) => (a.time_label || "").localeCompare(b.time_label || ""))
-              .map((routine, i, arr) => {
-                // Find current routine index
-                let currentIdx = -1;
-                for (let j = 0; j < arr.length; j++) {
-                  if ((arr[j].time_label || "") <= currentTimeStr) {
-                    currentIdx = j;
-                  } else {
-                    break;
-                  }
+            {(() => {
+              const sortedRoutines = [...routines].sort((a, b) => (a.time_label || "24:00").localeCompare(b.time_label || "24:00"));
+
+              let latestActiveIdx = -1;
+              for (let i = 0; i < sortedRoutines.length; i++) {
+                const t = sortedRoutines[i].time_label || "";
+                if (t === "") continue; // Anytime
+                const start = t.split("-")[0].trim();
+                if (start <= currentTimeStr) {
+                  latestActiveIdx = i;
+                }
+              }
+
+              const categorized = sortedRoutines.map((routine, i) => {
+                const t = routine.time_label || "";
+                if (!t) return { routine, bucket: "anytime" };
+                
+                const parts = t.split("-").map(s => s.trim());
+                const start = parts[0];
+                const end = parts[1]; // might be undefined
+
+                if (currentTimeStr < start) {
+                  return { routine, bucket: "future" };
                 }
                 
-                const isCurrent = i === currentIdx;
-                const isPast = i < currentIdx;
+                if (end) {
+                  if (currentTimeStr >= end) return { routine, bucket: "past" };
+                  return { routine, bucket: "current" };
+                } else {
+                  // No end time. It is current if it's the latest active one.
+                  if (i === latestActiveIdx) return { routine, bucket: "current" };
+                  return { routine, bucket: "past" };
+                }
+              });
+
+              const displayRoutines = [
+                ...categorized.filter(c => c.bucket === "current").map(c => ({...c.routine, isCurrent: true, isPast: false})),
+                ...categorized.filter(c => c.bucket === "future").map(c => ({...c.routine, isCurrent: false, isPast: false})),
+                ...categorized.filter(c => c.bucket === "anytime").map(c => ({...c.routine, isCurrent: false, isPast: false})),
+                ...categorized.filter(c => c.bucket === "past").map(c => ({...c.routine, isCurrent: false, isPast: true}))
+              ];
+
+              return displayRoutines.map((routine) => {
+                const isCurrent = routine.isCurrent;
+                const isPast = routine.isPast;
 
                 return (
                   <div key={routine.id} className="relative">
@@ -604,8 +634,9 @@ export default function FocusPage() {
                     </div>
                   </div>
                 );
-              })}
-              
+              });
+            })()}
+            </div>
               {!isRoutineLocked ? (
                 <div className="pt-4 pl-6 relative">
                   <button
