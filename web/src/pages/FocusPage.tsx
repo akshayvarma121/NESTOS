@@ -65,19 +65,26 @@ export default function FocusPage() {
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
 
+  const [todayStr, setTodayStr] = useState(new Date().toISOString().split("T")[0]);
+
   useEffect(() => {
     const updateTime = () => {
       const now = new Date();
       setCurrentTimeStr(
         `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
       );
+      const newDateStr = now.toISOString().split("T")[0];
+      setTodayStr((prev) => {
+        if (prev !== newDateStr) {
+          return newDateStr;
+        }
+        return prev;
+      });
     };
     updateTime();
     const interval = setInterval(updateTime, 60000);
     return () => clearInterval(interval);
   }, []);
-
-  const todayStr = new Date().toISOString().split("T")[0];
 
   const fetchFocusData = async () => {
     try {
@@ -129,7 +136,7 @@ export default function FocusPage() {
   useEffect(() => {
     fetchFocusData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [todayStr]);
 
   const updateTaskStatus = async (id: string, newStatus: string) => {
     if (newStatus === "skipped") {
