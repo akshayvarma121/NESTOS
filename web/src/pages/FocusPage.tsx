@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { Check, Info, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import EditTimetablePanel from "../components/EditTimetablePanel";
+import EditTimetablePanel, { calculateDuration } from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
 
 const categoryColors: Record<string, string> = {
@@ -553,8 +553,15 @@ export default function FocusPage() {
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] font-mono text-[var(--text-secondary)] mt-0.5">
-                            {routine.time_label || "Anytime"}
+                          <div className="flex items-center gap-2 mt-0.5">
+                            <span className="text-[10px] font-mono text-[var(--text-secondary)]">
+                              {routine.time_label || "Anytime"}
+                            </span>
+                            {calculateDuration(routine.time_label) && (
+                              <span className="text-[10px] font-mono text-[var(--accent)] font-medium bg-[var(--accent)]/10 px-1.5 rounded">
+                                {calculateDuration(routine.time_label)}
+                              </span>
+                            )}
                           </div>
                         </div>
                       </div>
@@ -597,6 +604,7 @@ export default function FocusPage() {
               {!isRoutineLocked ? (
                 <div className="pt-4 pl-6 relative">
                   <button
+                    disabled={!currentTimeStr.startsWith("23:")}
                     onClick={async () => {
                       if (!confirm("Are you sure? You cannot edit today's routines after saving.")) return;
                       try {
@@ -606,9 +614,13 @@ export default function FocusPage() {
                         console.error(err);
                       }
                     }}
-                    className="w-full py-2.5 text-xs font-medium uppercase tracking-wider bg-[var(--text-primary)] text-[var(--bg-base)] rounded-xl hover:opacity-90 transition-opacity"
+                    className={`w-full py-2.5 text-xs font-medium uppercase tracking-wider rounded-xl transition-opacity ${
+                      currentTimeStr.startsWith("23:")
+                        ? "bg-[var(--text-primary)] text-[var(--bg-base)] hover:opacity-90"
+                        : "bg-[var(--bg-surface-raised)] border border-dashed border-[var(--border-hairline)] text-[var(--text-tertiary)] cursor-not-allowed"
+                    }`}
                   >
-                    Save & Lock Timeline
+                    {currentTimeStr.startsWith("23:") ? "Save & Lock Timeline" : "Available at 23:00 to Lock"}
                   </button>
                 </div>
               ) : (

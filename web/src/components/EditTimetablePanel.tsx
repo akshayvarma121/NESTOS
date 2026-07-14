@@ -1,6 +1,33 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import { X, Plus, Trash2 } from "lucide-react";
+import { X, Plus, Trash2, Edit2, Check } from "lucide-react";
+
+export function calculateDuration(timeLabel: string) {
+  if (!timeLabel || !timeLabel.includes("-")) return null;
+  const [start, end] = timeLabel.split("-").map((s) => s.trim());
+  if (!start || !end) return null;
+  
+  const [startH, startM] = start.split(":").map(Number);
+  const [endH, endM] = end.split(":").map(Number);
+  
+  if (isNaN(startH) || isNaN(endH)) return null;
+  
+  let startTotalMins = startH * 60 + (startM || 0);
+  let endTotalMins = endH * 60 + (endM || 0);
+  
+  if (endTotalMins < startTotalMins) {
+    endTotalMins += 24 * 60;
+  }
+  
+  const diff = endTotalMins - startTotalMins;
+  const h = Math.floor(diff / 60);
+  const m = diff % 60;
+  
+  if (h > 0 && m > 0) return `${h}h ${m}m`;
+  if (h > 0) return `${h}h`;
+  if (m > 0) return `${m}m`;
+  return null;
+}
 
 interface Props {
   isOpen: boolean;
@@ -19,9 +46,11 @@ export default function EditTimetablePanel({
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
-  // New Routine Form State
+  // New / Edit Routine Form State
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [title, setTitle] = useState("");
-  const [timeLabel, setTimeLabel] = useState("");
+  const [startTime, setStartTime] = useState("");
+  const [endTime, setEndTime] = useState("");
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
   const [assignedTo, setAssignedTo] = useState<string>("");
 
@@ -52,21 +81,34 @@ export default function EditTimetablePanel({
     }
   };
 
-  const handleCreate = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (selectedDays.length === 0) return alert("Select at least one day");
 
     setIsSubmitting(true);
     try {
-      await api.post("/routines", {
-        title,
-        time_label: timeLabel,
-        days_of_week: selectedDays,
-        assigned_to: assignedTo || null,
-      });
+      const time_label = endTime ? `${startTime} - ${endTime}` : startTime;
 
+      if (editingId) {
+        await api.patch(`/routines/${editingId}`, {
+          title,
+          time_label,
+          days_of_week: selectedDays,
+          assigned_to: assignedTo || null,
+        });
+      } else {
+        await api.post("/routines", {
+          title,
+          time_label,
+          days_of_week: selectedDays,
+          assigned_to: assignedTo || null,
+        });
+      }
+
+      setEditingId(null);
       setTitle("");
-      setTimeLabel("");
+      setStartTime("");
+      setEndTime("");
       setSelectedDays([]);
       setAssignedTo("");
       fetchData();
@@ -76,6 +118,34 @@ export default function EditTimetablePanel({
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const handleEditClick = (routine: any) => {
+    setEditingId(routine.id);
+    setTitle(routine.title);
+    setSelectedDays(routine.days_of_week);
+    setAssignedTo(routine.assigned_to || "");
+    
+    if (routine.time_label && routine.time_label.includes("-")) {
+      const [start, end] = routine.time_label.split("-").map((s: string) => s.trim());
+      setStartTime(start || "");
+      setEndTime(end || "");
+    } else {
+      setStartTime(routine.time_label || "");
+      setEndTime("");
+    }
+    
+    // Switch to manual mode if in JSON mode
+    setIsJSONMode(false);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setTitle("");
+    setStartTime("");
+    setEndTime("");
+    setSelectedDays([]);
+    setAssignedTo("");
   };
 
   const handleBulkCreate = async () => {
@@ -158,17 +228,19 @@ export default function EditTimetablePanel({
           {/* Create Form */}
           <div className="space-y-4 p-4 border border-[var(--border-hairline)] rounded-lg bg-[var(--bg-surface)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">Add Routine Block</h3>
-              <button
-                type="button"
-                onClick={() => setIsJSONMode(!isJSONMode)}
-                className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
-              >
-                {isJSONMode ? "Manual Entry" : "Bulk Paste JSON"}
-              </button>
+              <h3 className="text-sm font-medium">{editingId ? "Edit Routine Block" : "Add Routine Block"}</h3>
+              {!editingId && (
+                <button
+                  type="button"
+                  onClick={() => setIsJSONMode(!isJSONMode)}
+                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
+                >
+                  {isJSONMode ? "Manual Entry" : "Bulk Paste JSON"}
+                </button>
+              )}
             </div>
 
-            {isJSONMode ? (
+            {isJSONMode && !editingId ? (
               <div className="space-y-3">
                 <p className="text-xs text-[var(--text-tertiary)]">
                   Paste a JSON array of routines. Format: <br />
@@ -192,21 +264,46 @@ export default function EditTimetablePanel({
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleCreate} className="space-y-4">
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <datalist id="routine-titles">
+                  <option value="Wake up" />
+                  <option value="Sleep" />
+                  <option value="Dinner" />
+                  <option value="Lunch" />
+                  <option value="Breakfast" />
+                  <option value="Study session 1" />
+                  <option value="Study session 2" />
+                  <option value="Study session 3" />
+                  <option value="Break" />
+                  <option value="Nap" />
+                  <option value="Exercise" />
+                  <option value="Deep Work" />
+                </datalist>
+                
                 <div className="grid grid-cols-2 gap-3">
               <input
                 required
                 placeholder="Title (e.g. Wake up)"
                 value={title}
+                list="routine-titles"
                 onChange={(e) => setTitle(e.target.value)}
                 className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
               />
-              <input
-                placeholder="Time (optional, HH:MM)"
-                value={timeLabel}
-                onChange={(e) => setTimeLabel(e.target.value)}
-                className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)] font-mono"
-              />
+              <div className="flex items-center gap-1">
+                <input
+                  placeholder="Start (HH:MM)"
+                  value={startTime}
+                  onChange={(e) => setStartTime(e.target.value)}
+                  className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
+                />
+                <span className="text-[var(--text-tertiary)]">-</span>
+                <input
+                  placeholder="End (opt)"
+                  value={endTime}
+                  onChange={(e) => setEndTime(e.target.value)}
+                  className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
+                />
+              </div>
             </div>
 
             <div className="flex gap-1.5 justify-between">
@@ -239,13 +336,25 @@ export default function EditTimetablePanel({
               ))}
             </select>
 
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50"
-            >
-              <Plus className="w-4 h-4" /> Add
-            </button>
+            <div className="flex gap-2">
+              <button
+                type="submit"
+                disabled={isSubmitting}
+                className="flex-1 bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity"
+              >
+                {editingId ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                {editingId ? "Save Changes" : "Add Routine"}
+              </button>
+              {editingId && (
+                <button
+                  type="button"
+                  onClick={cancelEdit}
+                  className="bg-[var(--bg-base)] border border-[var(--border-hairline)] text-[var(--text-secondary)] px-4 py-2 rounded text-sm font-medium hover:text-[var(--text-primary)] transition-colors"
+                >
+                  Cancel
+                </button>
+              )}
+            </div>
               </form>
             )}
           </div>
@@ -285,8 +394,15 @@ export default function EditTimetablePanel({
                   key={routine.id}
                   className="p-3 border border-[var(--border-hairline)] rounded-lg flex items-center gap-4 bg-[var(--bg-surface)] flex-wrap"
                 >
-                  <div className="w-[45px] text-xs font-mono text-[var(--text-secondary)] shrink-0">
-                    {routine.time_label}
+                  <div className="w-[80px] flex flex-col shrink-0">
+                    <div className="text-xs font-mono text-[var(--text-secondary)]">
+                      {routine.time_label}
+                    </div>
+                    {calculateDuration(routine.time_label) && (
+                      <div className="text-[10px] font-mono text-[var(--accent)] font-medium mt-0.5">
+                        {calculateDuration(routine.time_label)}
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <p className="text-sm text-[var(--text-primary)] truncate">
@@ -310,12 +426,22 @@ export default function EditTimetablePanel({
                       </option>
                     ))}
                   </select>
-                  <button
-                    onClick={() => handleDelete(routine.id)}
-                    className="p-1.5 text-[var(--text-tertiary)] hover:text-red-500 rounded hover:bg-red-500/10 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex gap-1">
+                    <button
+                      onClick={() => handleEditClick(routine)}
+                      className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--accent)] rounded hover:bg-[var(--accent)]/10 transition-colors"
+                      title="Edit Routine"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(routine.id)}
+                      className="p-1.5 text-[var(--text-tertiary)] hover:text-red-500 rounded hover:bg-red-500/10 transition-colors"
+                      title="Delete Routine"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 </div>
               ))
             )}
