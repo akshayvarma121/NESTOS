@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import CreateGoalPanel from "../components/CreateGoalPanel";
+import GoalEditorPanel from "../components/GoalEditorPanel";
 import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
 import { Target, Plus, Info, UploadCloud, Trash2 } from "lucide-react";
 
@@ -15,6 +15,7 @@ export default function GoalsPage() {
   const [goals, setGoals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
 
   useEffect(() => {
@@ -33,8 +34,23 @@ export default function GoalsPage() {
   };
 
   const handleCreate = async (goalData: any) => {
-    await api.post("/macro-goals", goalData);
+    if (editingGoal) {
+      await api.put(`/macro-goals/${editingGoal.id}`, goalData);
+    } else {
+      await api.post("/macro-goals", goalData);
+    }
     await fetchGoals();
+    setEditingGoal(null);
+  };
+
+  const openNewGoal = () => {
+    setEditingGoal(null);
+    setIsPanelOpen(true);
+  };
+
+  const openEditGoal = (goal: any) => {
+    setEditingGoal(goal);
+    setIsPanelOpen(true);
   };
 
   const handleDeleteGoal = async (id: string) => {
@@ -86,7 +102,7 @@ export default function GoalsPage() {
             Bulk JSON
           </button>
           <button
-            onClick={() => setIsPanelOpen(true)}
+            onClick={openNewGoal}
             className="bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:bg-white transition-colors"
           >
             <Plus className="w-4 h-4" />
@@ -126,13 +142,22 @@ export default function GoalsPage() {
                           {goal.unit_label}
                         </span>
                       </div>
-                      <button
-                        onClick={() => handleDeleteGoal(goal.id)}
-                        className="p-1.5 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors flex-shrink-0"
-                        title="Delete Goal"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      <div className="flex gap-1 items-center">
+                        <button
+                          onClick={() => openEditGoal(goal)}
+                          className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded transition-colors flex-shrink-0"
+                          title="Edit Goal"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                        </button>
+                        <button
+                          onClick={() => handleDeleteGoal(goal.id)}
+                          className="p-1.5 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors flex-shrink-0"
+                          title="Delete Goal"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
                     </div>
 
                     {/* Thin Progress Bar */}
@@ -157,10 +182,14 @@ export default function GoalsPage() {
         ))
       )}
 
-      <CreateGoalPanel
+      <GoalEditorPanel
         isOpen={isPanelOpen}
-        onClose={() => setIsPanelOpen(false)}
+        onClose={() => {
+          setIsPanelOpen(false);
+          setEditingGoal(null);
+        }}
         onSubmit={handleCreate}
+        initialData={editingGoal}
       />
 
       <BulkImportGoalsModal

@@ -60,7 +60,7 @@ router.post("/", async (req: AuthRequest, res) => {
 router.get("/", async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from("pos_macro_goals")
-    .select("*, micro_tasks:pos_micro_tasks(status)")
+    .select("*, micro_tasks:pos_micro_tasks(*)")
     .in("user_id", req.sharedSpaceIds!);
 
   if (error) return res.status(500).json({ error: error.message });
@@ -77,6 +77,65 @@ router.get("/", async (req: AuthRequest, res) => {
   });
 
   res.json(enriched);
+});
+
+router.put("/:id", async (req: AuthRequest, res) => {
+  const { id } = req.params;
+  const { title, category, total_units, unit_label, deadline, customSlices } = req.body;
+
+  // Verify ownership
+  const { data: existing } = await supabase
+    .from("pos_macro_goals")
+    .select("user_id")
+    .eq("id", id)
+    .single();
+
+  if (!existing || !req.sharedSpaceIds!.includes(existing.user_id)) {
+    return res.status(403).json({ error: "Forbidden" });
+  }
+
+  // Update Macro Goal properties
+  const { error: goalError } = await supabase
+    .from("pos_macro_goals")
+    .update({ title, category, total_units, unit_label, deadline })
+    .eq("id", id);
+
+  if (goalError) return res.status(500).json({ error: goalError.message });
+
+  // Delete all existing micro tasks and recreate them
+  // This is much safer than trying to upsert and delete individual slices.
+  await supabase.from("pos_micro_tasks").delete().eq("macro_id", id);
+
+  let tasksToInsert = [];
+  if (customSlices && Array.isArray(customSlices) && customSlices.length > 0) {
+    tasksToInsert = customSlices.map((slice: any) => ({
+      user_id: req.user!.id,
+      macro_id: id,
+      title: slice.title,
+      description: slice.description || null,
+      scheduled_date: slice.scheduled_date || null,
+      pinned: slice.scheduled_date ? true : false,
+      status: slice.status || "pending",
+    }));
+  } else {
+    tasksToInsert = Array.from({ length: total_units }, (_, i) => ({
+      user_id: req.user!.id,
+      macro_id: id,
+      title: `${unit_label} ${i + 1}`,
+      description: null,
+      scheduled_date: null,
+      pinned: false,
+      status: "pending",
+    }));
+  }
+
+  const { error: tasksError } = await supabase
+    .from("pos_micro_tasks")
+    .insert(tasksToInsert);
+
+  if (tasksError) return res.status(500).json({ error: tasksError.message });
+
+  res.json({ success: true });
 });
 
 router.delete("/:id", async (req: AuthRequest, res) => {

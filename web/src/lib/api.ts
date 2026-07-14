@@ -48,6 +48,11 @@ export const api = {
       method: "POST",
       body: body ? JSON.stringify(body) : undefined,
     }),
+  put: (endpoint: string, body?: any) =>
+    fetchWithAuth(endpoint, {
+      method: "PUT",
+      body: body ? JSON.stringify(body) : undefined,
+    }),
   patch: (endpoint: string, body?: any) =>
     fetchWithAuth(endpoint, {
       method: "PATCH",
