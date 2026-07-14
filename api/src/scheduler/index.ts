@@ -42,7 +42,7 @@ export function recomputeSchedule(
     deadline.setHours(0, 0, 0, 0);
 
     const diffTime = deadline.getTime() - today.getTime();
-    let remaining_days = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    let remaining_days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both today and deadline
     remaining_days = Math.max(1, remaining_days); // At least 1 day even if overdue
 
     const unscheduledTasks: Task[] = [];
