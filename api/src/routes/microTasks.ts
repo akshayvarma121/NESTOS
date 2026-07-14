@@ -5,6 +5,34 @@ import { requireAuth, AuthRequest } from "../middleware/auth.js";
 const router = Router();
 router.use(requireAuth);
 
+router.get("/", async (req: AuthRequest, res) => {
+  const date = req.query.date as string;
+  const backlog = req.query.backlog === 'true';
+
+  let query = supabase
+    .from("pos_micro_tasks")
+    .select("*, macro:pos_macro_goals(category, title), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)")
+    .in("user_id", req.sharedSpaceIds!)
+    .neq("status", "skipped");
+
+  if (backlog) {
+    query = query.neq("status", "done").order("unit_number", { ascending: true });
+  } else if (date) {
+    query = query.eq("scheduled_date", date).order("unit_number", { ascending: true });
+  }
+
+  const { data, error } = await query;
+  if (error) return res.status(500).json({ error: error.message });
+  
+  const formatted = data.map((task: any) => ({
+    ...task,
+    category: task.macro?.category,
+    macro_title: task.macro?.title
+  }));
+
+  res.json(formatted);
+});
+
 router.post("/", async (req: AuthRequest, res) => {
   const { macro_id, title, description, urgency, assigned_to } = req.body;
   const { data, error } = await supabase

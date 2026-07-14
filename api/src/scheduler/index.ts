@@ -34,12 +34,14 @@ export function recomputeSchedule(
     scheduled_date: string | null;
     pinned?: boolean;
   }[] = [];
+  
+  // Use UTC methods exclusively to prevent local timezone offsets from shifting the day backwards
   const today = new Date(todayDateStr);
-  today.setHours(0, 0, 0, 0);
+  today.setUTCHours(0, 0, 0, 0);
 
   for (const goal of goals) {
     const deadline = new Date(goal.deadline);
-    deadline.setHours(0, 0, 0, 0);
+    deadline.setUTCHours(0, 0, 0, 0);
 
     const diffTime = deadline.getTime() - today.getTime();
     let remaining_days = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1; // +1 to include both today and deadline
@@ -52,7 +54,7 @@ export function recomputeSchedule(
 
       if (task.scheduled_date) {
         const schedDate = new Date(task.scheduled_date);
-        schedDate.setHours(0, 0, 0, 0);
+        schedDate.setUTCHours(0, 0, 0, 0);
 
         if (schedDate.getTime() < today.getTime()) {
           // Missed task, recalibrate. If it was pinned, unpin it per FR-3.3 self-healing.
@@ -85,7 +87,7 @@ export function recomputeSchedule(
       dayOffset++
     ) {
       const assignDate = new Date(today);
-      assignDate.setDate(today.getDate() + dayOffset);
+      assignDate.setUTCDate(today.getUTCDate() + dayOffset);
       const assignDateStr = assignDate.toISOString().split("T")[0];
 
       for (

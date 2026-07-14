@@ -8,7 +8,7 @@ router.use(requireAuth);
 
 router.post("/recompute", async (req: AuthRequest, res) => {
   try {
-    const todayStr = new Date().toISOString().split("T")[0];
+    const todayStr = req.body.date || new Date().toISOString().split("T")[0];
     
     // Fetch all active macro goals with their tasks
     const { data: goalsData, error: goalsError } = await supabase
@@ -39,7 +39,7 @@ router.post("/recompute", async (req: AuthRequest, res) => {
 });
 
 router.get("/focus", async (req: AuthRequest, res) => {
-  const todayStr = new Date().toISOString().split("T")[0];
+  const todayStr = (req.query.date as string) || new Date().toISOString().split("T")[0];
   const { data, error } = await supabase
     .from("pos_micro_tasks")
     .select(
