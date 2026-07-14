@@ -31,7 +31,7 @@ export default function PomodoroPage() {
       try {
         const todayStr = getLocalDateString();
         const [taskData, personalData, routinesData] = await Promise.all([
-          api.get("/scheduler/focus"),
+          api.get(`/scheduler/focus?date=${todayStr}`),
           api.get("/personal-todos"),
           api.get(`/routines/day?day=${new Date().toLocaleDateString("en-US", { weekday: "short" })}&date=${todayStr}`)
         ]);

@@ -158,7 +158,7 @@ export default function BacklogPage() {
           {
             ...draggedTask,
             scheduled_date: getLocalDateString(),
-            is_pinned: true,
+            pinned: true,
           },
         ]);
 
@@ -166,7 +166,7 @@ export default function BacklogPage() {
           const todayStr = getLocalDateString();
           await api.patch(`/micro-tasks/${draggedTask.id}`, {
             scheduled_date: todayStr,
-            is_pinned: true,
+            pinned: true,
           });
         } catch (e) {
           console.error("Failed to pin task", e);
@@ -274,7 +274,7 @@ export default function BacklogPage() {
                         </span>
                       )}
 
-                      {task.is_pinned && (
+                      {task.pinned && (
                         <span
                           className={`${task.assignee ? "ml-2" : "ml-auto"} text-[10px] uppercase font-mono bg-[var(--accent)]/10 text-[var(--accent)] px-1.5 py-0.5 rounded`}
                         >

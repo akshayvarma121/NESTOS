@@ -89,7 +89,7 @@ export default function FocusPage() {
 
   const fetchFocusData = async () => {
     try {
-      await api.post("/scheduler/recompute");
+      await api.post("/scheduler/recompute", { date: todayStr });
 
       const [
         taskData,
@@ -100,7 +100,7 @@ export default function FocusPage() {
         notesData,
         lockData,
       ] = await Promise.all([
-        api.get("/scheduler/focus"),
+        api.get(`/scheduler/focus?date=${todayStr}`),
         api.get("/partner/space"),
         api.get(
           `/routines/day?day=${new Date().toLocaleDateString("en-US", { weekday: "short" })}&date=${todayStr}`,
