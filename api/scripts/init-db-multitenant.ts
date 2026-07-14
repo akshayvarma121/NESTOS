@@ -148,6 +148,13 @@ CREATE TABLE pos_vault_entries (
   iv TEXT NOT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+CREATE TABLE pos_events (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id UUID NOT NULL REFERENCES pos_user_profiles(user_id),
+  title TEXT NOT NULL,
+  date DATE NOT NULL,
+  created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+);
 `;
 
 async function initDb() {
