@@ -25,7 +25,7 @@ router.post("/recompute", async (req: AuthRequest, res) => {
     if (result.tasksToUpdate.length > 0) {
       const promises = result.tasksToUpdate.map(t => {
         const updateData: any = { scheduled_date: t.scheduled_date };
-        if (t.pinned !== undefined) updateData.pinned = t.pinned;
+        if (t.is_pinned !== undefined) updateData.is_pinned = t.is_pinned;
         return supabase.from("pos_micro_tasks").update(updateData).eq("id", t.id);
       });
       
