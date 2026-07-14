@@ -15,9 +15,11 @@ const categoryColors: Record<string, string> = {
 function InlineEdit({
   initialValue,
   onSave,
+  disabled
 }: {
   initialValue: string;
   onSave: (val: string) => void;
+  disabled?: boolean;
 }) {
   const [editing, setEditing] = useState(false);
   const [val, setVal] = useState(initialValue);
@@ -42,8 +44,8 @@ function InlineEdit({
 
   return (
     <span
-      className="cursor-text hover:text-[var(--text-primary)] transition-colors py-1 block w-full"
-      onClick={() => setEditing(true)}
+      className={`py-1 block w-full ${disabled ? "opacity-75" : "cursor-text hover:text-[var(--text-primary)] transition-colors"}`}
+      onClick={() => { if (!disabled) setEditing(true); }}
     >
       {initialValue}
     </span>
@@ -129,11 +131,12 @@ export default function FocusPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleTask = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === "done" ? "pending" : "done";
-    setTasks((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)),
-    );
+  const updateTaskStatus = async (id: string, newStatus: string) => {
+    if (newStatus === "skipped") {
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+    } else {
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)));
+    }
     await api.patch(`/micro-tasks/${id}`, { status: newStatus });
   };
 
@@ -278,12 +281,13 @@ export default function FocusPage() {
               />
 
               <button
-                onClick={() => toggleTask(task.id, task.status)}
+                disabled={isRoutineLocked}
+                onClick={() => updateTaskStatus(task.id, task.status === "done" ? "pending" : "done")}
                 className={`w-5 h-5 flex-shrink-0 rounded-[4px] border ${
                   task.status === "done"
                     ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
                     : "border-[var(--border-hairline)] hover:border-[var(--text-secondary)]"
-                } flex items-center justify-center transition-colors`}
+                } flex items-center justify-center transition-colors disabled:opacity-50`}
               >
                 {task.status === "done" && (
                   <Check className="w-3.5 h-3.5 text-[var(--bg-base)]" />
@@ -296,8 +300,18 @@ export default function FocusPage() {
                 <InlineEdit
                   initialValue={task.title}
                   onSave={(newVal) => renameTask(task.id, newVal)}
+                  disabled={isRoutineLocked}
                 />
               </div>
+
+              <button
+                disabled={isRoutineLocked}
+                onClick={() => updateTaskStatus(task.id, "skipped")}
+                className="opacity-0 group-hover:opacity-100 p-1 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors disabled:opacity-0"
+                title="Skip Task"
+              >
+                <X className="w-4 h-4" />
+              </button>
 
               {/* Show date label if not today */}
               {task.scheduled_date !== todayStr && (
@@ -332,9 +346,9 @@ export default function FocusPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-3xl mx-auto space-y-12 relative pb-32">
+    <div className="p-6 md:p-8 max-w-6xl mx-auto relative pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between mb-12">
         <div>
           <div className="flex items-center gap-2 mb-1">
             <h1 className="text-2xl font-semibold">Focus Dashboard</h1>
@@ -361,6 +375,9 @@ export default function FocusPage() {
           </button>
         </div>
       </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 lg:gap-12 items-start">
+        <div className="space-y-12 min-w-0">
 
       {/* STICKY NOTES */}
       {dashboardNotes.length > 0 && (
@@ -681,26 +698,6 @@ export default function FocusPage() {
         </section>
       )}
 
-      {/* TODAY */}
-      {(todayTasks.length > 0 || routines.length === 0) && (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
-            <span>Today's Horizon</span>
-            <span className="text-xs font-mono text-[var(--text-tertiary)]">
-              {todayTasks.length} tasks
-            </span>
-          </h2>
-          {todayTasks.length === 0 ? (
-            <p className="text-sm text-[var(--text-secondary)] py-4 pl-3">
-              Nothing scheduled for today. Relax, or pull something from the
-              Backlog.
-            </p>
-          ) : (
-            <div className="space-y-6">{renderSubjectGroup(todayGrouped)}</div>
-          )}
-        </section>
-      )}
-
       {/* UPCOMING */}
       {upcomingTasks.length > 0 && (
         <section className="space-y-4 pt-8">
@@ -767,6 +764,29 @@ export default function FocusPage() {
           />
         </div>
       </section>
+        </div>
+
+        <div className="sticky top-8 space-y-6">
+          <div className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-xl p-5 shadow-sm">
+            <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-3 mb-4 flex items-center justify-between">
+              <span>Today's Horizon</span>
+              <span className="text-[10px] font-mono text-[var(--text-tertiary)] bg-[var(--bg-base)] px-2 py-0.5 rounded border border-[var(--border-hairline)]">
+                {todayTasks.length} tasks
+              </span>
+            </h2>
+            {todayTasks.length === 0 ? (
+              <p className="text-sm text-[var(--text-secondary)] italic">
+                Nothing scheduled for today. Relax, or pull something from the
+                Backlog.
+              </p>
+            ) : (
+              <div className="space-y-6">
+                {renderSubjectGroup(todayGrouped)}
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
 
       <EditTimetablePanel
         isOpen={isTimetableOpen}

@@ -176,8 +176,8 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
             </button>
           </form>
         ) : (
-          <div className="p-4 md:p-6 flex-1 overflow-y-auto space-y-4 flex flex-col">
-            <p className="text-xs text-[var(--text-secondary)] mb-2">
+          <div className="p-4 md:p-6 flex-1 overflow-hidden space-y-4 flex flex-col">
+            <p className="text-xs text-[var(--text-secondary)] mb-2 flex-shrink-0">
               Your goal has been sliced into {slices.length} micro-tasks. You
               can rename them or pre-assign them to specific dates. Any task
               without a date will go to the Canvas Backlog.
@@ -238,7 +238,7 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
             <button
               onClick={handleSubmit}
               disabled={loading}
-              className="w-full bg-[#10b981] text-[var(--bg-base)] font-medium py-2 rounded-md hover:bg-opacity-90 transition-colors mt-4 disabled:opacity-50"
+              className="flex-shrink-0 w-full bg-[#10b981] text-[var(--bg-base)] font-medium py-2 rounded-md hover:bg-opacity-90 transition-colors mt-4 disabled:opacity-50"
             >
               {loading ? "Saving..." : "Confirm & Create Goal"}
             </button>

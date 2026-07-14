@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { usePomodoro } from "../contexts/PomodoroContext";
 import FlipClock from "../components/FlipClock";
-import { Play, Pause, RotateCcw, SkipForward, Home, ListTodo, Settings, Check } from "lucide-react";
+import { Play, Pause, RotateCcw, SkipForward, Home, ListTodo, Settings, Check, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { api } from "../lib/api";
 
@@ -20,24 +20,28 @@ export default function PomodoroPage() {
 
   const [tasks, setTasks] = useState<any[]>([]);
   const [personalTodos, setPersonalTodos] = useState<any[]>([]);
+  const [routines, setRoutines] = useState<any[]>([]);
+  const [currentRoutine, setCurrentRoutine] = useState<any | null>(null);
 
   useEffect(() => {
-    // Fetch focus tasks and personal todos
+    // Fetch focus tasks, personal todos, and routines
     const fetchTasks = async () => {
       try {
-        const [taskData, personalData] = await Promise.all([
+        const todayStr = new Date().toISOString().split("T")[0];
+        const [taskData, personalData, routinesData] = await Promise.all([
           api.get("/scheduler/focus"),
           api.get("/personal-todos"),
+          api.get(`/routines/day?day=${new Date().toLocaleDateString("en-US", { weekday: "short" })}&date=${todayStr}`)
         ]);
-        const todayStr = new Date().toISOString().split("T")[0];
         
-        // Only get active tasks for today
+        // Only get active tasks for today (including pending or done, not skipped)
         const activeTasks = (taskData || []).filter(
           (t: any) => t.status !== "skipped" && t.scheduled_date === todayStr
         );
         
         setTasks(activeTasks);
         setPersonalTodos(personalData || []);
+        setRoutines(routinesData || []);
       } catch (err) {
         console.error("Failed to load tasks", err);
       }
@@ -45,9 +49,48 @@ export default function PomodoroPage() {
     fetchTasks();
   }, []);
 
-  const toggleTask = async (id: string, currentStatus: string) => {
-    const newStatus = currentStatus === "done" ? "pending" : "done";
-    setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)));
+  useEffect(() => {
+    const updateTime = () => {
+      const now = new Date();
+      const timeStr = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`;
+      
+      if (routines.length > 0) {
+        const sortedRoutines = [...routines].sort((a, b) => (a.time_label || "24:00").localeCompare(b.time_label || "24:00"));
+        let latestActive = null;
+        for (let i = 0; i < sortedRoutines.length; i++) {
+          const t = sortedRoutines[i].time_label || "";
+          if (t === "") continue;
+          const start = t.split("-")[0].trim();
+          if (start <= timeStr) {
+            latestActive = sortedRoutines[i];
+          }
+        }
+        
+        if (latestActive) {
+          const parts = (latestActive.time_label || "").split("-").map((s: string) => s.trim());
+          const end = parts[1];
+          if (end && timeStr >= end) {
+            setCurrentRoutine(null);
+          } else {
+            setCurrentRoutine(latestActive);
+          }
+        } else {
+          setCurrentRoutine(null);
+        }
+      }
+    };
+    
+    updateTime();
+    const interval = setInterval(updateTime, 60000);
+    return () => clearInterval(interval);
+  }, [routines]);
+
+  const updateTaskStatus = async (id: string, newStatus: string) => {
+    if (newStatus === "skipped") {
+      setTasks((prev) => prev.filter((t) => t.id !== id));
+    } else {
+      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)));
+    }
     await api.patch(`/micro-tasks/${id}`, { status: newStatus });
   };
 
@@ -80,12 +123,17 @@ export default function PomodoroPage() {
         {/* Main Timer Area */}
         <div className="flex-1 flex flex-col items-center justify-center p-8 relative z-0">
           
-          <div className="mb-8 text-center">
+          <div className="mb-8 flex flex-col items-center gap-3">
             <span className={`px-4 py-1 rounded-full text-xs font-bold tracking-widest uppercase border ${
               phase === "work" ? "border-red-500/50 text-red-500 bg-red-500/10" : "border-emerald-500/50 text-emerald-500 bg-emerald-500/10"
             }`}>
               {phase === "work" ? "Focus Session" : "Short Break"}
             </span>
+            {currentRoutine && (
+              <span className="text-sm text-gray-400 font-mono">
+                Current: <strong className="text-gray-300">{currentRoutine.title}</strong>
+              </span>
+            )}
           </div>
 
           <FlipClock timeRemaining={timeRemaining} />
@@ -133,7 +181,7 @@ export default function PomodoroPage() {
 
         {/* Tasks Pane */}
         <div className="w-full lg:w-[400px] border-t lg:border-t-0 lg:border-l border-[#1a1a1a] bg-[#0a0a0a] p-6 lg:p-8 overflow-y-auto max-h-[40vh] lg:max-h-screen">
-          <h2 className="text-gray-400 text-xs uppercase tracking-widest mb-6">Today's Focus</h2>
+          <h2 className="text-gray-400 text-xs uppercase tracking-widest mb-6">Today's Horizon</h2>
           
           <div className="space-y-6">
             {/* Horizon Tasks */}
@@ -142,16 +190,23 @@ export default function PomodoroPage() {
                 {tasks.map(task => (
                   <div key={task.id} className="flex items-start gap-3 group">
                     <button
-                      onClick={() => toggleTask(task.id, task.status)}
+                      onClick={() => updateTaskStatus(task.id, task.status === "done" ? "pending" : "done")}
                       className={`w-5 h-5 flex-shrink-0 mt-0.5 rounded-[4px] border flex items-center justify-center transition-colors ${
                         task.status === "done" ? "bg-gray-600 border-gray-600" : "border-gray-600 hover:border-white"
                       }`}
                     >
                       {task.status === "done" && <Check className="w-3.5 h-3.5 text-black" />}
                     </button>
-                    <span className={`text-sm leading-relaxed ${task.status === "done" ? "text-gray-600 line-through" : "text-gray-300"}`}>
+                    <span className={`text-sm leading-relaxed flex-1 ${task.status === "done" ? "text-gray-600 line-through" : "text-gray-300"}`}>
                       {task.title}
                     </span>
+                    <button
+                      onClick={() => updateTaskStatus(task.id, "skipped")}
+                      className="opacity-0 group-hover:opacity-100 p-1 text-gray-500 hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
+                      title="Skip Task"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
                   </div>
                 ))}
               </div>
