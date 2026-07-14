@@ -16,6 +16,7 @@ import deadlinesRouter from "./routes/deadlines.js";
 import calendarRouter from "./routes/calendar.js";
 import notesRouter from "./routes/notes.js";
 import accountRouter from "./routes/account.js";
+import analyticsRouter from "./routes/analytics.js";
 
 import "./cron/index.js"; // Start cron jobs
 
@@ -36,6 +37,7 @@ app.use("/api/partner", partnerRouter);
 app.use("/api/nudges", nudgesRouter);
 app.use("/api/push", pushRouter);
 app.use("/api/vault", vaultRouter);
+app.use("/api/analytics", analyticsRouter);
 app.use("/api/routines", routinesRouter);
 app.use("/api/personal-todos", personalRouter);
 app.use("/api/deadlines", deadlinesRouter);
