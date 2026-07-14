@@ -3,7 +3,7 @@ export interface Task {
   macro_id: string;
   scheduled_date: string | null;
   status: "pending" | "done" | "skipped";
-  is_pinned: boolean;
+  pinned: boolean;
 }
 
 export interface MacroGoal {
@@ -16,7 +16,7 @@ export interface RecomputeResult {
   tasksToUpdate: {
     id: string;
     scheduled_date: string | null;
-    is_pinned?: boolean;
+    pinned?: boolean;
   }[];
 }
 
@@ -32,7 +32,7 @@ export function recomputeSchedule(
   const tasksToUpdate: {
     id: string;
     scheduled_date: string | null;
-    is_pinned?: boolean;
+    pinned?: boolean;
   }[] = [];
   
   // Use UTC methods exclusively to prevent local timezone offsets from shifting the day backwards
@@ -62,11 +62,11 @@ export function recomputeSchedule(
           tasksToUpdate.push({
             id: task.id,
             scheduled_date: null,
-            is_pinned: false,
+            pinned: false,
           });
         } else if (schedDate.getTime() >= today.getTime()) {
           // If it's pinned to today or future, respect it and skip auto-scheduling.
-          if (!task.is_pinned) {
+          if (!task.pinned) {
             unscheduledTasks.push(task);
           }
         }
