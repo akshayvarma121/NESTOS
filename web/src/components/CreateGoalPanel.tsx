@@ -38,15 +38,19 @@ export default function CreateGoalPanel({ isOpen, onClose, onSubmit }: Props) {
 
   const handleSubmit = async () => {
     setLoading(true);
-    await onSubmit({
-      ...form,
-      total_units: slices.length,
-      customSlices: slices,
-    });
-    setLoading(false);
-    // Reset state and close
-    setStep(1);
-    onClose();
+    try {
+      await onSubmit({
+        ...form,
+        total_units: slices.length,
+        customSlices: slices,
+      });
+      setStep(1);
+      onClose();
+    } catch (e: any) {
+      alert("Error saving goal: " + (e.message || "Unknown error"));
+    } finally {
+      setLoading(false);
+    }
   };
 
   const updateSlice = (id: string, field: string, value: string) => {

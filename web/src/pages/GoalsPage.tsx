@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import CreateGoalPanel from "../components/CreateGoalPanel";
-import { Target, Plus, Info } from "lucide-react";
+import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
+import { Target, Plus, Info, UploadCloud } from "lucide-react";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -14,6 +15,7 @@ export default function GoalsPage() {
   const [goals, setGoals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isBulkOpen, setIsBulkOpen] = useState(false);
 
   useEffect(() => {
     fetchGoals();
@@ -64,13 +66,22 @@ export default function GoalsPage() {
             </div>
           </div>
         </div>
-        <button
-          onClick={() => setIsPanelOpen(true)}
-          className="bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:bg-white transition-colors"
-        >
-          <Plus className="w-4 h-4" />
-          New Goal
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => setIsBulkOpen(true)}
+            className="border border-[var(--border-hairline)] bg-[var(--bg-surface-raised)] text-[var(--text-primary)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:border-[var(--text-secondary)] transition-colors"
+          >
+            <UploadCloud className="w-4 h-4" />
+            Bulk JSON
+          </button>
+          <button
+            onClick={() => setIsPanelOpen(true)}
+            className="bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:bg-white transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            New Goal
+          </button>
+        </div>
       </div>
 
       {goals.length === 0 ? (
@@ -130,6 +141,12 @@ export default function GoalsPage() {
         isOpen={isPanelOpen}
         onClose={() => setIsPanelOpen(false)}
         onSubmit={handleCreate}
+      />
+
+      <BulkImportGoalsModal
+        isOpen={isBulkOpen}
+        onClose={() => setIsBulkOpen(false)}
+        onSuccess={fetchGoals}
       />
     </div>
   );
