@@ -4,6 +4,7 @@ import { Check, Info, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import EditTimetablePanel, { calculateDuration } from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
+import ExpandableDescription from "../components/ExpandableDescription";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -41,7 +42,6 @@ function InlineEdit({
       />
     );
   }
-
   return (
     <span
       className={`py-1 block w-full ${disabled ? "opacity-75" : "cursor-text hover:text-[var(--text-primary)] transition-colors"}`}
@@ -305,9 +305,9 @@ export default function FocusPage() {
                   />
                 </div>
                 {task.description && (
-                  <p className="text-[11px] text-[var(--text-tertiary)] italic -mt-0.5 mb-1 pr-4 line-clamp-2">
-                    {task.description}
-                  </p>
+                  <div className="-mt-0.5 mb-1 pr-4">
+                    <ExpandableDescription text={task.description} />
+                  </div>
                 )}
               </div>
 
@@ -597,9 +597,9 @@ export default function FocusPage() {
                           >
                             {routine.title}
                             {routine.description && (
-                              <span className="text-[11px] font-normal text-[var(--text-secondary)] ml-1">
-                                - {routine.description}
-                              </span>
+                              <div className="ml-1 mb-1 pr-4">
+                                <ExpandableDescription text={routine.description} />
+                              </div>
                             )}
                             {routine.assignee?.username && (
                               <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">

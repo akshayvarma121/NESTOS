@@ -4,6 +4,7 @@ import FlipClock from "../components/FlipClock";
 import { Play, Pause, RotateCcw, SkipForward, Home, ListTodo, Settings, Check, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { api } from "../lib/api";
+import ExpandableDescription from "../components/ExpandableDescription";
 
 export default function PomodoroPage() {
   const {
@@ -202,9 +203,9 @@ export default function PomodoroPage() {
                         {task.title}
                       </span>
                       {task.description && (
-                        <p className="text-[11px] text-gray-500 italic mt-0.5 pr-2 line-clamp-2">
-                          {task.description}
-                        </p>
+                        <div className="mt-0.5 pr-2">
+                          <ExpandableDescription text={task.description} />
+                        </div>
                       )}
                     </div>
                     <button
