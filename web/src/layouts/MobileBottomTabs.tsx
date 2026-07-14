@@ -13,6 +13,7 @@ import {
   BarChart2,
   X,
   Timer,
+  PieChart,
 } from "lucide-react";
 
 const mainTabs = [
@@ -24,6 +25,7 @@ const mainTabs = [
 
 const moreTabs = [
   { name: "Pomodoro", path: "/pomodoro", icon: Timer },
+  { name: "Analytics", path: "/routines-history", icon: PieChart },
   { name: "Goals", path: "/goals", icon: BarChart2 },
   { name: "Captures", path: "/captures", icon: Inbox },
   { name: "Notes", path: "/notes", icon: ListTodo },

@@ -428,7 +428,7 @@ export default function FocusPage() {
                 to="/routines-history" 
                 className="text-[10px] uppercase font-mono bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-2 py-0.5 rounded text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors"
               >
-                History
+                Analytics
               </NavLink>
               <span className="text-xs font-mono text-[var(--text-tertiary)]">
                 Timeline
