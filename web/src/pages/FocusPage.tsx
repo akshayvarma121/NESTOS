@@ -140,6 +140,13 @@ export default function FocusPage() {
     await api.patch(`/micro-tasks/${id}`, { status: newStatus });
   };
 
+  const moveToBacklog = async (id: string) => {
+    // Remove from FocusPage UI by filtering it out
+    setTasks((prev) => prev.filter((t) => t.id !== id));
+    // Patch backend to clear scheduled_date and reset status to pending
+    await api.patch(`/micro-tasks/${id}`, { status: "pending", scheduled_date: null });
+  };
+
   const renameTask = async (id: string, newTitle: string) => {
     setTasks((prev) =>
       prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t)),
@@ -313,9 +320,9 @@ export default function FocusPage() {
 
               <button
                 disabled={isRoutineLocked}
-                onClick={() => updateTaskStatus(task.id, "skipped")}
+                onClick={() => moveToBacklog(task.id)}
                 className="opacity-0 group-hover:opacity-100 p-1 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors disabled:opacity-0"
-                title="Skip Task"
+                title="Move to Backlog"
               >
                 <X className="w-4 h-4" />
               </button>
