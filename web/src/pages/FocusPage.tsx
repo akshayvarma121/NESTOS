@@ -636,7 +636,6 @@ export default function FocusPage() {
                 );
               });
             })()}
-            </div>
               {!isRoutineLocked ? (
                 <div className="pt-4 pl-6 relative">
                   <button
