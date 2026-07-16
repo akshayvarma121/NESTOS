@@ -57,9 +57,36 @@ router.get("/", async (req: AuthRequest, res) => {
         completed: c.total_completed,
       }));
 
+    // Generate Smart Suggestions
+    let suggestion: { text: string; type: "warning" | "success" | "info" } | null = null;
+    if (days >= 7) {
+      let totalDone = 0;
+      let totalSkipped = 0;
+      for (const stat of Object.values(routineStats)) {
+        totalDone += stat.done;
+        totalSkipped += stat.skipped;
+      }
+      const total = totalDone + totalSkipped;
+      if (total > 0) {
+        const adherence = totalDone / total;
+        if (adherence < 0.6) {
+          suggestion = {
+            type: "warning",
+            text: `Your routine adherence is at ${Math.round(adherence * 100)}% over the last ${days} days. Consider loosening your schedule or dropping overly ambitious routines to prevent burnout.`,
+          };
+        } else if (adherence > 0.85) {
+          suggestion = {
+            type: "success",
+            text: `Excellent consistency! Your adherence is at ${Math.round(adherence * 100)}%. You are sustaining a highly productive rhythm.`,
+          };
+        }
+      }
+    }
+
     res.json({
       routineTrends: aggregatedRoutines,
       sliceTrends: formattedCloseouts,
+      suggestion,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });

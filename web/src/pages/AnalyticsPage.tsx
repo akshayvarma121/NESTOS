@@ -22,6 +22,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<{
     routineTrends: any[];
     sliceTrends: any[];
+    suggestion?: { text: string; type: "warning" | "success" | "info" };
   } | null>(null);
   
   const [loading, setLoading] = useState(true);
@@ -135,6 +136,33 @@ export default function AnalyticsPage() {
         </div>
       ) : (
         <>
+          {/* AI Suggestion Banner */}
+          {analytics?.suggestion && (
+            <div
+              className={`p-4 rounded-xl border flex items-start gap-3 shadow-sm ${
+                analytics.suggestion.type === "warning"
+                  ? "bg-[var(--warning)]/5 border-[var(--warning)]/20 text-[var(--warning)]"
+                  : "bg-[var(--accent)]/5 border-[var(--accent)]/20 text-[var(--accent)]"
+              }`}
+            >
+              <div className="mt-0.5">
+                {analytics.suggestion.type === "warning" ? (
+                  <Activity className="w-5 h-5" />
+                ) : (
+                  <Check className="w-5 h-5" />
+                )}
+              </div>
+              <div>
+                <h3 className="font-semibold text-sm mb-1">
+                  {analytics.suggestion.type === "warning" ? "Burnout Warning" : "Great Job!"}
+                </h3>
+                <p className="text-sm opacity-90 leading-relaxed text-[var(--text-primary)]">
+                  {analytics.suggestion.text}
+                </p>
+              </div>
+            </div>
+          )}
+
           {/* KPI Cards */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] p-5 rounded-xl flex items-center gap-4 shadow-sm">
