@@ -5,7 +5,7 @@ import { Play, Pause, RotateCcw, SkipForward, Home, ListTodo, Settings, Check, X
 import { NavLink } from "react-router-dom";
 import { api } from "../lib/api";
 import ExpandableDescription from "../components/ExpandableDescription";
-import { getLocalDateString } from "../lib/dateUtils";
+import { getLocalDateString, getLocalDayName } from "../lib/dateUtils";
 
 export default function PomodoroPage() {
   const {
@@ -33,7 +33,7 @@ export default function PomodoroPage() {
         const [taskData, personalData, routinesData] = await Promise.all([
           api.get(`/scheduler/focus?date=${todayStr}`),
           api.get("/personal-todos"),
-          api.get(`/routines/day?day=${new Date().toLocaleDateString("en-US", { weekday: "short" })}&date=${todayStr}`)
+          api.get(`/routines/day?day=${getLocalDayName()}&date=${todayStr}`)
         ]);
         
         // Only get active tasks for today (including pending or done, not skipped)

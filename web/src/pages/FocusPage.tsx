@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import EditTimetablePanel, { calculateDuration } from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
 import ExpandableDescription from "../components/ExpandableDescription";
-import { getLocalDateString } from "../lib/dateUtils";
+import { getLocalDateString, getLocalDayName } from "../lib/dateUtils";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -103,7 +103,7 @@ export default function FocusPage() {
         api.get(`/scheduler/focus?date=${todayStr}`),
         api.get("/partner/space"),
         api.get(
-          `/routines/day?day=${new Date().toLocaleDateString("en-US", { weekday: "short" })}&date=${todayStr}`,
+          `/routines/day?day=${getLocalDayName()}&date=${todayStr}`,
         ),
         api.get("/personal-todos"),
         api.get("/deadlines"),
