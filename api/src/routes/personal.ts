@@ -33,6 +33,13 @@ router.patch("/:id", async (req: AuthRequest, res) => {
   const { id } = req.params;
   const updates = req.body;
 
+  // Handle completed_at timestamp
+  if (updates.status === "done") {
+    updates.completed_at = new Date().toISOString();
+  } else if (updates.status === "pending") {
+    updates.completed_at = null;
+  }
+
   const { data, error } = await supabase
     .from("pos_personal_todos")
     .update(updates)

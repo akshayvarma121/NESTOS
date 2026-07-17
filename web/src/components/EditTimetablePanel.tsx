@@ -42,7 +42,8 @@ export default function EditTimetablePanel({
   onClose,
   onUpdate,
 }: Props) {
-  const [routines, setRoutines] = useState<any[]>([]);
+  const [myRoutines, setMyRoutines] = useState<any[]>([]);
+  const [partnerRoutines, setPartnerRoutines] = useState<any[]>([]);
   const [spaceMembers, setSpaceMembers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -73,7 +74,8 @@ export default function EditTimetablePanel({
         api.get("/routines"),
         api.get("/partner/space"),
       ]);
-      setRoutines(routinesData);
+      setMyRoutines(routinesData.myRoutines || []);
+      setPartnerRoutines(routinesData.partnerRoutines || []);
       setSpaceMembers(membersData);
     } catch (e) {
       console.error(e);
@@ -196,7 +198,7 @@ export default function EditTimetablePanel({
 
   const handleAssignChange = async (id: string, newAssignee: string | null) => {
     // Optimistic update
-    setRoutines((prev) =>
+    setMyRoutines((prev) =>
       prev.map((r) => (r.id === id ? { ...r, assigned_to: newAssignee } : r)),
     );
     await api.patch(`/routines/${id}`, { assigned_to: newAssignee });
@@ -375,8 +377,8 @@ export default function EditTimetablePanel({
           {/* List */}
           <div className="space-y-3">
             <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-2">
-              <h3 className="text-sm font-medium">Active Routines</h3>
-              {routines.length > 0 && (
+              <h3 className="text-sm font-medium">My Active Routines</h3>
+              {myRoutines.length > 0 && (
                 <button
                   onClick={async () => {
                     if (confirm("Are you sure you want to delete ALL routines? This cannot be undone.")) {
@@ -397,12 +399,12 @@ export default function EditTimetablePanel({
             </div>
             {loading ? (
               <p className="text-sm text-[var(--text-tertiary)]">Loading...</p>
-            ) : routines.length === 0 ? (
+            ) : myRoutines.length === 0 ? (
               <p className="text-sm text-[var(--text-tertiary)]">
                 No routines configured yet.
               </p>
             ) : (
-              routines.map((routine) => (
+              myRoutines.map((routine) => (
                 <div
                   key={routine.id}
                   className="p-3 border border-[var(--border-hairline)] rounded-lg flex items-center gap-4 bg-[var(--bg-surface)] flex-wrap"
@@ -464,6 +466,35 @@ export default function EditTimetablePanel({
               ))
             )}
           </div>
+
+          {partnerRoutines.length > 0 && (
+            <div className="space-y-3 pt-6 border-t border-[var(--border-hairline)]">
+              <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-2">
+                <h3 className="text-sm font-medium text-[var(--text-secondary)]">Partner's Active Routines</h3>
+              </div>
+              {partnerRoutines.map((routine) => (
+                <div
+                  key={routine.id}
+                  className="p-3 border border-[var(--border-hairline)] rounded-lg flex items-center gap-4 bg-[var(--bg-base)] opacity-70 flex-wrap"
+                >
+                  <div className="w-[80px] flex flex-col shrink-0">
+                    <div className="text-xs font-mono text-[var(--text-secondary)]">
+                      {routine.time_label}
+                    </div>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-[var(--text-primary)] truncate">
+                      {routine.title}
+                    </p>
+                    <p className="text-[10px] text-[var(--text-tertiary)] font-mono uppercase truncate mt-0.5">
+                      {routine.days_of_week.join(", ")}
+                    </p>
+                  </div>
+                  <div className="text-xs text-[var(--text-tertiary)] italic">Read-Only</div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </div>
     </>

@@ -22,22 +22,28 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<{
     routineTrends: any[];
     sliceTrends: any[];
+    taskLogs?: any[];
     suggestion?: { text: string; type: "warning" | "success" | "info" };
   } | null>(null);
   
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(14);
   const [search, setSearch] = useState("");
+  const [partners, setPartners] = useState<{id: string, username: string}[]>([]);
+  const [targetUserId, setTargetUserId] = useState<string>("");
 
   const fetchData = async () => {
     setLoading(true);
     try {
-      const [historyData, analyticsData] = await Promise.all([
-        api.get(`/routines/history?days=${days}`),
-        api.get(`/analytics?days=${days}`),
+      const q = targetUserId ? `&target_user_id=${targetUserId}` : "";
+      const [historyData, analyticsData, partnerData] = await Promise.all([
+        api.get(`/routines/history?days=${days}${q}`),
+        api.get(`/analytics?days=${days}${q}`),
+        api.get("/partner/space")
       ]);
       setLogs(historyData || []);
       setAnalytics(analyticsData || { routineTrends: [], sliceTrends: [] });
+      setPartners(partnerData || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -48,7 +54,7 @@ export default function AnalyticsPage() {
   useEffect(() => {
     fetchData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [days]);
+  }, [days, targetUserId]);
 
   // Group logs by date
   const groupedLogs = logs.reduce((acc: any, log: any) => {
@@ -95,37 +101,51 @@ export default function AnalyticsPage() {
               Analyze your routine consistency and goal execution.
             </p>
           </div>
-          <div className="flex items-center gap-2 bg-[var(--bg-surface-raised)] p-1 rounded-lg border border-[var(--border-hairline)]">
-            <button
-              onClick={() => setDays(7)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                days === 7
-                  ? "bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              7 Days
-            </button>
-            <button
-              onClick={() => setDays(14)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                days === 14
-                  ? "bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              14 Days
-            </button>
-            <button
-              onClick={() => setDays(30)}
-              className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
-                days === 30
-                  ? "bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm"
-                  : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              }`}
-            >
-              30 Days
-            </button>
+          <div className="flex items-center gap-2">
+            {partners.length > 0 && (
+              <select
+                value={targetUserId}
+                onChange={(e) => setTargetUserId(e.target.value)}
+                className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg px-3 py-1.5 text-sm outline-none font-medium"
+              >
+                <option value="">My Analytics</option>
+                {partners.map(p => (
+                  <option key={p.id} value={p.id}>{p.username}'s Analytics</option>
+                ))}
+              </select>
+            )}
+            <div className="flex items-center gap-2 bg-[var(--bg-surface-raised)] p-1 rounded-lg border border-[var(--border-hairline)]">
+              <button
+                onClick={() => setDays(7)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  days === 7
+                    ? "bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                7 Days
+              </button>
+              <button
+                onClick={() => setDays(14)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  days === 14
+                    ? "bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                14 Days
+              </button>
+              <button
+                onClick={() => setDays(30)}
+                className={`px-3 py-1.5 text-xs font-medium rounded-md transition-colors ${
+                  days === 30
+                    ? "bg-[var(--bg-base)] text-[var(--text-primary)] shadow-sm"
+                    : "text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                }`}
+              >
+                30 Days
+              </button>
+            </div>
           </div>
         </div>
       </div>
@@ -360,6 +380,43 @@ export default function AnalyticsPage() {
                   </section>
                 );
               })}
+            </div>
+          )}
+
+          {/* Task Logs */}
+          <div className="flex items-center justify-between border-t border-[var(--border-hairline)] pt-8 mt-12">
+            <h2 className="text-lg font-semibold">Task Log Book</h2>
+          </div>
+          {(!analytics?.taskLogs || analytics.taskLogs.length === 0) ? (
+            <div className="text-center text-[var(--text-secondary)] py-12 border border-dashed border-[var(--border-hairline)] rounded-xl">
+              <Check className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-3" />
+              <p>No tasks completed in this period.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {analytics.taskLogs.map((log: any, idx: number) => (
+                <div
+                  key={`${log.type}-${idx}`}
+                  className="p-4 rounded-xl border border-[var(--border-hairline)] bg-[var(--bg-surface)] flex items-center justify-between gap-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 flex-shrink-0 rounded-full flex items-center justify-center bg-[var(--accent)]/10 text-[var(--accent)]">
+                      <Check className="w-4 h-4" strokeWidth={3} />
+                    </div>
+                    <div>
+                      <div className="text-sm font-medium text-[var(--text-primary)]">
+                        {log.title}
+                      </div>
+                      <div className="text-[10px] font-mono text-[var(--text-secondary)]">
+                        Completed at {new Date(log.completed_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} on {new Date(log.completed_at).toLocaleDateString()}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="text-xs font-mono uppercase tracking-wider text-[var(--text-tertiary)] bg-[var(--bg-surface-raised)] px-2 py-1 rounded">
+                    {log.type === "macro" ? "Macro Task" : "Personal"}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </>

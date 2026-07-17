@@ -56,6 +56,7 @@ function InlineEdit({
 export default function FocusPage() {
   const [tasks, setTasks] = useState<any[]>([]);
   const [routines, setRoutines] = useState<any[]>([]);
+  const [partnerRoutines, setPartnerRoutines] = useState<any[]>([]);
   const [personalTodos, setPersonalTodos] = useState<any[]>([]);
   const [deadlines, setDeadlines] = useState<any[]>([]);
   const [dashboardNotes, setDashboardNotes] = useState<any[]>([]);
@@ -113,7 +114,8 @@ export default function FocusPage() {
 
       setTasks(taskData);
       setSpaceMembers(membersData);
-      setRoutines(routinesData || []);
+      setRoutines(routinesData?.myRoutines || []);
+      setPartnerRoutines(routinesData?.partnerRoutines || []);
       setPersonalTodos(personalData || []);
       setDeadlines(deadlinesData || []);
       setDashboardNotes(
@@ -707,6 +709,36 @@ export default function FocusPage() {
             </div>
           )}
         </section>
+
+        {partnerRoutines.length > 0 && (
+          <section className="space-y-4 pt-8 border-t border-[var(--border-hairline)]">
+            <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
+              <span>Partner's Timeline</span>
+            </h2>
+            <div className="relative border-l-2 border-[var(--border-hairline)] ml-3 space-y-8 opacity-70">
+              {partnerRoutines.map((routine, idx) => (
+                <div key={routine.id} className="relative pl-6">
+                  <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--border-hairline)] ring-4 ring-[var(--bg-base)]" />
+                  <div className="flex items-start gap-4">
+                    <div className="w-[80px] shrink-0 pt-0.5">
+                      <div className="text-xs font-mono font-medium text-[var(--text-secondary)]">
+                        {routine.time_label}
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-[var(--text-primary)]">
+                        {routine.title}
+                      </div>
+                      <div className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-1">
+                        Status: {routine.status === "done" ? "Completed" : routine.status === "skipped" ? "Skipped" : "Pending"}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
 
       {/* OVERDUE */}
       {overdueTasks.length > 0 && (

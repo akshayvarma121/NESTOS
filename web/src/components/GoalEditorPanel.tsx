@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { X, ArrowLeft, Plus, Trash2 } from "lucide-react";
 import { getLocalDateString } from "../lib/dateUtils";
+import { api } from "../lib/api";
 
 interface Props {
   isOpen: boolean;
@@ -19,12 +20,19 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
     total_units: 10 as number | string,
     unit_label: "chapters",
     deadline: getLocalDateString(new Date(Date.now() + 86400000 * 30)),
+    visibility: "shared",
+    assigned_to: "",
   });
 
   const [slices, setSlices] = useState<any[]>([]);
+  const [partners, setPartners] = useState<{id: string, username: string}[]>([]);
 
   useEffect(() => {
     if (isOpen) {
+      api.get("/partner").then((data) => {
+        setPartners(data.map((p: any) => ({ id: p.id, username: p.username })));
+      }).catch(console.error);
+
       if (initialData) {
         setForm({
           title: initialData.title,
@@ -32,6 +40,8 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
           total_units: initialData.total_units,
           unit_label: initialData.unit_label,
           deadline: initialData.deadline,
+          visibility: initialData.visibility || "shared",
+          assigned_to: initialData.assigned_to || "",
         });
         setSlices(initialData.micro_tasks || []);
         // Optional: skip directly to step 2 if editing?
@@ -44,6 +54,8 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
           total_units: 10,
           unit_label: "chapters",
           deadline: getLocalDateString(new Date(Date.now() + 86400000 * 30)),
+          visibility: "shared",
+          assigned_to: "",
         });
         setSlices([]);
         setStep(1);
@@ -161,6 +173,30 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
                 <option value="dsa">DSA</option>
                 <option value="dev">Dev</option>
                 <option value="other">Other</option>
+              </select>
+            </div>
+
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">
+                Visibility / Assignment
+              </label>
+              <select
+                value={form.visibility === "assigned" ? `assign:${form.assigned_to}` : form.visibility}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val.startsWith("assign:")) {
+                    setForm({ ...form, visibility: "assigned", assigned_to: val.split(":")[1] });
+                  } else {
+                    setForm({ ...form, visibility: val, assigned_to: "" });
+                  }
+                }}
+                className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+              >
+                <option value="shared">Shared (Both can see)</option>
+                <option value="personal">Personal (Only me)</option>
+                {partners.map(p => (
+                  <option key={p.id} value={`assign:${p.id}`}>Assign to: {p.username}</option>
+                ))}
               </select>
             </div>
 

@@ -65,8 +65,8 @@ Use this in the Goals Page -> Import JSON to instantly create goals and custom m
     "total_units": 3,
     "unit_label": "Chapter",
     "customSlices": [
-      { "title": "Load Balancing", "description": "Read chapter 1 and write notes" },
-      { "title": "Caching Strategies", "description": "Implement a Redis cache example" },
+      { "title": "Load Balancing", "description": "Read chapter 1 and write notes", "scheduled_date": "2026-07-20" },
+      { "title": "Caching Strategies", "description": "Implement a Redis cache example", "scheduled_date": "2026-07-22" },
       { "title": "Database Sharding", "description": "Understand horizontal partitioning" }
     ]
   }

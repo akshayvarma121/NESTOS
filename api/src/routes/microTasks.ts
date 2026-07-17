@@ -60,6 +60,13 @@ router.patch("/:id", async (req: AuthRequest, res) => {
     return res.status(403).json({ error: "Forbidden" });
   }
 
+  // Handle completed_at timestamp
+  if (updates.status === "done") {
+    updates.completed_at = new Date().toISOString();
+  } else if (updates.status === "pending") {
+    updates.completed_at = null;
+  }
+
   const { data, error } = await supabase
     .from("pos_micro_tasks")
     .update(updates)

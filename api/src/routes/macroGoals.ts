@@ -6,7 +6,7 @@ const router = Router();
 router.use(requireAuth);
 
 router.post("/", async (req: AuthRequest, res) => {
-  const { title, category, total_units, unit_label, deadline, customSlices } =
+  const { title, category, total_units, unit_label, deadline, customSlices, visibility, assigned_to } =
     req.body;
 
   const { data: goal, error: goalError } = await supabase
@@ -19,6 +19,8 @@ router.post("/", async (req: AuthRequest, res) => {
         total_units,
         unit_label,
         deadline,
+        visibility: visibility || 'shared',
+        assigned_to: assigned_to || null,
       },
     ])
     .select()
@@ -58,10 +60,14 @@ router.post("/", async (req: AuthRequest, res) => {
 });
 
 router.get("/", async (req: AuthRequest, res) => {
+  const myId = req.user!.id;
+  const sharedIds = req.sharedSpaceIds!.join(",");
+  const queryStr = `and(visibility.eq.shared,user_id.in.(${sharedIds})),and(visibility.eq.personal,user_id.eq.${myId}),and(visibility.eq.assigned,user_id.eq.${myId}),and(visibility.eq.assigned,assigned_to.eq.${myId})`;
+
   const { data, error } = await supabase
     .from("pos_macro_goals")
     .select("*, micro_tasks:pos_micro_tasks(*)")
-    .in("user_id", req.sharedSpaceIds!);
+    .or(queryStr);
 
   if (error) return res.status(500).json({ error: error.message });
 
@@ -81,7 +87,7 @@ router.get("/", async (req: AuthRequest, res) => {
 
 router.put("/:id", async (req: AuthRequest, res) => {
   const { id } = req.params;
-  const { title, category, total_units, unit_label, deadline, customSlices } = req.body;
+  const { title, category, total_units, unit_label, deadline, customSlices, visibility, assigned_to } = req.body;
 
   // Verify ownership
   const { data: existing } = await supabase
@@ -97,7 +103,15 @@ router.put("/:id", async (req: AuthRequest, res) => {
   // Update Macro Goal properties
   const { error: goalError } = await supabase
     .from("pos_macro_goals")
-    .update({ title, category, total_units, unit_label, deadline })
+    .update({ 
+      title, 
+      category, 
+      total_units, 
+      unit_label, 
+      deadline,
+      visibility: visibility || 'shared',
+      assigned_to: assigned_to || null
+    })
     .eq("id", id);
 
   if (goalError) return res.status(500).json({ error: goalError.message });

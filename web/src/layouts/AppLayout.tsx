@@ -4,9 +4,8 @@ import MobileBottomTabs from "./MobileBottomTabs";
 import { useState, useEffect } from "react";
 import QuickCapturePanel from "../components/QuickCapturePanel";
 import PrivacyBanner from "../components/PrivacyBanner";
-import { Plus, Bell, X, WifiOff, Download, Timer } from "lucide-react";
+import { Plus, Bell, X, WifiOff, Download } from "lucide-react";
 import { api } from "../lib/api";
-import { usePomodoro } from "../contexts/PomodoroContext";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -22,7 +21,6 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function AppLayout() {
-  const { isActiveSession, isRunning } = usePomodoro();
   const [showToast, setShowToast] = useState(false);
   const [isCaptureOpen, setIsCaptureOpen] = useState(false);
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
@@ -233,20 +231,6 @@ export default function AppLayout() {
         </div>
       )}
 
-      {/* Floating Pomodoro Button */}
-      {isActiveSession && (
-        <div className="fixed bottom-20 lg:bottom-8 right-6 z-50 animate-in fade-in zoom-in duration-300">
-          <NavLink
-            to="/pomodoro"
-            className="w-14 h-14 bg-[var(--text-primary)] rounded-full flex items-center justify-center shadow-2xl hover:scale-105 transition-transform"
-          >
-            <Timer className="w-6 h-6 text-[var(--bg-base)]" />
-            {!isRunning && (
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-500 rounded-full border-2 border-[var(--bg-base)]" />
-            )}
-          </NavLink>
-        </div>
-      )}
     </div>
   );
 }

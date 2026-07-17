@@ -16,12 +16,21 @@ router.get("/", async (req: AuthRequest, res) => {
     .order("time_label", { ascending: true });
 
   if (error) return res.status(500).json({ error: error.message });
-  res.json(data);
+
+  const myRoutines = data.filter((r) => r.user_id === req.user!.id);
+  const partnerRoutines = data.filter((r) => r.user_id !== req.user!.id);
+
+  res.json({ myRoutines, partnerRoutines });
 });
 
 // Get routines history (past N days)
 router.get("/history", async (req: AuthRequest, res) => {
   const days = parseInt(req.query.days as string) || 7;
+  const target_user_id = req.query.target_user_id as string;
+  const uid = target_user_id && req.sharedSpaceIds!.includes(target_user_id) 
+    ? target_user_id 
+    : req.user!.id;
+
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoffStr = cutoffDate.toISOString().split("T")[0];
@@ -29,7 +38,7 @@ router.get("/history", async (req: AuthRequest, res) => {
   const { data, error } = await supabase
     .from("pos_routine_logs")
     .select("*, routine:pos_routines!inner(title, time_label)")
-    .eq("user_id", req.user!.id)
+    .eq("user_id", uid)
     .gte("date", cutoffStr)
     .order("date", { ascending: false });
 
@@ -78,9 +87,12 @@ router.get("/day", async (req: AuthRequest, res) => {
       status: log?.status || "pending",
       note: log?.note || null,
     };
-  });
+  }) || [];
 
-  res.json(enriched);
+  const myRoutines = enriched.filter((r) => r.user_id === req.user!.id);
+  const partnerRoutines = enriched.filter((r) => r.user_id !== req.user!.id);
+
+  res.json({ myRoutines, partnerRoutines });
 });
 
 router.get("/day/lock-status", async (req: AuthRequest, res) => {

@@ -1,6 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
-import { PomodoroProvider } from "./contexts/PomodoroContext";
 import { LoginPage, RegisterPage } from "./pages/AuthPages";
 import AppLayout from "./layouts/AppLayout";
 import FocusPage from "./pages/FocusPage";
@@ -32,7 +31,6 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-        <PomodoroProvider>
           <Routes>
             {/* Public Auth Routes */}
             <Route path="/login" element={<LoginPage />} />
@@ -72,7 +70,6 @@ export default function App() {
               } 
             />
           </Routes>
-        </PomodoroProvider>
       </BrowserRouter>
     </AuthProvider>
   );
