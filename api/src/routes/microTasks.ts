@@ -12,13 +12,15 @@ router.get("/", async (req: AuthRequest, res) => {
   let query = supabase
     .from("pos_micro_tasks")
     .select("*, macro:pos_macro_goals(category, title), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)")
-    .in("user_id", req.sharedSpaceIds!)
-    .neq("status", "skipped");
+    .in("user_id", req.sharedSpaceIds!);
 
   if (backlog) {
     query = query.neq("status", "done").order("unit_number", { ascending: true });
-  } else if (date) {
-    query = query.eq("scheduled_date", date).order("unit_number", { ascending: true });
+  } else {
+    query = query.neq("status", "skipped");
+    if (date) {
+      query = query.eq("scheduled_date", date).order("unit_number", { ascending: true });
+    }
   }
 
   const { data, error } = await query;

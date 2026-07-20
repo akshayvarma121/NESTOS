@@ -159,6 +159,7 @@ export default function BacklogPage() {
             ...draggedTask,
             scheduled_date: getLocalDateString(),
             pinned: true,
+            status: "pending",
           },
         ]);
 
@@ -167,6 +168,7 @@ export default function BacklogPage() {
           await api.patch(`/micro-tasks/${draggedTask.id}`, {
             scheduled_date: todayStr,
             pinned: true,
+            status: "pending",
           });
         } catch (e) {
           console.error("Failed to pin task", e);

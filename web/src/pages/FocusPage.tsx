@@ -677,10 +677,12 @@ export default function FocusPage() {
                 );
               });
             })()}
-              {!isRoutineLocked ? (
+              {!isRoutineLocked ? (() => {
+                const isLockTime = currentTimeStr.startsWith("23:") || parseInt(currentTimeStr.split(":")[0]) < 4;
+                return (
                 <div className="pt-4 pl-6 relative">
                   <button
-                    disabled={!currentTimeStr.startsWith("23:")}
+                    disabled={!isLockTime}
                     onClick={async () => {
                       if (!confirm("Are you sure? You cannot edit today's routines after saving.")) return;
                       try {
@@ -691,15 +693,16 @@ export default function FocusPage() {
                       }
                     }}
                     className={`w-full py-2.5 text-xs font-medium uppercase tracking-wider rounded-xl transition-opacity ${
-                      currentTimeStr.startsWith("23:")
+                      isLockTime
                         ? "bg-[var(--text-primary)] text-[var(--bg-base)] hover:opacity-90"
                         : "bg-[var(--bg-surface-raised)] border border-dashed border-[var(--border-hairline)] text-[var(--text-tertiary)] cursor-not-allowed"
                     }`}
                   >
-                    {currentTimeStr.startsWith("23:") ? "Save & Lock Timeline" : "Available at 23:00 to Lock"}
+                    {isLockTime ? "Save & Lock Timeline" : "Available at 23:00 to Lock"}
                   </button>
                 </div>
-              ) : (
+                );
+              })() : (
                 <div className="pt-4 pl-6 relative">
                   <div className="w-full py-2.5 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] text-center border border-dashed border-[var(--border-hairline)] rounded-xl">
                     Timeline Locked for Today
