@@ -67,7 +67,8 @@ export default function FocusPage() {
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
 
-  const [todayStr, setTodayStr] = useState(getLocalDateString());
+  const [selectedDateStr, setSelectedDateStr] = useState(getLocalDateString());
+  const [actualTodayStr, setActualTodayStr] = useState(getLocalDateString());
 
   useEffect(() => {
     const updateTime = () => {
@@ -76,8 +77,9 @@ export default function FocusPage() {
         `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
       );
       const newDateStr = getLocalDateString(now);
-      setTodayStr((prev) => {
+      setActualTodayStr(prev => {
         if (prev !== newDateStr) {
+          setSelectedDateStr(curr => curr === prev ? newDateStr : curr);
           return newDateStr;
         }
         return prev;
@@ -90,7 +92,7 @@ export default function FocusPage() {
 
   const fetchFocusData = async () => {
     try {
-      await api.post("/scheduler/recompute", { date: todayStr });
+      await api.post("/scheduler/recompute", { date: selectedDateStr });
 
       const [
         taskData,
@@ -101,15 +103,15 @@ export default function FocusPage() {
         notesData,
         lockData,
       ] = await Promise.all([
-        api.get(`/scheduler/focus?date=${todayStr}`),
+        api.get(`/scheduler/focus?date=${selectedDateStr}`),
         api.get("/partner/space"),
         api.get(
-          `/routines/day?day=${getLocalDayName()}&date=${todayStr}`,
+          `/routines/day?day=${getLocalDayName()}&date=${selectedDateStr}`,
         ),
         api.get("/personal-todos"),
         api.get("/deadlines"),
         api.get("/notes"),
-        api.get(`/routines/day/lock-status?date=${todayStr}`),
+        api.get(`/routines/day/lock-status?date=${selectedDateStr}`),
       ]);
 
       setTasks(taskData);
@@ -139,7 +141,7 @@ export default function FocusPage() {
   useEffect(() => {
     fetchFocusData();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [todayStr]);
+  }, [selectedDateStr]);
 
   const updateTaskStatus = async (id: string, newStatus: string) => {
     if (newStatus === "skipped") {
@@ -253,14 +255,14 @@ export default function FocusPage() {
   // Active tasks mean they are not skipped
   const activeTasks = tasks.filter((t) => t.status !== "skipped");
 
-  const todayTasks = activeTasks.filter((t) => t.scheduled_date === todayStr);
+  const todayTasks = activeTasks.filter((t) => t.scheduled_date === selectedDateStr);
   const upcomingTasks = activeTasks.filter(
-    (t) => t.scheduled_date !== todayStr && t.scheduled_date > todayStr,
+    (t) => t.scheduled_date !== selectedDateStr && t.scheduled_date > selectedDateStr,
   );
   const overdueTasks = activeTasks.filter(
     (t) =>
-      t.scheduled_date !== todayStr &&
-      t.scheduled_date < todayStr &&
+      t.scheduled_date !== selectedDateStr &&
+      t.scheduled_date < selectedDateStr &&
       t.status !== "done",
   );
 
@@ -338,7 +340,7 @@ export default function FocusPage() {
               </button>
 
               {/* Show date label if not today */}
-              {task.scheduled_date !== todayStr && (
+              {task.scheduled_date !== selectedDateStr && (
                 <span className="text-[10px] uppercase font-mono text-[var(--text-tertiary)] mr-2 bg-[var(--bg-surface-raised)] px-1.5 py-0.5 rounded border border-[var(--border-hairline)]">
                   {new Date(task.scheduled_date).toLocaleDateString(undefined, {
                     month: "short",
@@ -385,9 +387,30 @@ export default function FocusPage() {
               </div>
             </div>
           </div>
-          <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider">
-            {getLogicalDate().toDateString()}
-          </p>
+          <div className="flex items-center gap-3 mt-1">
+            <button onClick={() => {
+              const d = new Date(selectedDateStr + 'T12:00:00');
+              d.setDate(d.getDate() - 1);
+              setSelectedDateStr(d.toISOString().split('T')[0]);
+            }} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            </button>
+            <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider min-w-[100px] text-center">
+              {selectedDateStr === actualTodayStr ? "TODAY" : new Date(selectedDateStr + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+            </p>
+            <button onClick={() => {
+              const d = new Date(selectedDateStr + 'T12:00:00');
+              d.setDate(d.getDate() + 1);
+              setSelectedDateStr(d.toISOString().split('T')[0]);
+            }} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+            </button>
+            {selectedDateStr !== actualTodayStr && (
+              <button onClick={() => setSelectedDateStr(actualTodayStr)} className="ml-1 text-[10px] uppercase font-mono text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1.5 py-0.5 rounded border border-[var(--border-hairline)]">
+                Today
+              </button>
+            )}
+          </div>
         </div>
 
         <div className="flex gap-2">
@@ -552,7 +575,7 @@ export default function FocusPage() {
                               );
                               try {
                                 await api.post(`/routines/${routine.id}/toggle`, {
-                                  date: todayStr,
+                                  date: selectedDateStr,
                                   status: newStatus
                                 });
                               } catch (e) {
@@ -583,7 +606,7 @@ export default function FocusPage() {
                               );
                               try {
                                 await api.post(`/routines/${routine.id}/toggle`, {
-                                  date: todayStr,
+                                  date: selectedDateStr,
                                   status: newStatus
                                 });
                               } catch (e) {
@@ -653,7 +676,7 @@ export default function FocusPage() {
                               const val = e.target.value;
                               if (val !== (routine.note || "")) {
                                 try {
-                                  await api.patch(`/routines/${routine.id}/log`, { date: todayStr, note: val });
+                                  await api.patch(`/routines/${routine.id}/log`, { date: selectedDateStr, note: val });
                                   setRoutines((prev) =>
                                     prev.map((r) =>
                                       r.id === routine.id ? { ...r, note: val } : r,
@@ -686,7 +709,7 @@ export default function FocusPage() {
                     onClick={async () => {
                       if (!confirm("Are you sure? You cannot edit today's routines after saving.")) return;
                       try {
-                        await api.post("/routines/day/lock", { date: todayStr });
+                        await api.post("/routines/day/lock", { date: selectedDateStr });
                         setIsRoutineLocked(true);
                       } catch (err) {
                         console.error(err);
