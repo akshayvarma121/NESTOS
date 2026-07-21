@@ -109,10 +109,9 @@ export default function BacklogPage() {
         (t: any) => t.scheduled_date === todayStr,
       );
 
-      // Backlog is everything pending that is NOT strictly scheduled for today or pinned/scheduled for tomorrow
-      // For simplicity: backlog is any pending task not in todayTasks
+      // Backlog is everything pending that has NO scheduled date OR is from a PAST date
       const backlog = allPending.filter(
-        (t: any) => t.scheduled_date !== todayStr,
+        (t: any) => !t.scheduled_date || t.scheduled_date < todayStr,
       );
 
       setBacklogTasks(backlog);
