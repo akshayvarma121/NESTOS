@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { X, Plus, Trash2, Edit2, Check } from "lucide-react";
+import { formatTimeInput } from "../lib/dateUtils";
 
 export function calculateDuration(timeLabel: string) {
   if (!timeLabel || !timeLabel.includes("-")) return null;
@@ -302,6 +303,7 @@ export default function EditTimetablePanel({
                   placeholder="Start (HH:MM)"
                   value={startTime}
                   onChange={(e) => setStartTime(e.target.value)}
+                  onBlur={() => setStartTime(formatTimeInput(startTime))}
                   className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
                 />
                 <span className="text-[var(--text-tertiary)]">-</span>
@@ -309,6 +311,7 @@ export default function EditTimetablePanel({
                   placeholder="End (opt)"
                   value={endTime}
                   onChange={(e) => setEndTime(e.target.value)}
+                  onBlur={() => setEndTime(formatTimeInput(endTime))}
                   className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
                 />
               </div>

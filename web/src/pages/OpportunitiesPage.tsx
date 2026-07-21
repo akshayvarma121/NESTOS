@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { Lightbulb, Plus, Trash2, ExternalLink, Info } from "lucide-react";
-import { getLocalDateString } from "../lib/dateUtils";
+import { getLocalDateString, formatTimeInput } from "../lib/dateUtils";
 
 export default function DeadlinesPage() {
   const [deadlines, setDeadlines] = useState<any[]>([]);
@@ -98,9 +98,11 @@ export default function DeadlinesPage() {
             className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
           />
           <input
-            type="time"
+            type="text"
+            placeholder="Time (HH:MM)"
             value={time}
             onChange={(e) => setTime(e.target.value)}
+            onBlur={() => setTime(formatTimeInput(time))}
             className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
           />
           <button
