@@ -92,7 +92,7 @@ export default function FocusPage() {
 
   const fetchFocusData = async () => {
     try {
-      await api.post("/scheduler/recompute", { date: selectedDateStr });
+      await api.post("/scheduler/recompute", { date: actualTodayStr });
 
       const [
         taskData,
@@ -106,7 +106,7 @@ export default function FocusPage() {
         api.get(`/scheduler/focus?date=${selectedDateStr}`),
         api.get("/partner/space"),
         api.get(
-          `/routines/day?day=${getLocalDayName()}&date=${selectedDateStr}`,
+          `/routines/day?day=${getLocalDayName(new Date(selectedDateStr + 'T12:00:00'))}&date=${selectedDateStr}`,
         ),
         api.get("/personal-todos"),
         api.get("/deadlines"),
@@ -222,35 +222,6 @@ export default function FocusPage() {
         Recalibrating Focus...
       </div>
     );
-
-  if (tasks.length === 0 && routines.length === 0 && hasGoals === false) {
-    return (
-      <div className="p-8 flex flex-col items-center justify-center h-full max-w-md mx-auto text-center space-y-4">
-        <p className="text-[var(--text-secondary)]">
-          No goals or routines yet.
-        </p>
-        <div className="flex gap-4">
-          <NavLink
-            to="/goals"
-            className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-4 py-2 rounded-lg text-sm hover:bg-[var(--border-hairline)] transition-colors"
-          >
-            Go to Goals
-          </NavLink>
-          <button
-            onClick={() => setIsTimetableOpen(true)}
-            className="bg-[var(--accent)] text-[var(--bg-base)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
-          >
-            Setup Timetable
-          </button>
-        </div>
-        <EditTimetablePanel
-          isOpen={isTimetableOpen}
-          onClose={() => setIsTimetableOpen(false)}
-          onUpdate={fetchFocusData}
-        />
-      </div>
-    );
-  }
 
   // Active tasks mean they are not skipped
   const activeTasks = tasks.filter((t) => t.status !== "skipped");
@@ -423,6 +394,33 @@ export default function FocusPage() {
         </div>
       </div>
 
+      {tasks.length === 0 && routines.length === 0 && hasGoals === false ? (
+        <div className="p-8 flex flex-col items-center justify-center h-full max-w-md mx-auto text-center space-y-4">
+          <p className="text-[var(--text-secondary)]">
+            No goals or routines yet.
+          </p>
+          <div className="flex gap-4">
+            <NavLink
+              to="/goals"
+              className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-4 py-2 rounded-lg text-sm hover:bg-[var(--border-hairline)] transition-colors"
+            >
+              Go to Goals
+            </NavLink>
+            <button
+              onClick={() => setIsTimetableOpen(true)}
+              className="bg-[var(--accent)] text-[var(--bg-base)] px-4 py-2 rounded-lg text-sm font-medium hover:opacity-90 transition-opacity"
+            >
+              Setup Timetable
+            </button>
+          </div>
+          <EditTimetablePanel
+            isOpen={isTimetableOpen}
+            onClose={() => setIsTimetableOpen(false)}
+            onUpdate={fetchFocusData}
+          />
+        </div>
+      ) : (
+      <>
       <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 lg:gap-12 items-start">
         <div className="space-y-12 min-w-0">
 
@@ -867,6 +865,8 @@ export default function FocusPage() {
           </div>
         </div>
       </div>
+      </>
+      )}
 
       <EditTimetablePanel
         isOpen={isTimetableOpen}
