@@ -1,9 +1,14 @@
-export const getLocalDateString = (d: Date = new Date()) => {
-  // Support late-night working: consider 00:00 to 03:59 as part of "yesterday"
+export const getLogicalDate = (d: Date = new Date()) => {
   const adjusted = new Date(d.getTime());
   if (adjusted.getHours() < 4) {
     adjusted.setDate(adjusted.getDate() - 1);
   }
+  return adjusted;
+};
+
+export const getLocalDateString = (d: Date = new Date()) => {
+  const adjusted = getLogicalDate(d);
+
   
   const year = adjusted.getFullYear();
   const month = String(adjusted.getMonth() + 1).padStart(2, '0');
@@ -12,9 +17,6 @@ export const getLocalDateString = (d: Date = new Date()) => {
 };
 
 export const getLocalDayName = (d: Date = new Date()) => {
-  const adjusted = new Date(d.getTime());
-  if (adjusted.getHours() < 4) {
-    adjusted.setDate(adjusted.getDate() - 1);
-  }
+  const adjusted = getLogicalDate(d);
   return adjusted.toLocaleDateString("en-US", { weekday: "short" });
 };

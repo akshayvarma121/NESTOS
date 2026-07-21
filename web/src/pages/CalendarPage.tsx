@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
+import { getLogicalDate } from "../lib/dateUtils";
 import {
   Calendar as CalendarIcon,
   ChevronLeft,
@@ -9,7 +10,7 @@ import {
 } from "lucide-react";
 
 export default function CalendarPage() {
-  const [currentDate, setCurrentDate] = useState(new Date());
+  const [currentDate, setCurrentDate] = useState(getLogicalDate());
   const [loading, setLoading] = useState(true);
 
   // Data
@@ -86,7 +87,7 @@ export default function CalendarPage() {
     year: "numeric",
   });
 
-  const todayObj = new Date();
+  const todayObj = getLogicalDate();
   // Helpers to get data for a specific date
   const getDateStr = (d: number) => {
     const mm = String(month + 1).padStart(2, "0");

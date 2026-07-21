@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { Lightbulb, Plus, Trash2, ExternalLink, Info } from "lucide-react";
+import { getLocalDateString } from "../lib/dateUtils";
 
 export default function DeadlinesPage() {
   const [deadlines, setDeadlines] = useState<any[]>([]);
@@ -118,7 +119,7 @@ export default function DeadlinesPage() {
           </p>
         ) : (
           deadlines.map((d) => {
-            const isPast = new Date(d.deadline) < new Date();
+            const isPast = d.deadline && d.deadline.split('T')[0] < getLocalDateString();
             return (
               <div
                 key={d.id}

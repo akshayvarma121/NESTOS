@@ -5,7 +5,7 @@ import { NavLink } from "react-router-dom";
 import EditTimetablePanel, { calculateDuration } from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
 import ExpandableDescription from "../components/ExpandableDescription";
-import { getLocalDateString, getLocalDayName } from "../lib/dateUtils";
+import { getLocalDateString, getLocalDayName, getLogicalDate } from "../lib/dateUtils";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -211,7 +211,7 @@ export default function FocusPage() {
   };
 
   const activeDeadlines = deadlines
-    .filter((d) => new Date(d.deadline) > new Date())
+    .filter((d) => d.deadline && d.deadline.split('T')[0] >= getLocalDateString())
     .slice(0, 3); // show up to 3 upcoming
 
   if (loading)
@@ -386,7 +386,7 @@ export default function FocusPage() {
             </div>
           </div>
           <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider">
-            {new Date().toDateString()}
+            {getLogicalDate().toDateString()}
           </p>
         </div>
 
