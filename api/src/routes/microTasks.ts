@@ -15,11 +15,11 @@ router.get("/", async (req: AuthRequest, res) => {
     .in("user_id", req.sharedSpaceIds!);
 
   if (backlog) {
-    query = query.neq("status", "done").order("unit_number", { ascending: true });
+    query = query.neq("status", "done").order("created_at", { ascending: true });
   } else {
     query = query.neq("status", "skipped");
     if (date) {
-      query = query.eq("scheduled_date", date).order("unit_number", { ascending: true });
+      query = query.eq("scheduled_date", date).order("created_at", { ascending: true });
     }
   }
 
