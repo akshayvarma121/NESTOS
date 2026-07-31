@@ -2,7 +2,8 @@ import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import GoalEditorPanel from "../components/GoalEditorPanel";
 import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
-import { Target, Plus, Info, UploadCloud, Trash2 } from "lucide-react";
+import GoalJsonEditorModal from "../components/GoalJsonEditorModal";
+import { Target, Plus, Info, UploadCloud, Trash2, Code } from "lucide-react";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -17,6 +18,7 @@ export default function GoalsPage() {
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
+  const [jsonEditingGoal, setJsonEditingGoal] = useState<any>(null);
 
   useEffect(() => {
     fetchGoals();
@@ -144,6 +146,13 @@ export default function GoalsPage() {
                       </div>
                       <div className="flex gap-1 items-center">
                         <button
+                          onClick={() => setJsonEditingGoal(goal)}
+                          className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded transition-colors flex-shrink-0"
+                          title="Edit JSON"
+                        >
+                          <Code className="w-4 h-4" />
+                        </button>
+                        <button
                           onClick={() => openEditGoal(goal)}
                           className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded transition-colors flex-shrink-0"
                           title="Edit Goal"
@@ -196,7 +205,13 @@ export default function GoalsPage() {
         isOpen={isBulkOpen}
         onClose={() => setIsBulkOpen(false)}
         onSuccess={fetchGoals}
-        currentGoals={goals}
+      />
+
+      <GoalJsonEditorModal
+        isOpen={!!jsonEditingGoal}
+        onClose={() => setJsonEditingGoal(null)}
+        onSuccess={fetchGoals}
+        goal={jsonEditingGoal}
       />
     </div>
   );
