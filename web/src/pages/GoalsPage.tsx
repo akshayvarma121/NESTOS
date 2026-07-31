@@ -196,6 +196,7 @@ export default function GoalsPage() {
         isOpen={isBulkOpen}
         onClose={() => setIsBulkOpen(false)}
         onSuccess={fetchGoals}
+        currentGoals={goals}
       />
     </div>
   );

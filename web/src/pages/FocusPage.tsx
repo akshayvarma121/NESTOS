@@ -90,7 +90,17 @@ export default function FocusPage() {
     return () => clearInterval(interval);
   }, []);
 
+  useEffect(() => {
+    // Clear tasks immediately to prevent flicker while fetching new date
+    setTasks([]);
+    setRoutines([]);
+    setPartnerRoutines([]);
+    fetchFocusData();
+    // Fetch once on mount or when selectedDateStr changes
+  }, [selectedDateStr]);
+
   const fetchFocusData = async () => {
+    setLoading(true);
     try {
       await api.post("/scheduler/recompute", { date: actualTodayStr });
 
@@ -138,10 +148,7 @@ export default function FocusPage() {
     }
   };
 
-  useEffect(() => {
-    fetchFocusData();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedDateStr]);
+
 
   const updateTaskStatus = async (id: string, newStatus: string) => {
     if (newStatus === "skipped") {
@@ -847,7 +854,7 @@ export default function FocusPage() {
         <div className="sticky top-8 space-y-6">
           <div className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-xl p-5 shadow-sm">
             <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-3 mb-4 flex items-center justify-between">
-              <span>Today's Horizon</span>
+              <span>{selectedDateStr === actualTodayStr ? "Today's Horizon" : "Focus Horizon"}</span>
               <span className="text-[10px] font-mono text-[var(--text-tertiary)] bg-[var(--bg-base)] px-2 py-0.5 rounded border border-[var(--border-hairline)]">
                 {todayTasks.length} tasks
               </span>

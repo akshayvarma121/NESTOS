@@ -22,6 +22,7 @@ export default function CalendarPage() {
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [isAddingEvent, setIsAddingEvent] = useState(false);
   const [newEventTitle, setNewEventTitle] = useState("");
+  const [touchStart, setTouchStart] = useState<number | null>(null);
 
   const fetchData = async () => {
     try {
@@ -56,6 +57,29 @@ export default function CalendarPage() {
     } catch (e) {
       console.error(e);
     }
+  };
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setTouchStart(e.targetTouches[0].clientX);
+  };
+
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStart === null || !selectedDate) return;
+    const touchEnd = e.changedTouches[0].clientX;
+    const diff = touchStart - touchEnd;
+    
+    if (Math.abs(diff) > 50) {
+      const dateObj = new Date(selectedDate);
+      if (diff > 0) {
+        // Swipe left -> next day
+        dateObj.setDate(dateObj.getDate() + 1);
+      } else {
+        // Swipe right -> prev day
+        dateObj.setDate(dateObj.getDate() - 1);
+      }
+      setSelectedDate(dateObj.toISOString().split('T')[0]);
+    }
+    setTouchStart(null);
   };
 
   // Calendar Logic
@@ -241,6 +265,8 @@ export default function CalendarPage() {
 
       {/* Slide-over Details Panel */}
       <div
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
         className={`fixed inset-y-0 right-0 w-full md:w-[400px] bg-[var(--bg-surface)] border-l border-[var(--border-hairline)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[100] ${selectedDate ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="h-full flex flex-col p-6">

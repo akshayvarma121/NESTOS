@@ -63,6 +63,20 @@ export default function EditTimetablePanel({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    if (isJSONMode) {
+      const formatted = myRoutines.map(r => ({
+        id: r.id,
+        title: r.title,
+        description: r.description,
+        time_label: r.time_label,
+        days_of_week: r.days_of_week,
+        assigned_to: r.assigned_to
+      }));
+      setJsonInput(JSON.stringify(formatted, null, 2));
+    }
+  }, [isJSONMode, myRoutines]);
+
+  useEffect(() => {
     if (isOpen) {
       fetchData();
     }
@@ -172,13 +186,20 @@ export default function EditTimetablePanel({
 
       for (const item of parsed) {
         if (!item.title || !Array.isArray(item.days_of_week) || item.days_of_week.length === 0) continue;
-        await api.post("/routines", {
+        
+        const payload = {
           title: item.title,
           description: item.description || null,
           time_label: item.time_label || "",
           days_of_week: item.days_of_week,
           assigned_to: item.assigned_to || null,
-        });
+        };
+
+        if (item.id) {
+          await api.patch(`/routines/${item.id}`, payload);
+        } else {
+          await api.post("/routines", payload);
+        }
       }
       setJsonInput("");
       setIsJSONMode(false);
@@ -245,7 +266,7 @@ export default function EditTimetablePanel({
                   onClick={() => setIsJSONMode(!isJSONMode)}
                   className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
                 >
-                  {isJSONMode ? "Manual Entry" : "Bulk Paste JSON"}
+                  {isJSONMode ? "Manual Entry" : "Bulk Edit JSON"}
                 </button>
               )}
             </div>
@@ -253,9 +274,9 @@ export default function EditTimetablePanel({
             {isJSONMode && !editingId ? (
               <div className="space-y-3">
                 <p className="text-xs text-[var(--text-tertiary)]">
-                  Paste a JSON array of routines. Format: <br />
+                  Edit the JSON array of routines. Format: <br />
                   <code className="bg-[var(--bg-base)] px-1 rounded">
-                    {`[{"title": "Wake up", "time_label": "07:00", "days_of_week": ["Mon", "Tue"]}]`}
+                    {`[{"id": "...", "title": "Wake up", "time_label": "07:00", "days_of_week": ["Mon", "Tue"]}]`}
                   </code>
                 </p>
                 <textarea
@@ -270,7 +291,7 @@ export default function EditTimetablePanel({
                   disabled={isSubmitting || !jsonInput.trim()}
                   className="w-full bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 disabled:opacity-50"
                 >
-                  {isSubmitting ? "Importing..." : "Import JSON"}
+                  {isSubmitting ? "Saving..." : "Save JSON"}
                 </button>
               </div>
             ) : (

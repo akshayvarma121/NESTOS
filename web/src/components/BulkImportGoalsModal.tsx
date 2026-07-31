@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { X, Code } from "lucide-react";
 import { api } from "../lib/api";
 
@@ -6,12 +6,29 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+  currentGoals: any[];
 }
 
-export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Props) {
+export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess, currentGoals }: Props) {
   const [jsonText, setJsonText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Pre-fill text area with current goals
+  useEffect(() => {
+    if (isOpen) {
+      const formattedGoals = currentGoals.map(g => ({
+        id: g.id,
+        title: g.title,
+        category: g.category,
+        deadline: g.deadline ? g.deadline.split('T')[0] : g.deadline,
+        total_units: g.total_units,
+        unit_label: g.unit_label,
+      }));
+      setJsonText(JSON.stringify(formattedGoals, null, 2));
+      setError(null);
+    }
+  }, [isOpen, currentGoals]);
 
   if (!isOpen) return null;
 
@@ -31,12 +48,16 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
         throw new Error("The imported data must be a JSON array.");
       }
 
-      // Loop through and POST each goal
+      // Loop through and POST/PUT each goal
       for (const goal of data) {
         if (!goal.title || !goal.category || !goal.deadline || !goal.total_units || !goal.unit_label) {
           throw new Error(`Goal "${goal.title || 'Untitled'}" is missing required fields (title, category, deadline, total_units, unit_label).`);
         }
-        await api.post("/macro-goals", goal);
+        if (goal.id) {
+          await api.put(`/macro-goals/${goal.id}`, goal);
+        } else {
+          await api.post("/macro-goals", goal);
+        }
       }
 
       setJsonText("");
@@ -56,7 +77,7 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
         <div className="flex items-center justify-between p-4 border-b border-[var(--border-hairline)]">
           <div className="flex items-center gap-2">
             <Code className="w-5 h-5 text-[var(--text-secondary)]" />
-            <h2 className="text-lg font-semibold">Bulk Import JSON</h2>
+            <h2 className="text-lg font-semibold">Bulk Edit JSON</h2>
           </div>
           <button
             onClick={onClose}
@@ -68,7 +89,7 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
 
         <div className="p-4 space-y-4">
           <p className="text-sm text-[var(--text-secondary)]">
-            Paste a JSON array of goals. Each goal should have <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">title</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">category</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">deadline</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">total_units</code>, and <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">unit_label</code>. You can optionally provide a <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">customSlices</code> array (with optional <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">description</code> or <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">scheduled_date</code>).
+            Edit the JSON array below. Existing goals have an <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">id</code> and will be updated. New goals without an ID will be created. Required fields: <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">title</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">category</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">deadline</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">total_units</code>, and <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">unit_label</code>.
           </p>
           
           <textarea
@@ -108,7 +129,7 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
             disabled={loading || !jsonText.trim()}
             className="px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-base)] text-sm font-medium rounded-md hover:opacity-90 transition-opacity disabled:opacity-50"
           >
-            {loading ? "Importing..." : "Import JSON"}
+            {loading ? "Saving..." : "Save JSON"}
           </button>
         </div>
       </div>
