@@ -478,8 +478,8 @@ export default function AnalyticsPage() {
                           color: "var(--text-primary)",
                         }}
                         itemStyle={{ fontSize: "12px" }}
-                        formatter={(value: number) => {
-                          const mins = Math.floor(value / 60);
+                        formatter={(value: any) => {
+                          const mins = Math.floor((Number(value) || 0) / 60);
                           return [`${mins}m`, "Focus Time"];
                         }}
                         labelFormatter={(label) =>
