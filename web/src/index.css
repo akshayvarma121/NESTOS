@@ -74,6 +74,7 @@
     font-size: 14px;
     line-height: 1.4;
     padding-top: env(titlebar-area-height, 0);
+    overflow: hidden; /* Prevent double scrollbars */
   }
 
   @media (max-width: 1023px) {
@@ -123,27 +124,22 @@
     box-shadow: 0px 0px 0px var(--border-brutal) !important;
   }
 
-  /* Custom Brutalist Scrollbars */
+  /* Minimalist Scrollbars */
   ::-webkit-scrollbar {
-    width: 14px;
-    height: 14px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: var(--bg-surface);
-    border-left: 2px solid var(--border-brutal);
+    background: transparent;
   }
 
   ::-webkit-scrollbar-thumb {
-    background-color: var(--text-primary);
-    border: 3px solid var(--bg-surface);
+    background-color: var(--border-hairline);
+    border-radius: 10px;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background-color: var(--accent);
-  }
-
-  ::-webkit-scrollbar-corner {
-    background: var(--bg-surface);
+    background-color: var(--text-tertiary);
   }
 }
