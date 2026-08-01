@@ -26,8 +26,11 @@ import {
   BarChart,
   Bar,
 } from "recharts";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function AnalyticsPage() {
+  const { user } = useAuth();
+  const name = user?.user_metadata?.name || user?.email?.split("@")[0] || "you";
   const [logs, setLogs] = useState<any[]>([]);
   const [analytics, setAnalytics] = useState<{
     routineTrends: any[];
@@ -132,9 +135,11 @@ export default function AnalyticsPage() {
         </NavLink>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-2xl font-semibold">Productivity Analytics</h1>
-            <p className="text-[var(--text-secondary)] text-sm mt-1">
-              Analyze your routine consistency and goal execution.
+            <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+              Productivity Analytics
+            </h1>
+            <p className="text-[var(--text-secondary)] text-sm font-bold mt-1">
+              Your performance metrics, {name}.
             </p>
           </div>
           <div className="flex items-center gap-2">

@@ -11,8 +11,11 @@ import {
   Info,
   X,
 } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function VaultPage() {
+  const { user } = useAuth();
+  const name = user?.user_metadata?.name || user?.email?.split("@")[0] || "you";
   const [isSetup, setIsSetup] = useState<boolean | null>(null);
   const [vaultToken, setVaultToken] = useState<string | null>(null);
   const [entries, setEntries] = useState<any[]>([]);
@@ -242,8 +245,14 @@ export default function VaultPage() {
       <div className="flex justify-between items-start mb-8">
         <div>
           <div className="flex items-center gap-3 mb-8">
-            <Lock className="w-5 h-5 text-[var(--accent)]" />
-            <h1 className="text-2xl font-semibold">Vault</h1>
+            <div className="flex flex-col">
+              <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+                Vault
+              </h1>
+              <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
+                Secured assets for {name}.
+              </p>
+            </div>
             <div className="relative group cursor-help ml-2 mt-1">
               <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
               <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">

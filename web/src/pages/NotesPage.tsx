@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { StickyNote, Plus, Trash2, Edit2, Check } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function NotesPage() {
+  const { user } = useAuth();
+  const name = user?.user_metadata?.name || user?.email?.split("@")[0] || "you";
   const [notes, setNotes] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,8 +92,15 @@ export default function NotesPage() {
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto pb-32">
       <div className="flex items-center gap-3 mb-8">
-        <StickyNote className="w-5 h-5 text-[var(--accent)]" />
-        <h1 className="text-2xl font-semibold">Notes & Stickies</h1>
+        <StickyNote className="w-8 h-8 text-black" />
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+            Notes & Stickies
+          </h1>
+          <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
+            Jot it down, {name}.
+          </p>
+        </div>
       </div>
 
       <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-4 mb-8">

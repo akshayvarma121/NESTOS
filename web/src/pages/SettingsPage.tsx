@@ -46,7 +46,7 @@ export default function SettingsPage() {
       <div className="mb-8">
         <h1 className="text-2xl font-semibold mb-1">Settings</h1>
         <p className="text-[var(--text-secondary)] text-sm">
-          System configuration.
+          System configuration for {user?.user_metadata?.name || user?.email?.split("@")[0] || "you"}.
         </p>
       </div>
 
@@ -93,7 +93,7 @@ export default function SettingsPage() {
               <div>
                 <h3 className="text-sm font-medium">Display Name</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  How you want to be greeted in the app.
+                  Your identity across the application.
                 </p>
               </div>
               <div className="flex gap-2">

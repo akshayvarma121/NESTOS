@@ -94,6 +94,8 @@ function DroppableToday({ children }: { children: React.ReactNode }) {
 }
 
 export default function BacklogPage() {
+  const { user } = useAuth();
+  const name = user?.user_metadata?.name || user?.email?.split("@")[0] || "you";
   const [backlogTasks, setBacklogTasks] = useState<any[]>([]);
   const [todayTasks, setTodayTasks] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -198,15 +200,24 @@ export default function BacklogPage() {
     <div className="p-6 md:p-8 max-w-6xl mx-auto h-[calc(100vh-80px)] flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2">
-          <ListTodo className="w-5 h-5 text-[var(--accent)]" />
-          <h1 className="text-2xl font-semibold">Canvas Backlog</h1>
-          <div className="relative group cursor-help ml-2 mt-1">
-            <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-            <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
-              A brain dump for micro-tasks. Items here are not scheduled yet.
-              You can pick tasks from here during your morning planning or
-              assign them to a macro goal later.
+          <ListTodo className="w-8 h-8 text-black" />
+          <div className="flex flex-col">
+            <div className="flex items-center">
+              <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+                Canvas Backlog
+              </h1>
+              <div className="relative group cursor-help ml-2 mt-1">
+                <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+                <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-white border-2 border-black rounded-none brutal-shadow opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-black font-bold">
+                  A brain dump for micro-tasks. Items here are not scheduled yet.
+                  You can pick tasks from here during your morning planning or
+                  assign them to a macro goal later.
+                </div>
+              </div>
             </div>
+            <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
+              Clear the queue, {name}.
+            </p>
           </div>
         </div>
       </div>

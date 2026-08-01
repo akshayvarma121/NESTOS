@@ -1,8 +1,11 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { Inbox, Plus, Trash2, Info } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function CapturesPage() {
+  const { user } = useAuth();
+  const name = user?.user_metadata?.name || user?.email?.split("@")[0] || "you";
   const [captures, setCaptures] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -44,15 +47,24 @@ export default function CapturesPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-3xl mx-auto pb-32">
-      <div className="flex items-center gap-3 mb-8">
-        <Inbox className="w-5 h-5 text-[var(--accent)]" />
-        <h1 className="text-2xl font-semibold">Captures</h1>
-        <div className="relative group cursor-help ml-2 mt-1">
-          <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-          <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
-            A quick inbox for unstructured thoughts, ideas, or social media
-            drafts. Shared with your partner.
+      <div className="flex items-start gap-3 mb-8">
+        <Inbox className="w-8 h-8 text-black mt-1" />
+        <div className="flex flex-col">
+          <div className="flex items-center">
+            <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+              Captures
+            </h1>
+            <div className="relative group cursor-help ml-2 mt-1">
+              <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+              <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-white border-2 border-black rounded-none brutal-shadow opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-black font-bold">
+                A quick inbox for unstructured thoughts, ideas, or social media
+                drafts. Shared with your partner.
+              </div>
+            </div>
           </div>
+          <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
+            Log your thoughts, {name}.
+          </p>
         </div>
       </div>
 

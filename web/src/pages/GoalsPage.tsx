@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { usePullToRefresh } from "../lib/usePullToRefresh";
 import EmptyState from "../components/EmptyState";
+import { useAuth } from "../contexts/AuthContext";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[#ff6b6b]",
@@ -25,6 +26,8 @@ const categoryColors: Record<string, string> = {
 };
 
 export default function GoalsPage() {
+  const { user } = useAuth();
+  const name = user?.user_metadata?.name || user?.email?.split("@")[0] || "you";
   const [goals, setGoals] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [isPanelOpen, setIsPanelOpen] = useState(false);
@@ -121,19 +124,24 @@ export default function GoalsPage() {
       )}
 
       <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Target className="w-8 h-8 text-black" />
-          <h1 className="text-3xl font-black uppercase tracking-wider text-black">
-            Macro Goals
-          </h1>
-          <div className="relative group cursor-help ml-2 mt-1">
-            <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-            <div className="absolute left-0 top-full mt-2 w-64 p-4 bg-white brutal-border brutal-shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-sm text-black font-bold">
-              Define your high-level macro goals. Break them down into small
-              units (e.g. 50 chapters). The progress bar fills up as you
-              complete scheduled tasks linked to this goal.
+        <div className="flex flex-col">
+          <div className="flex items-center gap-3">
+            <Target className="w-8 h-8 text-black" />
+            <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+              Macro Goals
+            </h1>
+            <div className="relative group cursor-help ml-2 mt-1">
+              <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
+              <div className="absolute left-0 top-full mt-2 w-64 p-4 bg-white brutal-border brutal-shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-sm text-black font-bold">
+                Define your high-level macro goals. Break them down into small
+                units (e.g. 50 chapters). The progress bar fills up as you
+                complete action items.
+              </div>
             </div>
           </div>
+          <p className="text-sm font-bold text-[var(--text-secondary)] mt-1 ml-11">
+            Command your ambitions, {name}.
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <button

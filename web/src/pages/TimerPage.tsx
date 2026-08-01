@@ -319,10 +319,10 @@ export default function TimerPage() {
                   <button
                     key={task.id}
                     onClick={() => toggleTask(task.id, task.status)}
-                    className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full flex items-start gap-3 p-4 rounded-xl border-2 transition-all group ${
                       task.status === "done"
                         ? "bg-[#2ed573]/20 border-[#2ed573] opacity-60"
-                        : "bg-[#fdfbf7] border-[var(--border-brutal)] hover:bg-[#ffeb3b] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow"
+                        : "bg-[var(--bg-base)] border-[var(--border-brutal)] hover:bg-[var(--text-primary)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow"
                     }`}
                   >
                     <div
@@ -338,12 +338,12 @@ export default function TimerPage() {
                     </div>
                     <div className="flex-1 text-left">
                       <p
-                        className={`text-sm font-black uppercase ${task.status === "done" ? "line-through text-[var(--text-primary)]/50" : "text-[var(--text-primary)]"}`}
+                        className={`text-sm font-black uppercase transition-colors ${task.status === "done" ? "line-through text-[var(--text-primary)]/50" : "text-[var(--text-primary)] group-hover:text-[var(--bg-base)]"}`}
                       >
                         {task.title}
                       </p>
                       {task.category && (
-                        <p className="text-[10px] font-black font-mono uppercase tracking-wider text-[var(--text-primary)]/50 mt-1">
+                        <p className={`text-[10px] font-black font-mono uppercase tracking-wider mt-1 transition-colors ${task.status === "done" ? "text-[var(--text-primary)]/50" : "text-[var(--text-primary)]/50 group-hover:text-[var(--bg-base)]/70"}`}>
                           {task.category}
                         </p>
                       )}
@@ -362,10 +362,10 @@ export default function TimerPage() {
                   <button
                     key={task.id}
                     onClick={() => toggleTodo(task.id, task.status)}
-                    className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all ${
+                    className={`w-full flex items-center gap-3 p-4 rounded-xl border-2 transition-all group ${
                       task.status === "done"
                         ? "bg-[#2ed573]/20 border-[#2ed573] opacity-60"
-                        : "bg-[#fdfbf7] border-[var(--border-brutal)] hover:bg-[#a8e6cf] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow"
+                        : "bg-[var(--bg-base)] border-[var(--border-brutal)] hover:bg-[var(--text-primary)] hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow"
                     }`}
                   >
                     <div
@@ -380,7 +380,7 @@ export default function TimerPage() {
                       )}
                     </div>
                     <p
-                      className={`text-sm font-black uppercase text-left ${task.status === "done" ? "line-through text-[var(--text-primary)]/50" : "text-[var(--text-primary)]"}`}
+                      className={`text-sm font-black uppercase text-left transition-colors ${task.status === "done" ? "line-through text-[var(--text-primary)]/50" : "text-[var(--text-primary)] group-hover:text-[var(--bg-base)]"}`}
                     >
                       {task.title}
                     </p>
