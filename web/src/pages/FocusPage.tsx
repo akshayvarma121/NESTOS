@@ -1,11 +1,18 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import { Check, Info, X } from "lucide-react";
+import { Check, Info, X, Calendar as CalendarIcon } from "lucide-react";
 import { NavLink } from "react-router-dom";
-import EditTimetablePanel, { calculateDuration } from "../components/EditTimetablePanel";
+import EditTimetablePanel, {
+  calculateDuration,
+} from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
 import ExpandableDescription from "../components/ExpandableDescription";
-import { getLocalDateString, getLocalDayName, getLogicalDate } from "../lib/dateUtils";
+import BrutalistCalendar from "../components/BrutalistCalendar";
+import {
+  getLocalDateString,
+  getLocalDayName,
+  getLogicalDate,
+} from "../lib/dateUtils";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -17,7 +24,7 @@ const categoryColors: Record<string, string> = {
 function InlineEdit({
   initialValue,
   onSave,
-  disabled
+  disabled,
 }: {
   initialValue: string;
   onSave: (val: string) => void;
@@ -46,7 +53,9 @@ function InlineEdit({
   return (
     <span
       className={`py-1 block w-full ${disabled ? "opacity-75" : "cursor-text hover:text-[var(--text-primary)] transition-colors"}`}
-      onClick={() => { if (!disabled) setEditing(true); }}
+      onClick={() => {
+        if (!disabled) setEditing(true);
+      }}
     >
       {initialValue}
     </span>
@@ -66,6 +75,9 @@ export default function FocusPage() {
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
+  const [events, setEvents] = useState<any[]>([]);
+  const [closeouts, setCloseouts] = useState<any[]>([]);
+  const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
   const [selectedDateStr, setSelectedDateStr] = useState(getLocalDateString());
   const [actualTodayStr, setActualTodayStr] = useState(getLocalDateString());
@@ -74,12 +86,12 @@ export default function FocusPage() {
     const updateTime = () => {
       const now = new Date();
       setCurrentTimeStr(
-        `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`
+        `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}`,
       );
       const newDateStr = getLocalDateString(now);
-      setActualTodayStr(prev => {
+      setActualTodayStr((prev) => {
         if (prev !== newDateStr) {
-          setSelectedDateStr(curr => curr === prev ? newDateStr : curr);
+          setSelectedDateStr((curr) => (curr === prev ? newDateStr : curr));
           return newDateStr;
         }
         return prev;
@@ -96,8 +108,8 @@ export default function FocusPage() {
     setRoutines([]);
     setPartnerRoutines([]);
     fetchFocusData();
-    // Fetch once on mount or when selectedDateStr changes
-  }, [selectedDateStr]);
+    // Fetch once on mount or when selectedDateStr/currentCalendarDate changes
+  }, [selectedDateStr, currentCalendarDate]);
 
   const fetchFocusData = async () => {
     setLoading(true);
@@ -112,16 +124,18 @@ export default function FocusPage() {
         deadlinesData,
         notesData,
         lockData,
+        calendarData,
       ] = await Promise.all([
         api.get(`/scheduler/focus?date=${selectedDateStr}`),
         api.get("/partner/space"),
         api.get(
-          `/routines/day?day=${getLocalDayName(new Date(selectedDateStr + 'T12:00:00'))}&date=${selectedDateStr}`,
+          `/routines/day?day=${getLocalDayName(new Date(selectedDateStr + "T12:00:00"))}&date=${selectedDateStr}`,
         ),
         api.get("/personal-todos"),
         api.get("/deadlines"),
         api.get("/notes"),
         api.get(`/routines/day/lock-status?date=${selectedDateStr}`),
+        api.get("/calendar"),
       ]);
 
       setTasks(taskData);
@@ -134,6 +148,8 @@ export default function FocusPage() {
         (notesData || []).filter((n: any) => n.type === "dashboard"),
       );
       setIsRoutineLocked(lockData?.isLocked || false);
+      setEvents(calendarData?.events || []);
+      setCloseouts(calendarData?.closeouts || []);
 
       if (taskData.length === 0) {
         const goalsData = await api.get("/macro-goals");
@@ -148,13 +164,13 @@ export default function FocusPage() {
     }
   };
 
-
-
   const updateTaskStatus = async (id: string, newStatus: string) => {
     if (newStatus === "skipped") {
       setTasks((prev) => prev.filter((t) => t.id !== id));
     } else {
-      setTasks((prev) => prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)));
+      setTasks((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, status: newStatus } : t)),
+      );
     }
     await api.patch(`/micro-tasks/${id}`, { status: newStatus });
   };
@@ -163,7 +179,10 @@ export default function FocusPage() {
     // Remove from FocusPage UI by filtering it out
     setTasks((prev) => prev.filter((t) => t.id !== id));
     // Patch backend to clear scheduled_date and reset status to pending
-    await api.patch(`/micro-tasks/${id}`, { status: "pending", scheduled_date: null });
+    await api.patch(`/micro-tasks/${id}`, {
+      status: "pending",
+      scheduled_date: null,
+    });
   };
 
   const renameTask = async (id: string, newTitle: string) => {
@@ -220,7 +239,9 @@ export default function FocusPage() {
   };
 
   const activeDeadlines = deadlines
-    .filter((d) => d.deadline && d.deadline.split('T')[0] >= getLocalDateString())
+    .filter(
+      (d) => d.deadline && d.deadline.split("T")[0] >= getLocalDateString(),
+    )
     .slice(0, 3); // show up to 3 upcoming
 
   if (loading)
@@ -233,9 +254,13 @@ export default function FocusPage() {
   // Active tasks mean they are not skipped
   const activeTasks = tasks.filter((t) => t.status !== "skipped");
 
-  const todayTasks = activeTasks.filter((t) => t.scheduled_date === selectedDateStr);
+  const todayTasks = activeTasks.filter(
+    (t) => t.scheduled_date === selectedDateStr,
+  );
   const upcomingTasks = activeTasks.filter(
-    (t) => t.scheduled_date !== selectedDateStr && t.scheduled_date > selectedDateStr,
+    (t) =>
+      t.scheduled_date !== selectedDateStr &&
+      t.scheduled_date > selectedDateStr,
   );
   const overdueTasks = activeTasks.filter(
     (t) =>
@@ -279,7 +304,12 @@ export default function FocusPage() {
 
               <button
                 disabled={isRoutineLocked}
-                onClick={() => updateTaskStatus(task.id, task.status === "done" ? "pending" : "done")}
+                onClick={() =>
+                  updateTaskStatus(
+                    task.id,
+                    task.status === "done" ? "pending" : "done",
+                  )
+                }
                 className={`w-5 h-5 flex-shrink-0 rounded-[4px] border ${
                   task.status === "done"
                     ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
@@ -350,12 +380,14 @@ export default function FocusPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-6xl mx-auto relative pb-32">
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto relative pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between mb-12">
+      <div className="flex items-center justify-between mb-8">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-semibold">Focus Dashboard</h1>
+          <div className="flex items-center gap-3 mb-1">
+            <h1 className="text-3xl font-black uppercase tracking-widest text-black">
+              Focus Dashboard
+            </h1>
             <div className="relative group cursor-help">
               <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
               <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)]">
@@ -365,38 +397,14 @@ export default function FocusPage() {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-3 mt-1">
-            <button onClick={() => {
-              const d = new Date(selectedDateStr + 'T12:00:00');
-              d.setDate(d.getDate() - 1);
-              setSelectedDateStr(d.toISOString().split('T')[0]);
-            }} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            </button>
-            <p className="text-[var(--text-secondary)] font-mono text-xs uppercase tracking-wider min-w-[100px] text-center">
-              {selectedDateStr === actualTodayStr ? "TODAY" : new Date(selectedDateStr + 'T12:00:00').toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
-            </p>
-            <button onClick={() => {
-              const d = new Date(selectedDateStr + 'T12:00:00');
-              d.setDate(d.getDate() + 1);
-              setSelectedDateStr(d.toISOString().split('T')[0]);
-            }} className="text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors p-1">
-              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m9 18 6-6-6-6"/></svg>
-            </button>
-            {selectedDateStr !== actualTodayStr && (
-              <button onClick={() => setSelectedDateStr(actualTodayStr)} className="ml-1 text-[10px] uppercase font-mono text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors px-1.5 py-0.5 rounded border border-[var(--border-hairline)]">
-                Today
-              </button>
-            )}
-          </div>
         </div>
 
         <div className="flex gap-2">
           <button
             onClick={() => setIsTimetableOpen(true)}
-            className="px-3 py-1.5 text-sm font-medium rounded-[4px] border bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] text-[var(--text-primary)] hover:border-[var(--text-secondary)] transition-colors"
+            className="brutal-btn bg-[#2ed573] text-black px-6 py-3 text-sm font-black uppercase tracking-wider"
           >
-            Timetable
+            Timetable Editor
           </button>
         </div>
       </div>
@@ -427,452 +435,566 @@ export default function FocusPage() {
           />
         </div>
       ) : (
-      <>
-      <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8 lg:gap-12 items-start">
-        <div className="space-y-12 min-w-0">
+        <>
+          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_350px] gap-8 items-start">
+            {/* COLUMN 1: CALENDAR & UPCOMING/OVERDUE */}
+            <div className="space-y-8 min-w-0">
+              <BrutalistCalendar
+                currentDate={currentCalendarDate}
+                selectedDateStr={selectedDateStr}
+                events={events}
+                closeouts={closeouts}
+                onSelectDate={setSelectedDateStr}
+                onMonthChange={setCurrentCalendarDate}
+              />
 
-      {/* STICKY NOTES */}
-      {dashboardNotes.length > 0 && (
-        <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
-          {dashboardNotes.map((note) => {
-            const colorClass =
-              note.color === "yellow"
-                ? "bg-yellow-500/20 text-yellow-500 border-yellow-500/30"
-                : note.color === "pink"
-                  ? "bg-pink-500/20 text-pink-500 border-pink-500/30"
-                  : note.color === "blue"
-                    ? "bg-blue-500/20 text-blue-500 border-blue-500/30"
-                    : "bg-emerald-500/20 text-emerald-500 border-emerald-500/30";
+              {/* UPCOMING */}
+              {upcomingTasks.length > 0 && (
+                <section className="space-y-4">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-black/70 border-b-2 border-black pb-2 flex items-center justify-between">
+                    <span>Upcoming Horizon</span>
+                    <span className="text-xs font-mono text-black/50">
+                      {upcomingTasks.length} tasks
+                    </span>
+                  </h2>
+                  <div className="space-y-6">
+                    {renderSubjectGroup(upcomingGrouped)}
+                  </div>
+                </section>
+              )}
 
-            return (
-              <div
-                key={note.id}
-                className={`p-4 border rounded-xl flex flex-col gap-2 min-h-[100px] shadow-sm transform -rotate-1 hover:rotate-0 transition-transform ${colorClass}`}
-              >
-                <div className="flex items-center justify-between opacity-50">
-                  <span className="text-[10px] font-mono uppercase">
-                    Sticky
-                  </span>
-                  <span className="text-[10px] font-mono">
-                    {note.creator?.username || "You"}
-                  </span>
-                </div>
-                <p className="text-sm whitespace-pre-wrap">{note.content}</p>
-              </div>
-            );
-          })}
-        </section>
-      )}
-
-      {/* DAILY ROUTINE TIMETABLE */}
-      <section className="space-y-4">
-          <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
-            <span>Daily Routine</span>
-            <div className="flex items-center gap-3">
-              <NavLink 
-                to="/routines-history" 
-                className="text-[10px] uppercase font-mono bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-2 py-0.5 rounded text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors"
-              >
-                Analytics
-              </NavLink>
-              <span className="text-xs font-mono text-[var(--text-tertiary)]">
-                Timeline
-              </span>
+              {/* OVERDUE */}
+              {overdueTasks.length > 0 && (
+                <section className="space-y-4">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-[#ff6b6b] border-b-2 border-[#ff6b6b] pb-2">
+                    Overdue Action Items
+                  </h2>
+                  <div className="p-4 bg-white brutal-border brutal-shadow-sm space-y-4">
+                    {renderSubjectGroup(overdueGrouped)}
+                  </div>
+                </section>
+              )}
             </div>
-          </h2>
-          {routines.length === 0 ? (
-            <div className="py-6 px-4 border border-dashed border-[var(--border-hairline)] rounded-xl flex flex-col items-center justify-center text-center space-y-3">
-              <p className="text-sm text-[var(--text-secondary)]">
-                No active routines scheduled for today.
-              </p>
-              <button
-                onClick={() => setIsTimetableOpen(true)}
-                className="text-xs bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-[4px] hover:border-[var(--text-secondary)] transition-colors"
-              >
-                Open Timetable Editor
-              </button>
-            </div>
-          ) : (
-            <div className="relative pl-6 space-y-6 pt-2">
-              <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[var(--border-hairline)] rounded-full" />
-            
-            {(() => {
-              const sortedRoutines = [...routines].sort((a, b) => (a.time_label || "24:00").localeCompare(b.time_label || "24:00"));
 
-              let latestActiveIdx = -1;
-              for (let i = 0; i < sortedRoutines.length; i++) {
-                const t = sortedRoutines[i].time_label || "";
-                if (t === "") continue; // Anytime
-                const start = t.split("-")[0].trim();
-                if (start <= currentTimeStr) {
-                  latestActiveIdx = i;
-                }
-              }
+            {/* COLUMN 2: DAILY ROUTINE & STICKY NOTES */}
+            <div className="space-y-8 min-w-0">
+              {/* STICKY NOTES */}
+              {dashboardNotes.length > 0 && (
+                <section className="grid grid-cols-2 gap-4">
+                  {dashboardNotes.map((note) => {
+                    const colorClass =
+                      note.color === "yellow"
+                        ? "bg-[#ffeb3b]"
+                        : note.color === "pink"
+                          ? "bg-[#ffb6c1]"
+                          : note.color === "blue"
+                            ? "bg-[#a8e6cf]"
+                            : "bg-[#2ed573]";
 
-              const categorized = sortedRoutines.map((routine, i) => {
-                const t = routine.time_label || "";
-                if (!t) return { routine, bucket: "anytime" };
-                
-                const parts = t.split("-").map((s: string) => s.trim());
-                const start = parts[0];
-                const end = parts[1]; // might be undefined
-
-                if (currentTimeStr < start) {
-                  return { routine, bucket: "future" };
-                }
-                
-                if (end) {
-                  if (currentTimeStr >= end) return { routine, bucket: "past" };
-                  return { routine, bucket: "current" };
-                } else {
-                  // No end time. It is current if it's the latest active one.
-                  if (i === latestActiveIdx) return { routine, bucket: "current" };
-                  return { routine, bucket: "past" };
-                }
-              });
-
-              const displayRoutines = [
-                ...categorized.filter(c => c.bucket === "current").map(c => ({...c.routine, isCurrent: true, isPast: false})),
-                ...categorized.filter(c => c.bucket === "future").map(c => ({...c.routine, isCurrent: false, isPast: false})),
-                ...categorized.filter(c => c.bucket === "anytime").map(c => ({...c.routine, isCurrent: false, isPast: false})),
-                ...categorized.filter(c => c.bucket === "past").map(c => ({...c.routine, isCurrent: false, isPast: true}))
-              ];
-
-              return displayRoutines.map((routine) => {
-                const isCurrent = routine.isCurrent;
-                const isPast = routine.isPast;
-
-                return (
-                  <div key={routine.id} className="relative">
-                    {/* Timeline Dot */}
-                    <div
-                      className={`absolute -left-[29px] top-4 w-3 h-3 rounded-full border-2 z-10 transition-colors ${
-                        isCurrent
-                          ? "bg-[var(--accent)] border-[var(--accent)] shadow-[0_0_10px_var(--accent)]"
-                          : isPast
-                          ? "bg-[var(--text-tertiary)] border-[var(--bg-base)]"
-                          : "bg-[var(--bg-base)] border-[var(--border-hairline)]"
-                      }`}
-                    />
-
-                    <div
-                      className={`flex flex-col p-3 rounded-xl border transition-colors ${
-                        isCurrent
-                          ? "border-[var(--accent)] bg-[var(--accent)]/5"
-                          : routine.status !== "pending"
-                          ? "bg-[var(--bg-surface-raised)] border-[var(--border-hairline)] opacity-80"
-                          : "bg-[var(--bg-surface)] border-[var(--border-hairline)] hover:border-[var(--text-secondary)]"
-                      }`}
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="flex flex-col gap-1.5 flex-shrink-0">
-                          {/* Done Button */}
-                          <button
-                            disabled={isRoutineLocked}
-                            onClick={async () => {
-                              const newStatus = routine.status === "done" ? "pending" : "done";
-                              setRoutines((prev) =>
-                                prev.map((r) =>
-                                  r.id === routine.id
-                                    ? { ...r, status: newStatus, note: newStatus === "pending" ? "" : r.note }
-                                    : r,
-                                ),
-                              );
-                              try {
-                                await api.post(`/routines/${routine.id}/toggle`, {
-                                  date: selectedDateStr,
-                                  status: newStatus
-                                });
-                              } catch (e) {
-                                fetchFocusData();
-                              }
-                            }}
-                            className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
-                              routine.status === "done"
-                                ? "bg-[var(--accent)] border-[var(--accent)]"
-                                : "border-[var(--border-hairline)] hover:border-[var(--accent)] text-transparent hover:text-[var(--accent)]"
-                            } ${isRoutineLocked ? "opacity-50 cursor-not-allowed" : ""}`}
-                            title="Mark as Done"
-                          >
-                            <Check className={`w-3.5 h-3.5 ${routine.status === "done" ? "text-[var(--bg-base)]" : "text-inherit"}`} strokeWidth={3} />
-                          </button>
-                          
-                          {/* Skipped Button */}
-                          <button
-                            disabled={isRoutineLocked}
-                            onClick={async () => {
-                              const newStatus = routine.status === "skipped" ? "pending" : "skipped";
-                              setRoutines((prev) =>
-                                prev.map((r) =>
-                                  r.id === routine.id
-                                    ? { ...r, status: newStatus, note: newStatus === "pending" ? "" : r.note }
-                                    : r,
-                                ),
-                              );
-                              try {
-                                await api.post(`/routines/${routine.id}/toggle`, {
-                                  date: selectedDateStr,
-                                  status: newStatus
-                                });
-                              } catch (e) {
-                                fetchFocusData();
-                              }
-                            }}
-                            className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
-                              routine.status === "skipped"
-                                ? "bg-[var(--warning)] border-[var(--warning)]"
-                                : "border-[var(--border-hairline)] hover:border-[var(--warning)] text-transparent hover:text-[var(--warning)]"
-                            } ${isRoutineLocked ? "opacity-50 cursor-not-allowed" : ""}`}
-                            title="Mark as Skipped/Failed"
-                          >
-                            <X className={`w-3 h-3 ${routine.status === "skipped" ? "text-[var(--bg-base)]" : "text-inherit"}`} strokeWidth={3} />
-                          </button>
+                    return (
+                      <div
+                        key={note.id}
+                        className={`p-4 brutal-border brutal-shadow-sm flex flex-col gap-2 min-h-[100px] transform -rotate-1 hover:rotate-0 transition-transform ${colorClass}`}
+                      >
+                        <div className="flex items-center justify-between opacity-70">
+                          <span className="text-[10px] font-black uppercase">
+                            Sticky
+                          </span>
+                          <span className="text-[10px] font-bold">
+                            {note.creator?.username || "You"}
+                          </span>
                         </div>
-                        <div className="flex-1 text-left">
-                          <div
-                            className={`text-sm font-medium flex items-center gap-2 ${
-                              routine.status === "done"
-                                ? "line-through text-[var(--text-tertiary)]"
-                                : routine.status === "skipped"
-                                ? "text-[var(--warning)]"
-                                : isCurrent
-                                ? "text-[var(--accent)]"
-                                : "text-[var(--text-primary)]"
-                            }`}
-                          >
-                            {routine.title}
-                            {routine.description && (
-                              <div className="ml-1 mb-1 pr-4">
-                                <ExpandableDescription text={routine.description} />
-                              </div>
-                            )}
-                            {routine.assignee?.username && (
-                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-[var(--bg-base)] border border-[var(--border-hairline)] no-underline text-[var(--text-secondary)]">
-                                {routine.assignee.username}
-                              </span>
-                            )}
-                            {isCurrent && routine.status === "pending" && (
-                              <span className="text-[10px] font-mono uppercase bg-[var(--accent)] text-[var(--bg-base)] px-1.5 py-0.5 rounded">
-                                Current
-                              </span>
-                            )}
-                          </div>
-                          <div className="flex items-center gap-2 mt-0.5">
-                            <span className="text-[10px] font-mono text-[var(--text-secondary)]">
-                              {routine.time_label || "Anytime"}
-                            </span>
-                            {calculateDuration(routine.time_label) && (
-                              <span className="text-[10px] font-mono text-[var(--accent)] font-medium bg-[var(--accent)]/10 px-1.5 rounded">
-                                {calculateDuration(routine.time_label)}
-                              </span>
-                            )}
-                          </div>
-                        </div>
+                        <p className="text-sm font-bold text-black whitespace-pre-wrap">
+                          {note.content}
+                        </p>
                       </div>
-                      {routine.status !== "pending" && (
-                        <div className="pl-9 mt-2">
-                          <input
-                            type="text"
-                            disabled={isRoutineLocked}
-                            placeholder={routine.status === "skipped" ? "Why did you skip/miss this?" : "Add a note (optional)..."}
-                            className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1 disabled:opacity-50 disabled:border-transparent"
-                            defaultValue={routine.note || ""}
-                            onBlur={async (e) => {
-                              const val = e.target.value;
-                              if (val !== (routine.note || "")) {
+                    );
+                  })}
+                </section>
+              )}
+
+              {/* DAILY ROUTINE TIMETABLE */}
+              <section className="space-y-4">
+                <h2 className="text-sm font-black uppercase tracking-widest text-black border-b-2 border-black pb-2 flex items-center justify-between">
+                  <span>Daily Routine</span>
+                  <div className="flex items-center gap-3">
+                    <NavLink
+                      to="/routines-history"
+                      className="text-[10px] uppercase font-bold brutal-border bg-white px-2 py-1 text-black hover:bg-black hover:text-white transition-colors"
+                    >
+                      Analytics
+                    </NavLink>
+                    <span className="text-xs font-mono font-bold text-black/50">
+                      Timeline
+                    </span>
+                  </div>
+                </h2>
+                {routines.length === 0 ? (
+                  <div className="py-6 px-4 border border-dashed border-[var(--border-hairline)] rounded-xl flex flex-col items-center justify-center text-center space-y-3">
+                    <p className="text-sm text-[var(--text-secondary)]">
+                      No active routines scheduled for today.
+                    </p>
+                    <button
+                      onClick={() => setIsTimetableOpen(true)}
+                      className="text-xs bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-[4px] hover:border-[var(--text-secondary)] transition-colors"
+                    >
+                      Open Timetable Editor
+                    </button>
+                  </div>
+                ) : (
+                  <div className="relative pl-6 space-y-6 pt-2">
+                    <div className="absolute left-[11px] top-4 bottom-4 w-[2px] bg-[var(--border-hairline)] rounded-full" />
+
+                    {(() => {
+                      const sortedRoutines = [...routines].sort((a, b) =>
+                        (a.time_label || "24:00").localeCompare(
+                          b.time_label || "24:00",
+                        ),
+                      );
+
+                      let latestActiveIdx = -1;
+                      for (let i = 0; i < sortedRoutines.length; i++) {
+                        const t = sortedRoutines[i].time_label || "";
+                        if (t === "") continue; // Anytime
+                        const start = t.split("-")[0].trim();
+                        if (start <= currentTimeStr) {
+                          latestActiveIdx = i;
+                        }
+                      }
+
+                      const categorized = sortedRoutines.map((routine, i) => {
+                        const t = routine.time_label || "";
+                        if (!t) return { routine, bucket: "anytime" };
+
+                        const parts = t.split("-").map((s: string) => s.trim());
+                        const start = parts[0];
+                        const end = parts[1]; // might be undefined
+
+                        if (currentTimeStr < start) {
+                          return { routine, bucket: "future" };
+                        }
+
+                        if (end) {
+                          if (currentTimeStr >= end)
+                            return { routine, bucket: "past" };
+                          return { routine, bucket: "current" };
+                        } else {
+                          // No end time. It is current if it's the latest active one.
+                          if (i === latestActiveIdx)
+                            return { routine, bucket: "current" };
+                          return { routine, bucket: "past" };
+                        }
+                      });
+
+                      const displayRoutines = [
+                        ...categorized
+                          .filter((c) => c.bucket === "current")
+                          .map((c) => ({
+                            ...c.routine,
+                            isCurrent: true,
+                            isPast: false,
+                          })),
+                        ...categorized
+                          .filter((c) => c.bucket === "future")
+                          .map((c) => ({
+                            ...c.routine,
+                            isCurrent: false,
+                            isPast: false,
+                          })),
+                        ...categorized
+                          .filter((c) => c.bucket === "anytime")
+                          .map((c) => ({
+                            ...c.routine,
+                            isCurrent: false,
+                            isPast: false,
+                          })),
+                        ...categorized
+                          .filter((c) => c.bucket === "past")
+                          .map((c) => ({
+                            ...c.routine,
+                            isCurrent: false,
+                            isPast: true,
+                          })),
+                      ];
+
+                      return displayRoutines.map((routine) => {
+                        const isCurrent = routine.isCurrent;
+                        const isPast = routine.isPast;
+
+                        return (
+                          <div key={routine.id} className="relative">
+                            {/* Timeline Dot */}
+                            <div
+                              className={`absolute -left-[29px] top-4 w-3 h-3 border-2 z-10 transition-colors ${
+                                isCurrent
+                                  ? "bg-[#ff6b6b] border-black brutal-shadow-sm"
+                                  : isPast
+                                    ? "bg-black border-black"
+                                    : "bg-white border-black"
+                              }`}
+                            />
+
+                            <div
+                              className={`flex flex-col p-4 brutal-border transition-colors ${
+                                isCurrent
+                                  ? "brutal-shadow-sm bg-white"
+                                  : routine.status !== "pending"
+                                    ? "bg-black/5 border-black/30"
+                                    : "bg-white hover:brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                              }`}
+                            >
+                              <div className="flex items-center gap-4">
+                                <div className="flex flex-col gap-1.5 flex-shrink-0">
+                                  {/* Done Button */}
+                                  <button
+                                    disabled={isRoutineLocked}
+                                    onClick={async () => {
+                                      const newStatus =
+                                        routine.status === "done"
+                                          ? "pending"
+                                          : "done";
+                                      setRoutines((prev) =>
+                                        prev.map((r) =>
+                                          r.id === routine.id
+                                            ? {
+                                                ...r,
+                                                status: newStatus,
+                                                note:
+                                                  newStatus === "pending"
+                                                    ? ""
+                                                    : r.note,
+                                              }
+                                            : r,
+                                        ),
+                                      );
+                                      try {
+                                        await api.post(
+                                          `/routines/${routine.id}/toggle`,
+                                          {
+                                            date: selectedDateStr,
+                                            status: newStatus,
+                                          },
+                                        );
+                                      } catch (e) {
+                                        fetchFocusData();
+                                      }
+                                    }}
+                                    className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
+                                      routine.status === "done"
+                                        ? "bg-[var(--accent)] border-[var(--accent)]"
+                                        : "border-[var(--border-hairline)] hover:border-[var(--accent)] text-transparent hover:text-[var(--accent)]"
+                                    } ${isRoutineLocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    title="Mark as Done"
+                                  >
+                                    <Check
+                                      className={`w-3.5 h-3.5 ${routine.status === "done" ? "text-[var(--bg-base)]" : "text-inherit"}`}
+                                      strokeWidth={3}
+                                    />
+                                  </button>
+
+                                  {/* Skipped Button */}
+                                  <button
+                                    disabled={isRoutineLocked}
+                                    onClick={async () => {
+                                      const newStatus =
+                                        routine.status === "skipped"
+                                          ? "pending"
+                                          : "skipped";
+                                      setRoutines((prev) =>
+                                        prev.map((r) =>
+                                          r.id === routine.id
+                                            ? {
+                                                ...r,
+                                                status: newStatus,
+                                                note:
+                                                  newStatus === "pending"
+                                                    ? ""
+                                                    : r.note,
+                                              }
+                                            : r,
+                                        ),
+                                      );
+                                      try {
+                                        await api.post(
+                                          `/routines/${routine.id}/toggle`,
+                                          {
+                                            date: selectedDateStr,
+                                            status: newStatus,
+                                          },
+                                        );
+                                      } catch (e) {
+                                        fetchFocusData();
+                                      }
+                                    }}
+                                    className={`w-5 h-5 rounded-[4px] border flex items-center justify-center transition-colors ${
+                                      routine.status === "skipped"
+                                        ? "bg-[var(--warning)] border-[var(--warning)]"
+                                        : "border-[var(--border-hairline)] hover:border-[var(--warning)] text-transparent hover:text-[var(--warning)]"
+                                    } ${isRoutineLocked ? "opacity-50 cursor-not-allowed" : ""}`}
+                                    title="Mark as Skipped/Failed"
+                                  >
+                                    <X
+                                      className={`w-3 h-3 ${routine.status === "skipped" ? "text-[var(--bg-base)]" : "text-inherit"}`}
+                                      strokeWidth={3}
+                                    />
+                                  </button>
+                                </div>
+                                <div className="flex-1 text-left">
+                                  <div
+                                    className={`text-base font-black flex items-center gap-2 ${
+                                      routine.status === "done"
+                                        ? "line-through text-black/40"
+                                        : routine.status === "skipped"
+                                          ? "text-[#ff6b6b]"
+                                          : "text-black"
+                                    }`}
+                                  >
+                                    {routine.title}
+                                    {routine.description && (
+                                      <div className="ml-1 mb-1 pr-4">
+                                        <ExpandableDescription
+                                          text={routine.description}
+                                        />
+                                      </div>
+                                    )}
+                                    {routine.assignee?.username && (
+                                      <span className="text-[10px] font-black uppercase px-2 py-0.5 brutal-border bg-[#ffeb3b] text-black">
+                                        {routine.assignee.username}
+                                      </span>
+                                    )}
+                                    {isCurrent &&
+                                      routine.status === "pending" && (
+                                        <span className="text-[10px] font-black uppercase bg-[#ff6b6b] text-white px-2 py-0.5 brutal-border border-white">
+                                          Current
+                                        </span>
+                                      )}
+                                  </div>
+                                  <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-[11px] font-bold text-black/60 uppercase">
+                                      {routine.time_label || "Anytime"}
+                                    </span>
+                                    {calculateDuration(routine.time_label) && (
+                                      <span className="text-[11px] font-black uppercase text-[#ffeb3b] bg-black px-2 py-0.5 brutal-border">
+                                        {calculateDuration(routine.time_label)}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                              </div>
+                              {routine.status !== "pending" && (
+                                <div className="pl-9 mt-2">
+                                  <input
+                                    type="text"
+                                    disabled={isRoutineLocked}
+                                    placeholder={
+                                      routine.status === "skipped"
+                                        ? "Why did you skip/miss this?"
+                                        : "Add a note (optional)..."
+                                    }
+                                    className="w-full bg-transparent border-b border-[var(--border-hairline)] text-xs text-[var(--text-primary)] outline-none focus:border-[var(--accent)] transition-colors py-1 disabled:opacity-50 disabled:border-transparent"
+                                    defaultValue={routine.note || ""}
+                                    onBlur={async (e) => {
+                                      const val = e.target.value;
+                                      if (val !== (routine.note || "")) {
+                                        try {
+                                          await api.patch(
+                                            `/routines/${routine.id}/log`,
+                                            {
+                                              date: selectedDateStr,
+                                              note: val,
+                                            },
+                                          );
+                                          setRoutines((prev) =>
+                                            prev.map((r) =>
+                                              r.id === routine.id
+                                                ? { ...r, note: val }
+                                                : r,
+                                            ),
+                                          );
+                                        } catch (err) {
+                                          console.error(err);
+                                        }
+                                      }
+                                    }}
+                                    onKeyDown={(e) => {
+                                      if (e.key === "Enter") {
+                                        e.currentTarget.blur();
+                                      }
+                                    }}
+                                  />
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      });
+                    })()}
+                    {!isRoutineLocked ? (
+                      (() => {
+                        const isLockTime =
+                          currentTimeStr.startsWith("23:") ||
+                          parseInt(currentTimeStr.split(":")[0]) < 4;
+                        return (
+                          <div className="pt-4 pl-6 relative">
+                            <button
+                              disabled={!isLockTime}
+                              onClick={async () => {
+                                if (
+                                  !confirm(
+                                    "Are you sure? You cannot edit today's routines after saving.",
+                                  )
+                                )
+                                  return;
                                 try {
-                                  await api.patch(`/routines/${routine.id}/log`, { date: selectedDateStr, note: val });
-                                  setRoutines((prev) =>
-                                    prev.map((r) =>
-                                      r.id === routine.id ? { ...r, note: val } : r,
-                                    ),
-                                  );
+                                  await api.post("/routines/day/lock", {
+                                    date: selectedDateStr,
+                                  });
+                                  setIsRoutineLocked(true);
                                 } catch (err) {
                                   console.error(err);
                                 }
-                              }
-                            }}
-                            onKeyDown={(e) => {
-                              if (e.key === "Enter") {
-                                e.currentTarget.blur();
-                              }
-                            }}
-                          />
+                              }}
+                              className={`w-full py-2.5 text-xs font-medium uppercase tracking-wider rounded-xl transition-opacity ${
+                                isLockTime
+                                  ? "bg-[var(--text-primary)] text-[var(--bg-base)] hover:opacity-90"
+                                  : "bg-[var(--bg-surface-raised)] border border-dashed border-[var(--border-hairline)] text-[var(--text-tertiary)] cursor-not-allowed"
+                              }`}
+                            >
+                              {isLockTime
+                                ? "Save & Lock Timeline"
+                                : "Available at 23:00 to Lock"}
+                            </button>
+                          </div>
+                        );
+                      })()
+                    ) : (
+                      <div className="pt-4 pl-6 relative">
+                        <div className="w-full py-2.5 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] text-center border border-dashed border-[var(--border-hairline)] rounded-xl">
+                          Timeline Locked for Today
                         </div>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
-                );
-              });
-            })()}
-              {!isRoutineLocked ? (() => {
-                const isLockTime = currentTimeStr.startsWith("23:") || parseInt(currentTimeStr.split(":")[0]) < 4;
-                return (
-                <div className="pt-4 pl-6 relative">
-                  <button
-                    disabled={!isLockTime}
-                    onClick={async () => {
-                      if (!confirm("Are you sure? You cannot edit today's routines after saving.")) return;
-                      try {
-                        await api.post("/routines/day/lock", { date: selectedDateStr });
-                        setIsRoutineLocked(true);
-                      } catch (err) {
-                        console.error(err);
-                      }
-                    }}
-                    className={`w-full py-2.5 text-xs font-medium uppercase tracking-wider rounded-xl transition-opacity ${
-                      isLockTime
-                        ? "bg-[var(--text-primary)] text-[var(--bg-base)] hover:opacity-90"
-                        : "bg-[var(--bg-surface-raised)] border border-dashed border-[var(--border-hairline)] text-[var(--text-tertiary)] cursor-not-allowed"
-                    }`}
-                  >
-                    {isLockTime ? "Save & Lock Timeline" : "Available at 23:00 to Lock"}
-                  </button>
-                </div>
-                );
-              })() : (
-                <div className="pt-4 pl-6 relative">
-                  <div className="w-full py-2.5 text-xs font-medium uppercase tracking-wider text-[var(--text-secondary)] text-center border border-dashed border-[var(--border-hairline)] rounded-xl">
-                    Timeline Locked for Today
+                )}
+              </section>
+
+              {partnerRoutines.length > 0 && (
+                <section className="space-y-4 pt-8 border-t border-[var(--border-hairline)]">
+                  <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
+                    <span>Partner's Timeline</span>
+                  </h2>
+                  <div className="relative border-l-2 border-[var(--border-hairline)] ml-3 space-y-8 opacity-70">
+                    {partnerRoutines.map((routine, idx) => (
+                      <div key={routine.id} className="relative pl-6">
+                        <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--border-hairline)] ring-4 ring-[var(--bg-base)]" />
+                        <div className="flex items-start gap-4">
+                          <div className="w-[80px] shrink-0 pt-0.5">
+                            <div className="text-xs font-mono font-medium text-[var(--text-secondary)]">
+                              {routine.time_label}
+                            </div>
+                          </div>
+                          <div className="flex-1">
+                            <div className="text-sm font-medium text-[var(--text-primary)]">
+                              {routine.title}
+                            </div>
+                            <div className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-1">
+                              Status:{" "}
+                              {routine.status === "done"
+                                ? "Completed"
+                                : routine.status === "skipped"
+                                  ? "Skipped"
+                                  : "Pending"}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                </div>
+                </section>
               )}
             </div>
-          )}
-        </section>
 
-        {partnerRoutines.length > 0 && (
-          <section className="space-y-4 pt-8 border-t border-[var(--border-hairline)]">
-            <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
-              <span>Partner's Timeline</span>
-            </h2>
-            <div className="relative border-l-2 border-[var(--border-hairline)] ml-3 space-y-8 opacity-70">
-              {partnerRoutines.map((routine, idx) => (
-                <div key={routine.id} className="relative pl-6">
-                  <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--border-hairline)] ring-4 ring-[var(--bg-base)]" />
-                  <div className="flex items-start gap-4">
-                    <div className="w-[80px] shrink-0 pt-0.5">
-                      <div className="text-xs font-mono font-medium text-[var(--text-secondary)]">
-                        {routine.time_label}
-                      </div>
-                    </div>
-                    <div className="flex-1">
-                      <div className="text-sm font-medium text-[var(--text-primary)]">
-                        {routine.title}
-                      </div>
-                      <div className="text-xs text-[var(--text-secondary)] mt-1 line-clamp-1">
-                        Status: {routine.status === "done" ? "Completed" : routine.status === "skipped" ? "Skipped" : "Pending"}
-                      </div>
-                    </div>
+            {/* COLUMN 3: TODAY'S TASKS & PRIVATE FOCUS */}
+            <div className="space-y-6">
+              <div className="bg-white brutal-border brutal-shadow p-6">
+                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-black pb-3 mb-6 flex items-center justify-between text-black">
+                  <span>
+                    {selectedDateStr === actualTodayStr
+                      ? "Today's Horizon"
+                      : "Focus Horizon"}
+                  </span>
+                  <span className="text-[10px] font-bold bg-[#ffeb3b] brutal-border px-2 py-0.5">
+                    {todayTasks.length} tasks
+                  </span>
+                </h2>
+                {todayTasks.length === 0 ? (
+                  <p className="text-sm font-bold text-black/60 italic">
+                    Nothing scheduled for this date.
+                  </p>
+                ) : (
+                  <div className="space-y-6">
+                    {renderSubjectGroup(todayGrouped)}
                   </div>
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-      {/* OVERDUE */}
-      {overdueTasks.length > 0 && (
-        <section className="space-y-4">
-          <h2 className="text-sm font-medium text-red-500 border-b border-red-900/30 pb-2">
-            Overdue Action Items
-          </h2>
-          <div className="p-4 rounded-xl bg-red-950/10 border border-red-900/20 space-y-4">
-            {renderSubjectGroup(overdueGrouped)}
-          </div>
-        </section>
-      )}
-
-      {/* UPCOMING */}
-      {upcomingTasks.length > 0 && (
-        <section className="space-y-4 pt-8">
-          <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
-            <span>Upcoming Horizon</span>
-            <span className="text-xs font-mono text-[var(--text-tertiary)]">
-              {upcomingTasks.length} tasks
-            </span>
-          </h2>
-          <div className="space-y-6 opacity-75 hover:opacity-100 transition-opacity">
-            {renderSubjectGroup(upcomingGrouped)}
-          </div>
-        </section>
-      )}
-
-      {/* PRIVATE FOCUS */}
-      <section className="space-y-4 pt-12">
-        <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between">
-          <span className="flex items-center gap-2">
-            Private Focus{" "}
-            <span className="text-[10px] bg-[var(--text-secondary)] text-[var(--bg-base)] px-1.5 py-0.5 rounded font-mono uppercase">
-              Only You
-            </span>
-          </span>
-        </h2>
-        <div className="space-y-2 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-xl p-4">
-          {personalTodos.map((todo) => (
-            <div key={todo.id} className="flex items-center gap-3 group">
-              <button
-                onClick={() => togglePersonalTodo(todo.id, todo.status)}
-                className={`w-4 h-4 flex-shrink-0 rounded-[4px] border flex items-center justify-center transition-colors ${
-                  todo.status === "done"
-                    ? "bg-[var(--text-tertiary)] border-[var(--text-tertiary)]"
-                    : "border-[var(--text-secondary)] hover:border-[var(--text-primary)]"
-                }`}
-              >
-                {todo.status === "done" && (
-                  <Check className="w-3 h-3 text-[var(--bg-base)]" />
                 )}
-              </button>
-              <div
-                className={`flex-1 text-sm ${todo.status === "done" ? "text-[var(--text-tertiary)] line-through" : "text-[var(--text-primary)]"}`}
-              >
-                {todo.title}
               </div>
-              <button
-                onClick={() => deletePersonalTodo(todo.id)}
-                className="opacity-0 group-hover:opacity-100 text-[var(--text-tertiary)] hover:text-red-500 text-xs transition-all"
-              >
-                Delete
-              </button>
-            </div>
-          ))}
-          <input
-            type="text"
-            placeholder="Add a private to-do... (Press Enter)"
-            className="w-full bg-transparent outline-none text-sm text-[var(--text-primary)] placeholder-[var(--text-tertiary)] pt-2 border-t border-[var(--border-hairline)] mt-2"
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                addPersonalTodo(e.currentTarget.value);
-                e.currentTarget.value = "";
-              }
-            }}
-          />
-        </div>
-      </section>
-        </div>
 
-        <div className="sticky top-8 space-y-6">
-          <div className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-xl p-5 shadow-sm">
-            <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-3 mb-4 flex items-center justify-between">
-              <span>{selectedDateStr === actualTodayStr ? "Today's Horizon" : "Focus Horizon"}</span>
-              <span className="text-[10px] font-mono text-[var(--text-tertiary)] bg-[var(--bg-base)] px-2 py-0.5 rounded border border-[var(--border-hairline)]">
-                {todayTasks.length} tasks
-              </span>
-            </h2>
-            {todayTasks.length === 0 ? (
-              <p className="text-sm text-[var(--text-secondary)] italic">
-                Nothing scheduled for today. Relax, or pull something from the
-                Backlog.
-              </p>
-            ) : (
-              <div className="space-y-6">
-                {renderSubjectGroup(todayGrouped)}
-              </div>
-            )}
+              {/* PRIVATE FOCUS */}
+              <section className="space-y-4 pt-4">
+                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-black pb-2 flex items-center justify-between text-black">
+                  <span className="flex items-center gap-2">
+                    Private Focus{" "}
+                    <span className="text-[10px] bg-black text-white px-2 py-0.5 brutal-border border-transparent uppercase font-bold">
+                      Only You
+                    </span>
+                  </span>
+                </h2>
+                <div className="space-y-3 bg-white brutal-border brutal-shadow-sm p-4">
+                  {personalTodos.map((todo) => (
+                    <div
+                      key={todo.id}
+                      className="flex items-center gap-3 group"
+                    >
+                      <button
+                        onClick={() => togglePersonalTodo(todo.id, todo.status)}
+                        className={`w-5 h-5 flex-shrink-0 brutal-border flex items-center justify-center transition-colors ${
+                          todo.status === "done"
+                            ? "bg-black"
+                            : "hover:bg-[#a8e6cf]"
+                        }`}
+                      >
+                        {todo.status === "done" && (
+                          <Check className="w-4 h-4 text-white" />
+                        )}
+                      </button>
+                      <div
+                        className={`flex-1 text-sm font-bold ${todo.status === "done" ? "text-black/40 line-through" : "text-black"}`}
+                      >
+                        {todo.title}
+                      </div>
+                      <button
+                        onClick={() => deletePersonalTodo(todo.id)}
+                        className="opacity-0 group-hover:opacity-100 text-[#ff6b6b] text-xs font-bold uppercase transition-all"
+                      >
+                        Del
+                      </button>
+                    </div>
+                  ))}
+                  <input
+                    type="text"
+                    placeholder="Add a private to-do... (Press Enter)"
+                    className="w-full bg-transparent outline-none text-sm font-bold text-black placeholder-black/40 pt-3 border-t-2 border-black mt-3"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        addPersonalTodo(e.currentTarget.value);
+                        e.currentTarget.value = "";
+                      }
+                    }}
+                  />
+                </div>
+              </section>
+            </div>
           </div>
-        </div>
-      </div>
-      </>
+        </>
       )}
 
       <EditTimetablePanel
