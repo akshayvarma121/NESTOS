@@ -12,7 +12,7 @@ router.get("/", async (req: AuthRequest, res) => {
   // or limit to a specific date range if passed. For now, let's return all.
 
   try {
-    const [eventsRes, closeoutsRes, tasksRes] = await Promise.all([
+    const [eventsRes, closeoutsRes, tasksRes, macroGoalsRes, deadlinesRes] = await Promise.all([
       supabase
         .from("pos_events")
         .select("*")
@@ -26,12 +26,24 @@ router.get("/", async (req: AuthRequest, res) => {
         .select("id, title, scheduled_date, status, description")
         .in("user_id", req.sharedSpaceIds!)
         .not("scheduled_date", "is", null),
+      supabase
+        .from("pos_macro_goals")
+        .select("id, title, deadline, progress")
+        .in("user_id", req.sharedSpaceIds!)
+        .not("deadline", "is", null),
+      supabase
+        .from("pos_deadlines")
+        .select("id, title, deadline")
+        .in("user_id", req.sharedSpaceIds!)
+        .not("deadline", "is", null),
     ]);
 
     res.json({
       events: eventsRes.data || [],
       closeouts: closeoutsRes.data || [],
       scheduledTasks: tasksRes.data || [],
+      macroGoals: macroGoalsRes.data || [],
+      deadlines: deadlinesRes.data || [],
     });
   } catch (e: any) {
     res.status(500).json({ error: e.message });

@@ -21,6 +21,7 @@ const mainTabs = [{ name: "Focus", path: "/focus", icon: Target }];
 const secondaryTabs = [{ name: "Backlog", path: "/backlog", icon: ListTodo }];
 
 const moreTabs = [
+  { name: "Calendar", path: "/calendar", icon: CalendarIcon },
   { name: "Timer", path: "/timer", icon: Timer },
   { name: "Goals", path: "/goals", icon: BarChart2 },
   { name: "Dates", path: "/opportunities", icon: Lightbulb },

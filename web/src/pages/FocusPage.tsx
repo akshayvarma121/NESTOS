@@ -78,7 +78,7 @@ export default function FocusPage() {
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
   const [events, setEvents] = useState<any[]>([]);
-  const [showEventInput, setShowEventInput] = useState(false);
+
   const [showFocusInput, setShowFocusInput] = useState(false);
   const [closeouts, setCloseouts] = useState<any[]>([]);
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
@@ -500,41 +500,6 @@ export default function FocusPage() {
                   )}
                 </div>
 
-                {showEventInput ? (
-                  <div className="relative mt-2">
-                    <input
-                      type="text"
-                      autoFocus
-                      placeholder="Mark a new date... (Press Enter)"
-                      className="w-full bg-[var(--bg-surface-raised)] outline-none text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] p-3 border-b-2 border-[var(--accent)] transition-colors shadow-lg"
-                      onBlur={() => setShowEventInput(false)}
-                      onKeyDown={async (e) => {
-                        if (e.key === "Escape") setShowEventInput(false);
-                        if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                          const title = e.currentTarget.value.trim();
-                          e.currentTarget.value = "";
-                          try {
-                            const res = await api.post("/calendar/events", {
-                              title,
-                              date: selectedDateStr,
-                            });
-                            setEvents((prev) => [...prev, res]);
-                            setShowEventInput(false);
-                          } catch (err) {
-                            console.error("Failed to add event");
-                          }
-                        }
-                      }}
-                    />
-                  </div>
-                ) : (
-                  <button
-                    onClick={() => setShowEventInput(true)}
-                    className="mt-2 bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 text-xs font-black uppercase brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
-                  >
-                    + Add Event
-                  </button>
-                )}
               </div>
 
               {/* DAILY ROUTINE TIMETABLE */}

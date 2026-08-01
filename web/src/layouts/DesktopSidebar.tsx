@@ -30,6 +30,7 @@ const navGroups = [
   {
     label: "Planning",
     items: [
+      { name: "Calendar", path: "/calendar", icon: CalendarIcon },
       { name: "Backlog", path: "/backlog", icon: ListTodo },
       { name: "Goals", path: "/goals", icon: BarChart2 },
       { name: "Deadlines", path: "/opportunities", icon: Lightbulb },

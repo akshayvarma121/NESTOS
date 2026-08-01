@@ -7,6 +7,8 @@ import {
   ChevronRight,
   Plus,
   X,
+  Flag,
+  AlertCircle
 } from "lucide-react";
 
 export default function CalendarPage() {
@@ -17,6 +19,8 @@ export default function CalendarPage() {
   const [events, setEvents] = useState<any[]>([]);
   const [closeouts, setCloseouts] = useState<any[]>([]);
   const [scheduledTasks, setScheduledTasks] = useState<any[]>([]);
+  const [macroGoals, setMacroGoals] = useState<any[]>([]);
+  const [deadlines, setDeadlines] = useState<any[]>([]);
 
   // Modals
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -31,6 +35,8 @@ export default function CalendarPage() {
       setEvents(data.events || []);
       setCloseouts(data.closeouts || []);
       setScheduledTasks(data.scheduledTasks || []);
+      setMacroGoals(data.macroGoals || []);
+      setDeadlines(data.deadlines || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -136,40 +142,46 @@ export default function CalendarPage() {
   const selectedTasks = selectedDate
     ? scheduledTasks.filter((t) => t.scheduled_date === selectedDate)
     : [];
+  const selectedMacroGoals = selectedDate
+    ? macroGoals.filter((g) => g.deadline && g.deadline.startsWith(selectedDate))
+    : [];
+  const selectedDeadlines = selectedDate
+    ? deadlines.filter((d) => d.deadline && d.deadline.startsWith(selectedDate))
+    : [];
 
   return (
-    <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 flex flex-col pb-32">
+    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 flex flex-col pb-32">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <CalendarIcon className="w-5 h-5 text-[var(--accent)]" />
-          <h1 className="text-2xl font-semibold">Calendar & Analytics</h1>
+          <CalendarIcon className="w-8 h-8 text-[var(--text-primary)]" />
+          <h1 className="text-4xl font-black uppercase tracking-tighter">Calendar Horizon</h1>
         </div>
-        <div className="flex items-center gap-4 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg p-1">
+        <div className="flex items-center gap-4 border-2 border-[var(--border-brutal)] p-1 brutal-shadow-sm bg-[var(--bg-surface)]">
           <button
             onClick={prevMonth}
-            className="p-1.5 hover:bg-[var(--bg-base)] rounded transition-colors"
+            className="p-1.5 hover:bg-[var(--bg-base)] transition-colors"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <ChevronLeft className="w-5 h-5 font-black text-[var(--text-primary)]" />
           </button>
-          <span className="text-sm font-medium min-w-[100px] text-center">
+          <span className="text-sm font-black uppercase min-w-[120px] text-center">
             {monthName}
           </span>
           <button
             onClick={nextMonth}
-            className="p-1.5 hover:bg-[var(--bg-base)] rounded transition-colors"
+            className="p-1.5 hover:bg-[var(--bg-base)] transition-colors"
           >
-            <ChevronRight className="w-4 h-4" />
+            <ChevronRight className="w-5 h-5 font-black text-[var(--text-primary)]" />
           </button>
         </div>
       </div>
 
-      <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl overflow-hidden flex flex-col shadow-sm">
+      <div className="border-2 border-[var(--border-brutal)] brutal-shadow bg-[var(--bg-base)] flex flex-col">
         {/* Calendar Header */}
-        <div className="grid grid-cols-7 border-b border-[var(--border-hairline)] bg-[var(--bg-surface-raised)]">
+        <div className="grid grid-cols-7 border-b-2 border-[var(--border-brutal)] bg-[var(--bg-surface-raised)]">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div
               key={day}
-              className="p-2 text-center text-xs font-medium text-[var(--text-secondary)]"
+              className="p-3 text-center text-xs font-black uppercase tracking-widest text-[var(--text-primary)] border-r-2 border-[var(--border-brutal)] last:border-r-0"
             >
               {day}
             </div>
@@ -178,83 +190,113 @@ export default function CalendarPage() {
 
         {/* Calendar Grid */}
         <div
-          className="grid grid-cols-7 bg-[var(--border-hairline)] gap-px"
+          className="grid grid-cols-7 bg-[var(--border-brutal)] gap-[2px]"
           style={{
-            gridTemplateRows: `repeat(${totalSlots / 7}, minmax(100px, 1fr))`,
+            gridTemplateRows: `repeat(${totalSlots / 7}, minmax(140px, 1fr))`,
           }}
         >
           {loading ? (
-            <div className="col-span-7 row-span-full flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-secondary)]">
-              Loading Analytics...
+            <div className="col-span-7 row-span-full flex items-center justify-center bg-[var(--bg-base)] text-[var(--text-secondary)] font-black uppercase">
+              Loading Calendar...
             </div>
           ) : (
             days.map((d, i) => {
               if (d === null)
                 return (
-                  <div key={`empty-${i}`} className="bg-[var(--bg-surface)]" />
+                  <div key={`empty-${i}`} className="bg-[var(--bg-surface-raised)] opacity-50" />
                 );
 
               const dateStr = getDateStr(d);
               const dayEvents = events.filter((e) => e.date === dateStr);
               const closeout = closeouts.find((c) => c.date === dateStr);
+              const dayMacroGoals = macroGoals.filter((g) => g.deadline && g.deadline.startsWith(dateStr));
+              const dayDeadlines = deadlines.filter((dl) => dl.deadline && dl.deadline.startsWith(dateStr));
               const isSelected = selectedDate === dateStr;
               const isToday = isTodayDate(d);
 
-              // Simple visual density logic for heatmap
-              let bgClass =
-                "bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-raised)]";
+              let bgClass = "bg-[var(--bg-base)] hover:bg-[var(--bg-surface)]";
               if (closeout) {
                 if (closeout.total_completed >= 5)
-                  bgClass = "bg-[#10b981]/20 hover:bg-[#10b981]/30";
+                  bgClass = "bg-[#2ed573]/20 hover:bg-[#2ed573]/30";
                 else if (closeout.total_completed > 0)
-                  bgClass = "bg-[#10b981]/10 hover:bg-[#10b981]/20";
+                  bgClass = "bg-[#2ed573]/10 hover:bg-[#2ed573]/20";
               }
 
               return (
                 <div
                   key={i}
                   onClick={() => setSelectedDate(dateStr)}
-                  className={`relative p-2 cursor-pointer transition-colors ${bgClass} ${isSelected ? "ring-2 ring-inset ring-[var(--accent)] z-10" : ""}`}
+                  className={`relative p-2 cursor-pointer transition-colors ${bgClass} ${isSelected ? "ring-4 ring-inset ring-[var(--text-primary)] z-10 bg-[var(--bg-surface)]" : ""}`}
                 >
-                  <div className="flex justify-between items-start">
+                  <div className="flex justify-between items-start mb-2">
                     <span
-                      className={`text-sm font-medium ${isToday ? "bg-[var(--accent)] text-white w-6 h-6 flex items-center justify-center rounded-full" : isSelected ? "text-[var(--accent)]" : "text-[var(--text-primary)]"}`}
+                      className={`text-lg font-black ${isToday ? "bg-[var(--text-primary)] text-[var(--bg-base)] w-8 h-8 flex items-center justify-center brutal-border" : "text-[var(--text-primary)]"}`}
                     >
                       {d}
                     </span>
                     {closeout && (
-                      <span className="text-[9px] font-mono text-[var(--text-secondary)] bg-[var(--bg-base)] border border-[var(--border-hairline)] px-1 rounded-sm">
+                      <span className="text-[10px] font-black bg-[var(--bg-surface-raised)] brutal-border px-1">
                         {closeout.total_completed}/{closeout.total_scheduled}
                       </span>
                     )}
                   </div>
 
-                  <div className="mt-1 space-y-1 overflow-hidden h-[40px] lg:h-[60px]">
+                  <div className="space-y-1 overflow-hidden h-[85px]">
+                    {/* Goal Deadlines */}
+                    {dayMacroGoals.map((g) => (
+                      <div
+                        key={`mg-${g.id}`}
+                        className="text-[10px] font-black uppercase leading-tight bg-[#ff4757] text-white border border-black brutal-shadow-sm px-1 py-0.5 truncate flex items-center gap-1"
+                      >
+                        <Flag className="w-3 h-3 flex-shrink-0" />
+                        {g.title}
+                      </div>
+                    ))}
+                    
+                    {/* Standalone Deadlines */}
+                    {dayDeadlines.map((dl) => (
+                      <div
+                        key={`dl-${dl.id}`}
+                        className="text-[10px] font-black uppercase leading-tight bg-[#ffa502] text-black border border-black brutal-shadow-sm px-1 py-0.5 truncate flex items-center gap-1"
+                      >
+                        <AlertCircle className="w-3 h-3 flex-shrink-0" />
+                        {dl.title}
+                      </div>
+                    ))}
+
+                    {/* Events */}
                     {dayEvents.map((e) => (
                       <div
-                        key={e.id}
-                        className="text-[10px] leading-tight bg-[var(--accent)]/10 text-[var(--accent)] border border-[var(--accent)]/20 rounded px-1 py-0.5 truncate"
+                        key={`ev-${e.id}`}
+                        className="text-[10px] font-bold leading-tight bg-[#4b7bff] text-white border border-black px-1 py-0.5 truncate"
                       >
                         {e.title}
                       </div>
                     ))}
+                    
+                    {/* Tasks */}
                     {scheduledTasks
                       .filter((t) => t.scheduled_date === dateStr)
-                      .slice(0, 3)
+                      .slice(0, 2)
                       .map((t) => (
                         <div
-                          key={t.id}
-                          className={`text-[9px] leading-tight flex items-center gap-1 rounded px-1 py-0.5 truncate ${
+                          key={`t-${t.id}`}
+                          className={`text-[9px] font-bold leading-tight flex items-center gap-1 px-1 py-0.5 truncate ${
                             t.status === "done"
-                              ? "bg-[#10b981]/10 text-[#10b981] line-through"
+                              ? "text-[var(--text-tertiary)] line-through"
                               : t.status === "skipped"
-                                ? "bg-[var(--warning)]/10 text-[var(--warning)]"
-                                : "bg-[var(--bg-surface-raised)] text-[var(--text-secondary)]"
+                                ? "text-[var(--warning)]"
+                                : "text-[var(--text-secondary)]"
                           }`}
                         >
-                          <span className="truncate">{t.title}</span>
+                          <span className="truncate flex-1">- {t.title}</span>
                         </div>
                       ))}
+                    {scheduledTasks.filter((t) => t.scheduled_date === dateStr).length > 2 && (
+                       <div className="text-[9px] font-black text-[var(--text-tertiary)] px-1">
+                         +{scheduledTasks.filter((t) => t.scheduled_date === dateStr).length - 2} more tasks
+                       </div>
+                    )}
                   </div>
                 </div>
               );
@@ -267,11 +309,11 @@ export default function CalendarPage() {
       <div
         onTouchStart={handleTouchStart}
         onTouchEnd={handleTouchEnd}
-        className={`fixed inset-y-0 right-0 w-full md:w-[400px] bg-[var(--bg-surface)] border-l border-[var(--border-hairline)] shadow-2xl transition-transform duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] z-[100] ${selectedDate ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed inset-y-0 right-0 w-full md:w-[400px] bg-[var(--bg-base)] border-l-4 border-[var(--border-brutal)] brutal-shadow transition-transform duration-300 ease-in-out z-[100] ${selectedDate ? "translate-x-0" : "translate-x-full"}`}
       >
-        <div className="h-full flex flex-col p-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold">
+        <div className="h-full flex flex-col p-6 overflow-y-auto">
+          <div className="flex justify-between items-center mb-8 border-b-2 border-[var(--border-brutal)] pb-4">
+            <h2 className="text-2xl font-black uppercase">
               {selectedDate
                 ? new Date(selectedDate).toLocaleDateString(undefined, {
                     weekday: "short",
@@ -286,46 +328,76 @@ export default function CalendarPage() {
                 setSelectedDate(null);
                 setIsAddingEvent(false);
               }}
-              className="p-2 -mr-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+              className="p-1 brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform bg-[var(--bg-surface)] text-[var(--text-primary)]"
             >
               <X className="w-5 h-5" />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto space-y-8 pr-2">
-            {/* Events Section */}
-            <section className="space-y-3">
-              <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-2">
-                <h3 className="text-sm font-medium">Events & Reminders</h3>
-                <button
-                  onClick={() => setIsAddingEvent(!isAddingEvent)}
-                  className="text-xs bg-[var(--bg-surface-raised)] hover:text-white px-2 py-1 rounded transition-colors"
-                >
-                  {isAddingEvent ? "Cancel" : "+ Add Event"}
-                </button>
-              </div>
+          <div className="space-y-8 pb-10">
+            {/* Deadlines Section */}
+            {(selectedMacroGoals.length > 0 || selectedDeadlines.length > 0) && (
+              <section className="space-y-4">
+                <h3 className="text-sm font-black uppercase tracking-widest text-[#ff4757] border-b-2 border-[#ff4757] pb-1">
+                  Deadlines
+                </h3>
+                <div className="space-y-2">
+                  {selectedMacroGoals.map((g) => (
+                    <div key={`mg-p-${g.id}`} className="p-3 bg-[#ff4757] text-white border-2 border-black brutal-shadow-sm flex items-center gap-3">
+                      <Flag className="w-5 h-5" />
+                      <div>
+                        <div className="text-[10px] font-black uppercase opacity-80">Goal Deadline</div>
+                        <div className="font-bold text-sm">{g.title}</div>
+                      </div>
+                    </div>
+                  ))}
+                  {selectedDeadlines.map((dl) => (
+                    <div key={`dl-p-${dl.id}`} className="p-3 bg-[#ffa502] text-black border-2 border-black brutal-shadow-sm flex items-center gap-3">
+                      <AlertCircle className="w-5 h-5" />
+                      <div>
+                        <div className="text-[10px] font-black uppercase opacity-80">Standalone Deadline</div>
+                        <div className="font-bold text-sm">{dl.title}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
 
-              {isAddingEvent && (
+            {/* Events Section */}
+            <section className="space-y-4">
+              <h3 className="text-sm font-black uppercase tracking-widest text-[#4b7bff] border-b-2 border-[#4b7bff] pb-1">
+                Events
+              </h3>
+              
+              {isAddingEvent ? (
                 <form onSubmit={handleAddEvent} className="flex gap-2 mb-4">
                   <input
                     autoFocus
                     required
                     value={newEventTitle}
                     onChange={(e) => setNewEventTitle(e.target.value)}
-                    placeholder="e.g. ML Midterm"
-                    className="flex-1 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-1.5 text-sm outline-none focus:border-[var(--accent)]"
+                    placeholder="Event title..."
+                    className="flex-1 bg-[var(--bg-surface-raised)] border-2 border-[var(--border-brutal)] p-2 text-sm font-bold outline-none focus:border-[var(--accent)]"
                   />
                   <button
                     type="submit"
-                    className="bg-[var(--accent)] text-white px-3 rounded-md text-sm font-medium"
+                    className="bg-[#4b7bff] text-white px-4 font-black uppercase text-xs brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
                   >
                     Add
                   </button>
                 </form>
+              ) : (
+                <button
+                  onClick={() => setIsAddingEvent(true)}
+                  className="bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 text-xs font-black uppercase brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
+                >
+                  + Add Event
+                </button>
               )}
 
               {selectedEvents.length === 0 && !isAddingEvent ? (
-                <p className="text-xs text-[var(--text-secondary)]">
+                <p className="text-xs font-bold text-[var(--text-secondary)] italic">
                   No events scheduled.
                 </p>
               ) : (
@@ -333,70 +405,52 @@ export default function CalendarPage() {
                   {selectedEvents.map((e) => (
                     <div
                       key={e.id}
-                      className="p-2 bg-[var(--accent)]/5 border border-[var(--accent)]/20 rounded-md text-sm text-[var(--text-primary)]"
+                      className="p-3 bg-[#4b7bff]/10 border-2 border-[#4b7bff] font-bold text-sm text-[var(--text-primary)] flex justify-between group"
                     >
-                      {e.title}
+                      <span>{e.title}</span>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.delete(`/calendar/events/${e.id}`);
+                            setEvents((prev) => prev.filter(ev => ev.id !== e.id));
+                          } catch (err) {
+                            console.error("Failed to delete event", err);
+                          }
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-[#ff6b6b] text-xs uppercase font-black hover:underline transition-all"
+                      >
+                        Del
+                      </button>
                     </div>
                   ))}
                 </div>
               )}
             </section>
 
-            {/* Analytics Section */}
-            <section className="space-y-3">
-              <h3 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2">
-                Day Summary
-              </h3>
-              {selectedCloseout ? (
-                <div className="grid grid-cols-2 gap-3">
-                  <div className="p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg text-center">
-                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                      Completed
-                    </p>
-                    <p className="text-xl font-semibold text-[#10b981]">
-                      {selectedCloseout.total_completed}
-                    </p>
-                  </div>
-                  <div className="p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg text-center">
-                    <p className="text-xs text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                      Scheduled
-                    </p>
-                    <p className="text-xl font-semibold">
-                      {selectedCloseout.total_scheduled}
-                    </p>
-                  </div>
-                </div>
-              ) : (
-                <p className="text-xs text-[var(--text-secondary)]">
-                  No close-out data for this day.
-                </p>
-              )}
-            </section>
-
             {/* Scheduled Tasks Section */}
             {selectedTasks.length > 0 && (
-              <section className="space-y-3">
-                <h3 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2">
-                  Scheduled Tasks (Slices)
+              <section className="space-y-4">
+                <h3 className="text-sm font-black uppercase tracking-widest border-b-2 border-[var(--border-brutal)] pb-1">
+                  Scheduled Tasks
                 </h3>
-                <div className="space-y-1.5">
+                <div className="space-y-2">
                   {selectedTasks.map((t) => (
                     <div
                       key={t.id}
-                      className="flex flex-col gap-0.5 p-2 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-md"
+                      className="flex flex-col gap-1 p-3 bg-[var(--bg-surface)] border-2 border-[var(--border-brutal)]"
                     >
                       <div className="flex items-center gap-2">
                         <div
-                          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                          className={`w-2 h-2 rounded-full flex-shrink-0 ${
                             t.status === "done"
-                              ? "bg-[#10b981]"
+                              ? "bg-[#2ed573]"
                               : t.status === "skipped"
                                 ? "bg-[var(--warning)]"
                                 : "bg-[var(--text-secondary)]"
                           }`}
                         ></div>
                         <span
-                          className={`text-sm ${
+                          className={`text-sm font-bold ${
                             t.status === "done"
                               ? "text-[var(--text-tertiary)] line-through"
                               : t.status === "skipped"
@@ -406,17 +460,7 @@ export default function CalendarPage() {
                         >
                           {t.title}
                         </span>
-                        {t.status === "pending" && (
-                          <span className="text-[10px] uppercase font-medium bg-[var(--text-secondary)]/20 text-[var(--text-secondary)] px-1.5 rounded ml-auto">
-                            Pending
-                          </span>
-                        )}
                       </div>
-                      {t.description && (
-                        <p className="text-[11px] text-[var(--text-tertiary)] italic pl-3.5 line-clamp-2">
-                          {t.description}
-                        </p>
-                      )}
                     </div>
                   ))}
                 </div>
@@ -425,10 +469,14 @@ export default function CalendarPage() {
           </div>
         </div>
       </div>
+      
       {selectedDate && (
         <div
-          className="fixed inset-0 bg-black/40 z-[90] backdrop-blur-sm lg:hidden"
-          onClick={() => setSelectedDate(null)}
+          className="fixed inset-0 bg-black/60 z-[90] backdrop-blur-sm lg:hidden"
+          onClick={() => {
+            setSelectedDate(null);
+            setIsAddingEvent(false);
+          }}
         />
       )}
     </div>

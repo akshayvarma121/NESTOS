@@ -16,6 +16,7 @@ import SharedPartnerPage from "./pages/SharedPartnerPage";
 import NotesPage from "./pages/NotesPage";
 import TimerPage from "./pages/TimerPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
+import CalendarPage from "./pages/CalendarPage";
 
 import type { ReactNode } from "react";
 
@@ -51,6 +52,7 @@ export default function App() {
             >
               <Route index element={<Navigate to="/focus" replace />} />
               <Route path="focus" element={<FocusPage />} />
+              <Route path="calendar" element={<CalendarPage />} />
               <Route path="routines-history" element={<AnalyticsPage />} />
               <Route path="backlog" element={<BacklogPage />} />
               <Route path="goals" element={<GoalsPage />} />
