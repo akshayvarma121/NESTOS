@@ -61,11 +61,11 @@ export default function BrutalistCalendar({
   };
 
   return (
-    <div className="bg-white brutal-border brutal-shadow-sm flex flex-col overflow-hidden">
-      <div className="flex items-center justify-between p-3 border-b-2 border-black bg-[#ffeb3b]">
+    <div className="bg-[var(--bg-surface)] border-t-4 border-l-4 border-[var(--border-brutal)] brutal-shadow-sm flex flex-col overflow-hidden">
+      <div className="flex items-center justify-between p-3 border-b-2 border-[var(--border-brutal)] bg-[#ffeb3b]">
         <button
           onClick={prevMonth}
-          className="p-1 hover:bg-black hover:text-white border-2 border-transparent hover:border-black transition-colors cursor-pointer"
+          className="p-1 hover:bg-black hover:text-[#ffeb3b] border-2 border-transparent hover:border-black transition-colors cursor-pointer text-black"
         >
           <ChevronLeft className="w-5 h-5" />
         </button>
@@ -74,17 +74,17 @@ export default function BrutalistCalendar({
         </span>
         <button
           onClick={nextMonth}
-          className="p-1 hover:bg-black hover:text-white border-2 border-transparent hover:border-black transition-colors cursor-pointer"
+          className="p-1 hover:bg-black hover:text-[#ffeb3b] border-2 border-transparent hover:border-black transition-colors cursor-pointer text-black"
         >
           <ChevronRight className="w-5 h-5" />
         </button>
       </div>
 
-      <div className="grid grid-cols-7 border-b-2 border-black bg-[#fdfbf7]">
+      <div className="grid grid-cols-7 border-b-2 border-[var(--border-brutal)] bg-[var(--bg-surface-raised)]">
         {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
           <div
             key={day}
-            className="p-2 text-center text-xs font-black uppercase text-black/60 border-r-2 border-black last:border-r-0"
+            className="p-2 text-center text-xs font-black uppercase text-[var(--text-secondary)] border-r-2 border-[var(--border-brutal)] last:border-r-0"
           >
             {day.charAt(0)}
           </div>
@@ -92,14 +92,19 @@ export default function BrutalistCalendar({
       </div>
 
       <div
-        className="grid grid-cols-7 bg-black gap-[2px]"
+        className="grid grid-cols-7 bg-[var(--border-brutal)] gap-[2px]"
         style={{
           gridTemplateRows: `repeat(${totalSlots / 7}, minmax(48px, 1fr))`,
         }}
       >
         {days.map((d, i) => {
           if (d === null)
-            return <div key={`empty-${i}`} className="bg-[#fdfbf7]" />;
+            return (
+              <div
+                key={`empty-${i}`}
+                className="bg-[var(--bg-surface-raised)]"
+              />
+            );
 
           const dateStr = getDateStr(d);
           const dayEvents = events.filter((e) => e.date === dateStr);
@@ -107,12 +112,14 @@ export default function BrutalistCalendar({
           const isSelected = selectedDateStr === dateStr;
           const isToday = isTodayDate(d);
 
-          let bgClass = "bg-white hover:bg-black/5";
+          let bgClass =
+            "bg-[var(--bg-surface)] hover:bg-[var(--bg-surface-raised)]";
           if (closeout) {
             if (closeout.total_completed >= 5) bgClass = "bg-[#2ed573]";
             else if (closeout.total_completed > 0) bgClass = "bg-[#a8e6cf]";
           }
-          if (isSelected) bgClass = "bg-black text-white";
+          if (isSelected)
+            bgClass = "bg-[var(--text-primary)] text-[var(--bg-base)]";
 
           return (
             <div
@@ -126,8 +133,8 @@ export default function BrutalistCalendar({
                     isToday && !isSelected
                       ? "text-[#ff6b6b] underline decoration-2 underline-offset-2"
                       : isSelected
-                        ? "text-[#ffeb3b]"
-                        : "text-black"
+                        ? "text-[var(--bg-base)]"
+                        : "text-[var(--text-primary)]"
                   }`}
                 >
                   {d}
