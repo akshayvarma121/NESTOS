@@ -4,6 +4,7 @@ import { supabase } from "../supabase.js";
 export interface AuthRequest extends Request {
   user?: {
     id: string;
+    user_metadata?: Record<string, any>;
   };
   sharedSpaceIds?: string[];
 }
@@ -32,7 +33,10 @@ export const requireAuth = async (
     return res.status(401).json({ error: "Invalid or expired token" });
   }
 
-  req.user = { id: user.id };
+  req.user = { 
+    id: user.id,
+    user_metadata: user.user_metadata || {},
+  };
 
   // Determine Shared Space (Couples Mode)
   // Fetch all partner connections where this user is either side

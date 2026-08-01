@@ -73,6 +73,7 @@ export function RegisterPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [username, setUsername] = useState("");
+  const [country, setCountry] = useState("IN");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -81,9 +82,15 @@ export function RegisterPage() {
     setLoading(true);
     setError("");
 
-    const { data, error: signUpError } = await supabase.auth.signUp({
+    const { error: signUpError, data } = await supabase.auth.signUp({
       email,
       password,
+      options: {
+        data: {
+          username,
+          country,
+        },
+      },
     });
 
     if (signUpError) {
@@ -147,6 +154,18 @@ export function RegisterPage() {
             onChange={(e) => setUsername(e.target.value)}
             className="w-full bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-lg px-4 py-3 outline-none focus:border-[var(--accent)]"
           />
+          <select
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+            className="w-full bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-lg px-4 py-3 outline-none focus:border-[var(--accent)] text-[var(--text-primary)]"
+          >
+            <option value="IN">India (IN)</option>
+            <option value="US">United States (US)</option>
+            <option value="GB">United Kingdom (GB)</option>
+            <option value="CA">Canada (CA)</option>
+            <option value="AU">Australia (AU)</option>
+            <option value="DE">Germany (DE)</option>
+          </select>
           <input
             type="password"
             required

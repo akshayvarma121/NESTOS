@@ -122,6 +122,44 @@ export default function SettingsPage() {
               </div>
             </div>
 
+            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
+              <div>
+                <h3 className="text-sm font-medium">Country (Holidays)</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Used for displaying national holidays in your calendar.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <select
+                  id="countryInput"
+                  defaultValue={user?.user_metadata?.country || "US"}
+                  className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-md px-3 py-1.5 text-sm outline-none focus:border-[var(--text-primary)] w-full md:w-48 text-[var(--text-primary)]"
+                >
+                  <option value="IN">India (IN)</option>
+                  <option value="US">United States (US)</option>
+                  <option value="GB">United Kingdom (GB)</option>
+                  <option value="CA">Canada (CA)</option>
+                  <option value="AU">Australia (AU)</option>
+                  <option value="DE">Germany (DE)</option>
+                </select>
+                <button
+                  onClick={async () => {
+                    const input = document.getElementById("countryInput") as HTMLSelectElement;
+                    if (!input.value) return;
+                    try {
+                      await supabase.auth.updateUser({ data: { country: input.value } });
+                      alert("Country updated successfully! Refresh the page to see changes.");
+                    } catch (e: any) {
+                      alert("Failed to update country: " + e.message);
+                    }
+                  }}
+                  className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-3 py-1.5 rounded-md text-xs hover:opacity-90 transition-opacity whitespace-nowrap brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+
             <a
               href="/partner"
               className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-[var(--text-primary)] transition-colors"
