@@ -6,6 +6,17 @@ import ical from "node-ical";
 const router = Router();
 router.use(requireAuth);
 
+const holidayCache = new Map<string, { timestamp: number; data: any[] }>();
+
+const countryMapping: Record<string, string> = {
+  IN: "indian",
+  US: "usa",
+  GB: "uk",
+  CA: "canadian",
+  AU: "australian",
+  DE: "german",
+};
+
 router.get("/", async (req: AuthRequest, res) => {
   const { month, year } = req.query; // optional, e.g. "07", "2026", else we return all for simplicity or current month.
 
@@ -15,40 +26,7 @@ router.get("/", async (req: AuthRequest, res) => {
   const yearToFetch = year ? parseInt(year as string) : new Date().getFullYear();
   const userCountry = req.user?.user_metadata?.country || "US";
 
-  const countryMapping: Record<string, string> = {
-    IN: "indian",
-    US: "usa",
-    GB: "uk",
-    CA: "canadian",
-    AU: "australian",
-    DE: "german",
-  };
-
   try {
-    let publicHolidays: any[] = [];
-    try {
-      const gName = countryMapping[userCountry] || "usa";
-      const url = `https://calendar.google.com/calendar/ical/en.${gName}%23holiday%40group.v.calendar.google.com/public/basic.ics`;
-      const data = await ical.async.fromURL(url);
-      
-      for (const k in data) {
-        const ev = data[k];
-        if (ev.type === "VEVENT" && ev.start) {
-          const d = ev.start as Date;
-          if (d.getFullYear() === yearToFetch) {
-            const yy = d.getFullYear();
-            const mm = String(d.getMonth() + 1).padStart(2, "0");
-            const dd = String(d.getDate()).padStart(2, "0");
-            publicHolidays.push({
-              date: `${yy}-${mm}-${dd}`,
-              name: ev.summary,
-            });
-          }
-        }
-      }
-    } catch (err) {
-      console.error("Failed to generate public holidays via ICS:", err);
-    }
     const [eventsRes, closeoutsRes, tasksRes, macroGoalsRes, deadlinesRes] = await Promise.all([
       supabase
         .from("pos_events")
@@ -81,8 +59,53 @@ router.get("/", async (req: AuthRequest, res) => {
       scheduledTasks: tasksRes.data || [],
       macroGoals: macroGoalsRes.data || [],
       deadlines: deadlinesRes.data || [],
-      holidays: publicHolidays,
+      holidays: [], // Keep array to not break legacy code before frontend is updated
     });
+  } catch (e: any) {
+    res.status(500).json({ error: e.message });
+  }
+});
+
+router.get("/holidays", async (req: AuthRequest, res) => {
+  const { year } = req.query;
+  const yearToFetch = year ? parseInt(year as string) : new Date().getFullYear();
+  const userCountry = req.user?.user_metadata?.country || "US";
+
+  try {
+    let publicHolidays: any[] = [];
+    const gName = countryMapping[userCountry] || "usa";
+    const cacheKey = `${gName}-${yearToFetch}`;
+
+    if (holidayCache.has(cacheKey)) {
+      const cached = holidayCache.get(cacheKey)!;
+      if (Date.now() - cached.timestamp < 24 * 60 * 60 * 1000) {
+        publicHolidays = cached.data;
+      }
+    }
+
+    if (publicHolidays.length === 0) {
+      const url = `https://calendar.google.com/calendar/ical/en.${gName}%23holiday%40group.v.calendar.google.com/public/basic.ics`;
+      const data = await ical.async.fromURL(url);
+      
+      for (const k in data) {
+        const ev = data[k];
+        if (ev.type === "VEVENT" && ev.start) {
+          const d = ev.start as Date;
+          if (d.getFullYear() === yearToFetch) {
+            const yy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            publicHolidays.push({
+              date: `${yy}-${mm}-${dd}`,
+              name: ev.summary,
+            });
+          }
+        }
+      }
+      holidayCache.set(cacheKey, { timestamp: Date.now(), data: publicHolidays });
+    }
+
+    res.json(publicHolidays);
   } catch (e: any) {
     res.status(500).json({ error: e.message });
   }

@@ -8,7 +8,8 @@ import {
   Plus,
   X,
   Flag,
-  AlertCircle
+  AlertCircle,
+  RefreshCw
 } from "lucide-react";
 
 export default function CalendarPage() {
@@ -38,7 +39,16 @@ export default function CalendarPage() {
       setScheduledTasks(data.scheduledTasks || []);
       setMacroGoals(data.macroGoals || []);
       setDeadlines(data.deadlines || []);
-      setHolidays(data.holidays || []);
+
+      const year = currentDate.getFullYear();
+      const cachedHolidays = localStorage.getItem(`holidays_${year}`);
+      if (cachedHolidays) {
+        setHolidays(JSON.parse(cachedHolidays));
+      } else {
+        const holidaysData = await api.get(`/calendar/holidays?year=${year}`);
+        localStorage.setItem(`holidays_${year}`, JSON.stringify(holidaysData));
+        setHolidays(holidaysData);
+      }
     } catch (e) {
       console.error(e);
     } finally {
@@ -48,7 +58,13 @@ export default function CalendarPage() {
 
   useEffect(() => {
     fetchData();
-  }, [currentDate]);
+  }, []); // Only fetch on mount, rely on sync for manual refresh
+
+  const handleManualSync = async () => {
+    const year = currentDate.getFullYear();
+    localStorage.removeItem(`holidays_${year}`);
+    await fetchData();
+  };
 
   const handleAddEvent = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -157,6 +173,14 @@ export default function CalendarPage() {
         <div className="flex items-center gap-3">
           <CalendarIcon className="w-8 h-8 text-[var(--text-primary)]" />
           <h1 className="text-4xl font-black uppercase tracking-tighter">Calendar Horizon</h1>
+          <button
+            onClick={handleManualSync}
+            disabled={loading}
+            className="ml-4 p-2 bg-[var(--bg-surface-raised)] border-2 border-[var(--border-brutal)] brutal-shadow-sm hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all text-[var(--text-primary)] group disabled:opacity-50"
+            title="Force Refresh Data"
+          >
+            <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin text-[var(--accent)]" : "group-hover:rotate-180 transition-transform duration-500"}`} />
+          </button>
         </div>
         <div className="flex items-center gap-4 border-2 border-[var(--border-brutal)] p-1 brutal-shadow-sm bg-[var(--bg-surface)]">
           <button

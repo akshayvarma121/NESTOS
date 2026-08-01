@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import { Check, Info, X, Calendar as CalendarIcon, ExternalLink } from "lucide-react";
+import { Check, Info, X, Calendar as CalendarIcon, ExternalLink, RefreshCw } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import EditTimetablePanel, {
   calculateDuration,
@@ -163,7 +163,16 @@ export default function FocusPage() {
       setIsRoutineLocked(lockData?.isLocked || false);
       setEvents(calendarData?.events || []);
       setCloseouts(calendarData?.closeouts || []);
-      setHolidays(calendarData?.holidays || []);
+
+      const year = new Date(selectedDateStr).getFullYear();
+      const cachedHolidays = localStorage.getItem(`holidays_${year}`);
+      if (cachedHolidays) {
+        setHolidays(JSON.parse(cachedHolidays));
+      } else {
+        const holidaysData = await api.get(`/calendar/holidays?year=${year}`);
+        localStorage.setItem(`holidays_${year}`, JSON.stringify(holidaysData));
+        setHolidays(holidaysData);
+      }
 
       if (taskData.length === 0) {
         const goalsData = await api.get("/macro-goals");
@@ -176,6 +185,13 @@ export default function FocusPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleManualSync = async () => {
+    setLoading(true);
+    const year = new Date(selectedDateStr).getFullYear();
+    localStorage.removeItem(`holidays_${year}`);
+    await fetchFocusData();
   };
 
   const updateTaskStatus = async (id: string, newStatus: string) => {
@@ -426,12 +442,22 @@ export default function FocusPage() {
             </span>
           </div>
           <div className="w-px h-10 bg-[var(--border-hairline)] hidden md:block" />
-          <button
-            onClick={() => setIsTimetableOpen(true)}
-            className="brutal-btn bg-[#2ed573] text-black px-6 py-3 text-sm font-black uppercase tracking-wider flex-shrink-0"
-          >
-            Timetable Editor
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={handleManualSync}
+              disabled={loading}
+              className="p-3 bg-[var(--bg-surface-raised)] border-2 border-[var(--border-brutal)] brutal-shadow-sm hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all text-[var(--text-primary)] group disabled:opacity-50"
+              title="Force Refresh Data"
+            >
+              <RefreshCw className={`w-5 h-5 ${loading ? "animate-spin text-[var(--accent)]" : "group-hover:rotate-180 transition-transform duration-500"}`} />
+            </button>
+            <button
+              onClick={() => setIsTimetableOpen(true)}
+              className="brutal-btn bg-[#2ed573] text-black px-6 py-3 text-sm font-black uppercase tracking-wider flex-shrink-0"
+            >
+              Timetable Editor
+            </button>
+          </div>
         </div>
       </div>
 
