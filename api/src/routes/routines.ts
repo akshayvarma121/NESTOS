@@ -27,9 +27,10 @@ router.get("/", async (req: AuthRequest, res) => {
 router.get("/history", async (req: AuthRequest, res) => {
   const days = parseInt(req.query.days as string) || 7;
   const target_user_id = req.query.target_user_id as string;
-  const uid = target_user_id && req.sharedSpaceIds!.includes(target_user_id) 
-    ? target_user_id 
-    : req.user!.id;
+  const uid =
+    target_user_id && req.sharedSpaceIds!.includes(target_user_id)
+      ? target_user_id
+      : req.user!.id;
 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
@@ -79,15 +80,16 @@ router.get("/day", async (req: AuthRequest, res) => {
   }
 
   // Merge logs into routines
-  const enriched = routines?.map((r) => {
-    const log = logs.find((l) => l.routine_id === r.id);
-    return {
-      ...r,
-      is_completed: !!log,
-      status: log?.status || "pending",
-      note: log?.note || null,
-    };
-  }) || [];
+  const enriched =
+    routines?.map((r) => {
+      const log = logs.find((l) => l.routine_id === r.id);
+      return {
+        ...r,
+        is_completed: !!log,
+        status: log?.status || "pending",
+        note: log?.note || null,
+      };
+    }) || [];
 
   const myRoutines = enriched.filter((r) => r.user_id === req.user!.id);
   const partnerRoutines = enriched.filter((r) => r.user_id !== req.user!.id);
@@ -118,7 +120,8 @@ router.post("/day/lock", async (req: AuthRequest, res) => {
     .insert([{ user_id: req.user!.id, date }]);
 
   // If it already exists, it will throw an error due to primary key, which is fine
-  if (error && error.code !== "23505") { // 23505 is unique violation
+  if (error && error.code !== "23505") {
+    // 23505 is unique violation
     return res.status(500).json({ error: error.message });
   }
 
@@ -126,11 +129,19 @@ router.post("/day/lock", async (req: AuthRequest, res) => {
 });
 
 router.post("/", async (req: AuthRequest, res) => {
-  const { title, time_label, days_of_week, assigned_to, description } = req.body;
+  const { title, time_label, days_of_week, assigned_to, description } =
+    req.body;
   const { data, error } = await supabase
     .from("pos_routines")
     .insert([
-      { user_id: req.user!.id, title, time_label, days_of_week, assigned_to, description },
+      {
+        user_id: req.user!.id,
+        title,
+        time_label,
+        days_of_week,
+        assigned_to,
+        description,
+      },
     ])
     .select()
     .single();
@@ -191,7 +202,7 @@ router.post("/:id/toggle", async (req: AuthRequest, res) => {
     .eq("user_id", req.user!.id)
     .eq("date", date)
     .single();
-    
+
   if (lock) {
     return res.status(403).json({ error: "Timeline is locked for this date." });
   }
@@ -213,12 +224,15 @@ router.post("/:id/toggle", async (req: AuthRequest, res) => {
     .single();
 
   if (existing) {
-    await supabase.from("pos_routine_logs").update({ status }).eq("id", existing.id);
+    await supabase
+      .from("pos_routine_logs")
+      .update({ status })
+      .eq("id", existing.id);
     return res.json({ status: "updated" });
   } else {
-    await supabase.from("pos_routine_logs").insert([
-      { routine_id: id, user_id: req.user!.id, date, status },
-    ]);
+    await supabase
+      .from("pos_routine_logs")
+      .insert([{ routine_id: id, user_id: req.user!.id, date, status }]);
     return res.json({ status: "marked" });
   }
 });
@@ -234,7 +248,7 @@ router.patch("/:id/log", async (req: AuthRequest, res) => {
     .eq("user_id", req.user!.id)
     .eq("date", date)
     .single();
-    
+
   if (lock) {
     return res.status(403).json({ error: "Timeline is locked for this date." });
   }

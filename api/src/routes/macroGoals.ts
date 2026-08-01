@@ -6,8 +6,16 @@ const router = Router();
 router.use(requireAuth);
 
 router.post("/", async (req: AuthRequest, res) => {
-  const { title, category, total_units, unit_label, deadline, customSlices, visibility, assigned_to } =
-    req.body;
+  const {
+    title,
+    category,
+    total_units,
+    unit_label,
+    deadline,
+    customSlices,
+    visibility,
+    assigned_to,
+  } = req.body;
 
   const { data: goal, error: goalError } = await supabase
     .from("pos_macro_goals")
@@ -19,7 +27,7 @@ router.post("/", async (req: AuthRequest, res) => {
         total_units,
         unit_label,
         deadline,
-        visibility: visibility || 'shared',
+        visibility: visibility || "shared",
         assigned_to: assigned_to || null,
       },
     ])
@@ -87,7 +95,16 @@ router.get("/", async (req: AuthRequest, res) => {
 
 router.put("/:id", async (req: AuthRequest, res) => {
   const { id } = req.params;
-  const { title, category, total_units, unit_label, deadline, customSlices, visibility, assigned_to } = req.body;
+  const {
+    title,
+    category,
+    total_units,
+    unit_label,
+    deadline,
+    customSlices,
+    visibility,
+    assigned_to,
+  } = req.body;
 
   // Verify ownership
   const { data: existing } = await supabase
@@ -103,14 +120,14 @@ router.put("/:id", async (req: AuthRequest, res) => {
   // Update Macro Goal properties
   const { error: goalError } = await supabase
     .from("pos_macro_goals")
-    .update({ 
-      title, 
-      category, 
-      total_units, 
-      unit_label, 
+    .update({
+      title,
+      category,
+      total_units,
+      unit_label,
       deadline,
-      visibility: visibility || 'shared',
-      assigned_to: assigned_to || null
+      visibility: visibility || "shared",
+      assigned_to: assigned_to || null,
     })
     .eq("id", id);
 
@@ -168,12 +185,18 @@ router.delete("/:id", async (req: AuthRequest, res) => {
 
   // Delete associated micro tasks
   await supabase.from("pos_micro_tasks").delete().eq("macro_id", id);
-  
+
   // Unlink any captures
-  await supabase.from("pos_content_capture").update({ linked_macro_id: null }).eq("linked_macro_id", id);
+  await supabase
+    .from("pos_content_capture")
+    .update({ linked_macro_id: null })
+    .eq("linked_macro_id", id);
 
   // Delete macro goal
-  const { error } = await supabase.from("pos_macro_goals").delete().eq("id", id);
+  const { error } = await supabase
+    .from("pos_macro_goals")
+    .delete()
+    .eq("id", id);
 
   if (error) return res.status(500).json({ error: error.message });
   res.json({ success: true });

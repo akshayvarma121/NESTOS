@@ -24,7 +24,6 @@ const navGroups = [
     items: [
       { name: "Focus", path: "/focus", icon: Target },
       { name: "Timer", path: "/timer", icon: Timer },
-      { name: "Captures", path: "/captures", icon: Inbox },
     ],
   },
   {

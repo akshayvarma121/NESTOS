@@ -55,7 +55,7 @@ export function recomputeSchedule(
     scheduled_date: string | null;
     pinned?: boolean;
   }[] = [];
-  
+
   // Use UTC methods exclusively to prevent local timezone offsets from shifting the day backwards
   const today = new Date(todayDateStr);
   today.setUTCHours(0, 0, 0, 0);

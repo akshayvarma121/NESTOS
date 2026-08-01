@@ -7,29 +7,35 @@ router.use(requireAuth);
 
 router.get("/", async (req: AuthRequest, res) => {
   const date = req.query.date as string;
-  const backlog = req.query.backlog === 'true';
+  const backlog = req.query.backlog === "true";
 
   let query = supabase
     .from("pos_micro_tasks")
-    .select("*, macro:pos_macro_goals(category, title), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)")
+    .select(
+      "*, macro:pos_macro_goals(category, title), assignee:pos_user_profiles!pos_micro_tasks_assigned_to_fkey(username)",
+    )
     .in("user_id", req.sharedSpaceIds!);
 
   if (backlog) {
-    query = query.neq("status", "done").order("created_at", { ascending: true });
+    query = query
+      .neq("status", "done")
+      .order("created_at", { ascending: true });
   } else {
     query = query.neq("status", "skipped");
     if (date) {
-      query = query.eq("scheduled_date", date).order("created_at", { ascending: true });
+      query = query
+        .eq("scheduled_date", date)
+        .order("created_at", { ascending: true });
     }
   }
 
   const { data, error } = await query;
   if (error) return res.status(500).json({ error: error.message });
-  
+
   const formatted = data.map((task: any) => ({
     ...task,
     category: task.macro?.category,
-    macro_title: task.macro?.title
+    macro_title: task.macro?.title,
   }));
 
   res.json(formatted);
@@ -39,7 +45,16 @@ router.post("/", async (req: AuthRequest, res) => {
   const { macro_id, title, description, urgency, assigned_to } = req.body;
   const { data, error } = await supabase
     .from("pos_micro_tasks")
-    .insert([{ user_id: req.user!.id, macro_id, title, description, urgency, assigned_to }])
+    .insert([
+      {
+        user_id: req.user!.id,
+        macro_id,
+        title,
+        description,
+        urgency,
+        assigned_to,
+      },
+    ])
     .select()
     .single();
 

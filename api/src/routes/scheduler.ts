@@ -9,7 +9,7 @@ router.use(requireAuth);
 router.post("/recompute", async (req: AuthRequest, res) => {
   try {
     const todayStr = req.body.date || new Date().toISOString().split("T")[0];
-    
+
     // Fetch all active macro goals with their tasks
     const { data: goalsData, error: goalsError } = await supabase
       .from("pos_macro_goals")
@@ -18,17 +18,24 @@ router.post("/recompute", async (req: AuthRequest, res) => {
       .neq("status", "completed");
 
     if (goalsError) return res.status(500).json({ error: goalsError.message });
-    if (!goalsData || goalsData.length === 0) return res.json({ success: true, updated: 0 });
+    if (!goalsData || goalsData.length === 0)
+      return res.json({ success: true, updated: 0 });
 
-    const result = recomputeSchedule(goalsData as unknown as MacroGoal[], todayStr);
+    const result = recomputeSchedule(
+      goalsData as unknown as MacroGoal[],
+      todayStr,
+    );
 
     if (result.tasksToUpdate.length > 0) {
-      const promises = result.tasksToUpdate.map(t => {
+      const promises = result.tasksToUpdate.map((t) => {
         const updateData: any = { scheduled_date: t.scheduled_date };
         if (t.pinned !== undefined) updateData.pinned = t.pinned;
-        return supabase.from("pos_micro_tasks").update(updateData).eq("id", t.id);
+        return supabase
+          .from("pos_micro_tasks")
+          .update(updateData)
+          .eq("id", t.id);
       });
-      
+
       await Promise.all(promises);
     }
 
@@ -39,7 +46,8 @@ router.post("/recompute", async (req: AuthRequest, res) => {
 });
 
 router.get("/focus", async (req: AuthRequest, res) => {
-  const todayStr = (req.query.date as string) || new Date().toISOString().split("T")[0];
+  const todayStr =
+    (req.query.date as string) || new Date().toISOString().split("T")[0];
   const { data, error } = await supabase
     .from("pos_micro_tasks")
     .select(

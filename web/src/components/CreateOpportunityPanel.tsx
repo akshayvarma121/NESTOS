@@ -1,16 +1,17 @@
 import { useState } from "react";
 import { X } from "lucide-react";
+import { api } from "../lib/api";
 
 interface Props {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (data: any) => Promise<void>;
+  onSuccess?: () => void;
 }
 
 export default function CreateOpportunityPanel({
   isOpen,
   onClose,
-  onSubmit,
+  onSuccess,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
@@ -28,12 +29,20 @@ export default function CreateOpportunityPanel({
     setLoading(true);
     // If deadline is empty string, send null
     const payload = {
-      ...form,
+      title: form.company + (form.role ? ` - ${form.role}` : ""), // Quick mapping since the old code used company/role
+      url: form.source_link,
+      notes: form.notes,
       deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
     };
-    await onSubmit(payload);
-    setLoading(false);
-    onClose();
+    try {
+      await api.post("/opportunities", payload);
+      if (onSuccess) onSuccess();
+      onClose();
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (

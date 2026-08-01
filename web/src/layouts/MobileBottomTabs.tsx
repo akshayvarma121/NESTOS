@@ -13,8 +13,8 @@ import {
   Timer,
   PieChart,
   Lightbulb,
-  Plus,
 } from "lucide-react";
+import SpeedDial from "../components/SpeedDial";
 
 const mainTabs = [{ name: "Focus", path: "/focus", icon: Target }];
 
@@ -41,11 +41,6 @@ export default function MobileBottomTabs() {
     }
   };
 
-  const handleQuickCapture = () => {
-    triggerHaptic();
-    window.dispatchEvent(new Event("open_quick_capture"));
-  };
-
   return (
     <>
       <div className="flex justify-around items-center h-[60px] px-2 bg-[var(--bg-surface-raised)] relative z-50">
@@ -70,14 +65,9 @@ export default function MobileBottomTabs() {
           </NavLink>
         ))}
 
-        {/* Floating Quick Capture Button */}
+        {/* Speed Dial Menu */}
         <div className="flex-1 flex justify-center items-center">
-          <button
-            onClick={handleQuickCapture}
-            className="w-12 h-12 brutal-border brutal-shadow bg-[#ff6b6b] text-black flex flex-col items-center justify-center -translate-y-4 hover:translate-y-[-14px] active:translate-y-[-12px] active:shadow-none transition-transform"
-          >
-            <Plus className="w-6 h-6" />
-          </button>
+          <SpeedDial />
         </div>
 
         {secondaryTabs.map((tab) => (

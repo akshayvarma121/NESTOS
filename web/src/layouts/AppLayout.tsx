@@ -2,8 +2,9 @@ import { Outlet, NavLink } from "react-router-dom";
 import DesktopSidebar from "./DesktopSidebar";
 import MobileBottomTabs from "./MobileBottomTabs";
 import { useState, useEffect } from "react";
-import QuickCapturePanel from "../components/QuickCapturePanel";
 import PrivacyBanner from "../components/PrivacyBanner";
+import EditTimetablePanel from "../components/EditTimetablePanel";
+import CreateOpportunityPanel from "../components/CreateOpportunityPanel";
 import { Plus, Bell, X, WifiOff, Download } from "lucide-react";
 import { api } from "../lib/api";
 import { useHotkeys } from "../lib/useHotkeys";
@@ -23,7 +24,11 @@ function urlBase64ToUint8Array(base64String: string) {
 
 export default function AppLayout() {
   const [showToast, setShowToast] = useState(false);
-  const [isCaptureOpen, setIsCaptureOpen] = useState(false);
+  
+  // Global Modal States
+  const [isTimetableOpen, setIsTimetableOpen] = useState(false);
+  const [isOpportunityOpen, setIsOpportunityOpen] = useState(false);
+  
   const [isOffline, setIsOffline] = useState(!navigator.onLine);
   const [deferredPrompt, setDeferredPrompt] = useState<any>(null);
 
@@ -51,9 +56,12 @@ export default function AppLayout() {
     };
     window.addEventListener("vault_copy", handleVaultCopy);
 
-    // Quick Capture Listener
-    const handleQuickCapture = () => setIsCaptureOpen(true);
-    window.addEventListener("open_quick_capture", handleQuickCapture);
+    // Global Modals Listeners
+    const handleTimetableOpen = () => setIsTimetableOpen(true);
+    const handleOpportunityOpen = () => setIsOpportunityOpen(true);
+    
+    window.addEventListener("open_timetable_creator", handleTimetableOpen);
+    window.addEventListener("open_opportunity_creator", handleOpportunityOpen);
 
     // PWA Install Prompt Listener
     const handleBeforeInstallPrompt = (e: any) => {
@@ -77,7 +85,8 @@ export default function AppLayout() {
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("milestone_reached", handleMilestone);
       window.removeEventListener("vault_copy", handleVaultCopy);
-      window.removeEventListener("open_quick_capture", handleQuickCapture);
+      window.removeEventListener("open_timetable_creator", handleTimetableOpen);
+      window.removeEventListener("open_opportunity_creator", handleOpportunityOpen);
       window.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt,
@@ -120,10 +129,6 @@ export default function AppLayout() {
     }
   };
 
-  useHotkeys("c", () => {
-    setIsCaptureOpen(true);
-  });
-
   return (
     <div className="flex h-[100dvh] w-full bg-[var(--bg-base)] overflow-hidden">
       {/* Desktop Sidebar (hidden on mobile) */}
@@ -144,10 +149,17 @@ export default function AppLayout() {
         <MobileBottomTabs />
       </div>
 
-      {/* Quick Capture Modal */}
-      <QuickCapturePanel
-        isOpen={isCaptureOpen}
-        onClose={() => setIsCaptureOpen(false)}
+      {/* Global Modals */}
+      <EditTimetablePanel
+        isOpen={isTimetableOpen}
+        onClose={() => setIsTimetableOpen(false)}
+        onUpdate={() => window.dispatchEvent(new Event("refresh_data"))}
+      />
+      
+      <CreateOpportunityPanel
+        isOpen={isOpportunityOpen}
+        onClose={() => setIsOpportunityOpen(false)}
+        onSuccess={() => window.dispatchEvent(new Event("refresh_data"))}
       />
 
       {/* Privacy & Cookie Consent Banner */}
