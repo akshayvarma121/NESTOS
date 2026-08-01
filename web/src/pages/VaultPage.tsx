@@ -121,24 +121,17 @@ export default function VaultPage() {
   const handleAddEntry = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Must use fetch directly or wrapper to pass custom header
-      const res = await fetch(
-        (import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api") +
-          "/vault/entries",
+      await api.postWithHeaders(
+        "/vault/entries",
         {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "x-vault-token": vaultToken || "",
-          },
-          body: JSON.stringify({
-            label: newLabel,
-            category: newCategory,
-            value: newValue,
-          }),
+          label: newLabel,
+          category: newCategory,
+          value: newValue,
         },
+        {
+          "x-vault-token": vaultToken || "",
+        }
       );
-      if (!res.ok) throw new Error("Failed to add entry");
 
       setNewLabel("");
       setNewValue("");
@@ -152,14 +145,12 @@ export default function VaultPage() {
 
   const revealAndCopy = async (id: string) => {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || "http://localhost:3000/api"}/vault/entries/${id}/reveal`,
+      const { value } = await api.getWithHeaders(
+        `/vault/entries/${id}/reveal`,
         {
-          headers: { "x-vault-token": vaultToken || "" },
-        },
+          "x-vault-token": vaultToken || "",
+        }
       );
-      if (!res.ok) throw new Error("Failed to reveal");
-      const { value } = await res.json();
 
       await navigator.clipboard.writeText(value);
 
@@ -265,12 +256,20 @@ export default function VaultPage() {
             Encrypted storage. Auto-locks in 2 mins or on exit.
           </p>
         </div>
-        <button
-          onClick={() => setVaultToken(null)}
-          className="text-sm font-medium px-3 py-1.5 bg-[var(--bg-surface-raised)] rounded hover:text-[var(--bg-base)] transition-colors"
-        >
-          Lock Now
-        </button>
+        <div className="flex gap-3">
+          <button
+            onClick={() => setIsAdding(true)}
+            className="text-sm font-black uppercase px-4 py-2 bg-[var(--accent)] text-white brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform flex items-center gap-2"
+          >
+            <Plus className="w-4 h-4" /> Add Secret
+          </button>
+          <button
+            onClick={() => setVaultToken(null)}
+            className="text-sm font-black uppercase px-4 py-2 bg-[var(--bg-base)] text-[var(--text-primary)] brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
+          >
+            Lock
+          </button>
+        </div>
       </div>
 
       <div className="flex-1 overflow-y-auto pb-24 space-y-3">
@@ -313,13 +312,6 @@ export default function VaultPage() {
         )}
       </div>
 
-      {/* FAB for Vault only appears when unlocked */}
-      <button
-        onClick={() => setIsAdding(true)}
-        className="fixed bottom-[100px] lg:bottom-12 right-6 lg:right-12 w-14 h-14 bg-[var(--accent)] text-[var(--bg-base)] rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-40"
-      >
-        <Plus className="w-6 h-6" />
-      </button>
 
       {/* Slide-in Add Panel */}
       <div
@@ -389,7 +381,7 @@ export default function VaultPage() {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full bg-[#10b981] text-[var(--bg-base)] font-medium py-2.5 rounded-md hover:bg-opacity-90 transition-colors text-sm"
+                className="w-full text-sm font-black uppercase px-4 py-3 bg-[var(--accent)] text-white brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
               >
                 Encrypt & Save
               </button>

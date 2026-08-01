@@ -62,4 +62,15 @@ export const api = {
     fetchWithAuth(endpoint, {
       method: "DELETE",
     }),
+  postWithHeaders: (endpoint: string, body: any, headers: Record<string, string>) =>
+    fetchWithAuth(endpoint, {
+      method: "POST",
+      body: JSON.stringify(body),
+      headers,
+    }),
+  getWithHeaders: (endpoint: string, headers: Record<string, string>) =>
+    fetchWithAuth(endpoint, {
+      method: "GET",
+      headers,
+    }),
 };
