@@ -139,7 +139,7 @@ export default function AnalyticsPage() {
               Productivity Analytics
             </h1>
             <p className="text-[var(--text-secondary)] text-sm font-bold mt-1">
-              Your performance metrics, {name}.
+              How you're doing lately, {name}.
             </p>
           </div>
           <div className="flex items-center gap-2">

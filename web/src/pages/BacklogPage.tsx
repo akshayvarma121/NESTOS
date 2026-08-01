@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
+import { useAuth } from "../contexts/AuthContext";
 import { getLocalDateString } from "../lib/dateUtils";
 import {
   DndContext,
@@ -216,7 +217,7 @@ export default function BacklogPage() {
               </div>
             </div>
             <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
-              Clear the queue, {name}.
+              Your unscheduled tasks, {name}.
             </p>
           </div>
         </div>

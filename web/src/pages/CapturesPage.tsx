@@ -63,7 +63,7 @@ export default function CapturesPage() {
             </div>
           </div>
           <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">
-            Log your thoughts, {name}.
+            Your quick inbox, {name}.
           </p>
         </div>
       </div>
