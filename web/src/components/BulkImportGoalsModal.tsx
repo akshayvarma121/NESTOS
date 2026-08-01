@@ -8,7 +8,11 @@ interface Props {
   onSuccess: () => void;
 }
 
-export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Props) {
+export default function BulkImportGoalsModal({
+  isOpen,
+  onClose,
+  onSuccess,
+}: Props) {
   const [jsonText, setJsonText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -24,7 +28,9 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
       try {
         data = JSON.parse(jsonText);
       } catch (e) {
-        throw new Error("Invalid JSON format. Please ensure it is a valid JSON array.");
+        throw new Error(
+          "Invalid JSON format. Please ensure it is a valid JSON array.",
+        );
       }
 
       if (!Array.isArray(data)) {
@@ -33,8 +39,16 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
 
       // Loop through and POST each goal
       for (const goal of data) {
-        if (!goal.title || !goal.category || !goal.deadline || !goal.total_units || !goal.unit_label) {
-          throw new Error(`Goal "${goal.title || 'Untitled'}" is missing required fields (title, category, deadline, total_units, unit_label).`);
+        if (
+          !goal.title ||
+          !goal.category ||
+          !goal.deadline ||
+          !goal.total_units ||
+          !goal.unit_label
+        ) {
+          throw new Error(
+            `Goal "${goal.title || "Untitled"}" is missing required fields (title, category, deadline, total_units, unit_label).`,
+          );
         }
         await api.post("/macro-goals", goal);
       }
@@ -68,9 +82,41 @@ export default function BulkImportGoalsModal({ isOpen, onClose, onSuccess }: Pro
 
         <div className="p-4 space-y-4">
           <p className="text-sm text-[var(--text-secondary)]">
-            Paste a JSON array of goals. Each goal should have <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">title</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">category</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">deadline</code>, <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">total_units</code>, and <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">unit_label</code>. You can optionally provide a <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">customSlices</code> array (with optional <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">description</code> or <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">scheduled_date</code>).
+            Paste a JSON array of goals. Each goal should have{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              title
+            </code>
+            ,{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              category
+            </code>
+            ,{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              deadline
+            </code>
+            ,{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              total_units
+            </code>
+            , and{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              unit_label
+            </code>
+            . You can optionally provide a{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              customSlices
+            </code>{" "}
+            array (with optional{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              description
+            </code>{" "}
+            or{" "}
+            <code className="text-xs bg-[var(--bg-base)] px-1 py-0.5 rounded border border-[var(--border-hairline)]">
+              scheduled_date
+            </code>
+            ).
           </p>
-          
+
           <textarea
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}

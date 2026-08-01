@@ -10,7 +10,12 @@ interface Props {
   initialData?: any;
 }
 
-export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData }: Props) {
+export default function GoalEditorPanel({
+  isOpen,
+  onClose,
+  onSubmit,
+  initialData,
+}: Props) {
   const [step, setStep] = useState<1 | 2>(1);
   const [loading, setLoading] = useState(false);
 
@@ -25,13 +30,20 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
   });
 
   const [slices, setSlices] = useState<any[]>([]);
-  const [partners, setPartners] = useState<{id: string, username: string}[]>([]);
+  const [partners, setPartners] = useState<{ id: string; username: string }[]>(
+    [],
+  );
 
   useEffect(() => {
     if (isOpen) {
-      api.get("/partner").then((data) => {
-        setPartners(data.map((p: any) => ({ id: p.id, username: p.username })));
-      }).catch(console.error);
+      api
+        .get("/partner")
+        .then((data) => {
+          setPartners(
+            data.map((p: any) => ({ id: p.id, username: p.username })),
+          );
+        })
+        .catch(console.error);
 
       if (initialData) {
         setForm({
@@ -67,14 +79,17 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
 
   const handleNext = (e: React.FormEvent) => {
     e.preventDefault();
-    const units = typeof form.total_units === "number" ? form.total_units : (parseInt(form.total_units) || 0);
-    
+    const units =
+      typeof form.total_units === "number"
+        ? form.total_units
+        : parseInt(form.total_units) || 0;
+
     // Only generate slices if they don't match the new unit count
     if (slices.length !== units) {
       const initialSlices = Array.from({ length: units }, (_, i) => {
         // Reuse existing slice if it exists at this index
         if (slices[i]) return slices[i];
-        
+
         return {
           id: `temp-${Date.now()}-${i}`,
           title: `${form.unit_label} ${i + 1}`,
@@ -85,7 +100,7 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
       });
       setSlices(initialSlices);
     }
-    
+
     setStep(2);
   };
 
@@ -130,7 +145,13 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
               </button>
             )}
             <h2 className="text-lg font-semibold">
-              {initialData ? (step === 1 ? "Edit Goal" : "Edit Goal Slices") : (step === 1 ? "New Macro Goal" : "New Goal Slices")}
+              {initialData
+                ? step === 1
+                  ? "Edit Goal"
+                  : "Edit Goal Slices"
+                : step === 1
+                  ? "New Macro Goal"
+                  : "New Goal Slices"}
             </h2>
           </div>
           <button
@@ -181,11 +202,19 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
                 Visibility / Assignment
               </label>
               <select
-                value={form.visibility === "assigned" ? `assign:${form.assigned_to}` : form.visibility}
+                value={
+                  form.visibility === "assigned"
+                    ? `assign:${form.assigned_to}`
+                    : form.visibility
+                }
                 onChange={(e) => {
                   const val = e.target.value;
                   if (val.startsWith("assign:")) {
-                    setForm({ ...form, visibility: "assigned", assigned_to: val.split(":")[1] });
+                    setForm({
+                      ...form,
+                      visibility: "assigned",
+                      assigned_to: val.split(":")[1],
+                    });
                   } else {
                     setForm({ ...form, visibility: val, assigned_to: "" });
                   }
@@ -194,8 +223,10 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
               >
                 <option value="shared">Shared (Both can see)</option>
                 <option value="personal">Personal (Only me)</option>
-                {partners.map(p => (
-                  <option key={p.id} value={`assign:${p.id}`}>Assign to: {p.username}</option>
+                {partners.map((p) => (
+                  <option key={p.id} value={`assign:${p.id}`}>
+                    Assign to: {p.username}
+                  </option>
                 ))}
               </select>
             </div>
@@ -214,7 +245,10 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
                   onChange={(e) =>
                     setForm({
                       ...form,
-                      total_units: e.target.value === "" ? "" : parseInt(e.target.value) || 0,
+                      total_units:
+                        e.target.value === ""
+                          ? ""
+                          : parseInt(e.target.value) || 0,
                     })
                   }
                   className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)] font-mono"
@@ -225,7 +259,11 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
                   Unit Label
                 </label>
                 <input
-                  required={(typeof form.total_units === "number" ? form.total_units : parseInt(form.total_units || "0")) > 0}
+                  required={
+                    (typeof form.total_units === "number"
+                      ? form.total_units
+                      : parseInt(form.total_units || "0")) > 0
+                  }
                   value={form.unit_label}
                   onChange={(e) =>
                     setForm({ ...form, unit_label: e.target.value })
@@ -284,7 +322,9 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
                     />
                     <button
                       type="button"
-                      onClick={() => setSlices(slices.filter(s => s.id !== slice.id))}
+                      onClick={() =>
+                        setSlices(slices.filter((s) => s.id !== slice.id))
+                      }
                       className="p-1 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -305,7 +345,11 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
                         type="date"
                         value={slice.scheduled_date || ""}
                         onChange={(e) =>
-                          updateSlice(slice.id, "scheduled_date", e.target.value)
+                          updateSlice(
+                            slice.id,
+                            "scheduled_date",
+                            e.target.value,
+                          )
                         }
                         className="bg-transparent border border-[var(--border-hairline)] rounded px-1.5 py-0.5 text-xs text-[var(--text-secondary)] outline-none focus:border-[var(--text-primary)] font-mono"
                       />
@@ -319,7 +363,16 @@ export default function GoalEditorPanel({ isOpen, onClose, onSubmit, initialData
 
               <button
                 type="button"
-                onClick={() => setSlices([...slices, { id: `manual-${Date.now()}`, title: `${form.unit_label} ${slices.length + 1}`, scheduled_date: "" }])}
+                onClick={() =>
+                  setSlices([
+                    ...slices,
+                    {
+                      id: `manual-${Date.now()}`,
+                      title: `${form.unit_label} ${slices.length + 1}`,
+                      scheduled_date: "",
+                    },
+                  ])
+                }
                 className="w-full py-2 flex items-center justify-center gap-2 border border-dashed border-[var(--border-hairline)] rounded-lg text-sm text-[var(--text-secondary)] hover:border-[var(--text-primary)] hover:text-[var(--text-primary)] transition-colors mt-2"
               >
                 <Plus className="w-4 h-4" />

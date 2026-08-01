@@ -9,7 +9,12 @@ interface Props {
   goal: any;
 }
 
-export default function GoalJsonEditorModal({ isOpen, onClose, onSuccess, goal }: Props) {
+export default function GoalJsonEditorModal({
+  isOpen,
+  onClose,
+  onSuccess,
+  goal,
+}: Props) {
   const [jsonText, setJsonText] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,7 +24,7 @@ export default function GoalJsonEditorModal({ isOpen, onClose, onSuccess, goal }
       const formattedGoal = {
         title: goal.title,
         category: goal.category,
-        deadline: goal.deadline ? goal.deadline.split('T')[0] : goal.deadline,
+        deadline: goal.deadline ? goal.deadline.split("T")[0] : goal.deadline,
         total_units: goal.total_units,
         unit_label: goal.unit_label,
         customSlices: goal.micro_tasks || [],
@@ -43,8 +48,16 @@ export default function GoalJsonEditorModal({ isOpen, onClose, onSuccess, goal }
         throw new Error("Invalid JSON format.");
       }
 
-      if (!data.title || !data.category || !data.deadline || !data.total_units || !data.unit_label) {
-        throw new Error("Missing required fields (title, category, deadline, total_units, unit_label).");
+      if (
+        !data.title ||
+        !data.category ||
+        !data.deadline ||
+        !data.total_units ||
+        !data.unit_label
+      ) {
+        throw new Error(
+          "Missing required fields (title, category, deadline, total_units, unit_label).",
+        );
       }
 
       await api.put(`/macro-goals/${goal.id}`, data);
@@ -80,7 +93,7 @@ export default function GoalJsonEditorModal({ isOpen, onClose, onSuccess, goal }
           <p className="text-sm text-[var(--text-secondary)]">
             Edit the JSON for this goal.
           </p>
-          
+
           <textarea
             value={jsonText}
             onChange={(e) => setJsonText(e.target.value)}

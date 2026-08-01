@@ -67,7 +67,7 @@ export default function CalendarPage() {
     if (touchStart === null || !selectedDate) return;
     const touchEnd = e.changedTouches[0].clientX;
     const diff = touchStart - touchEnd;
-    
+
     if (Math.abs(diff) > 50) {
       const dateObj = new Date(selectedDate);
       if (diff > 0) {
@@ -77,7 +77,7 @@ export default function CalendarPage() {
         // Swipe right -> prev day
         dateObj.setDate(dateObj.getDate() - 1);
       }
-      setSelectedDate(dateObj.toISOString().split('T')[0]);
+      setSelectedDate(dateObj.toISOString().split("T")[0]);
     }
     setTouchStart(null);
   };
@@ -242,19 +242,19 @@ export default function CalendarPage() {
                       .filter((t) => t.scheduled_date === dateStr)
                       .slice(0, 3)
                       .map((t) => (
-                      <div
-                        key={t.id}
-                        className={`text-[9px] leading-tight flex items-center gap-1 rounded px-1 py-0.5 truncate ${
-                          t.status === "done" 
-                            ? "bg-[#10b981]/10 text-[#10b981] line-through" 
-                            : t.status === "skipped"
-                            ? "bg-[var(--warning)]/10 text-[var(--warning)]"
-                            : "bg-[var(--bg-surface-raised)] text-[var(--text-secondary)]"
-                        }`}
-                      >
-                        <span className="truncate">{t.title}</span>
-                      </div>
-                    ))}
+                        <div
+                          key={t.id}
+                          className={`text-[9px] leading-tight flex items-center gap-1 rounded px-1 py-0.5 truncate ${
+                            t.status === "done"
+                              ? "bg-[#10b981]/10 text-[#10b981] line-through"
+                              : t.status === "skipped"
+                                ? "bg-[var(--warning)]/10 text-[var(--warning)]"
+                                : "bg-[var(--bg-surface-raised)] text-[var(--text-secondary)]"
+                          }`}
+                        >
+                          <span className="truncate">{t.title}</span>
+                        </div>
+                      ))}
                   </div>
                 </div>
               );
@@ -386,12 +386,24 @@ export default function CalendarPage() {
                       className="flex flex-col gap-0.5 p-2 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-md"
                     >
                       <div className="flex items-center gap-2">
-                        <div className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
-                          t.status === "done" ? "bg-[#10b981]" : t.status === "skipped" ? "bg-[var(--warning)]" : "bg-[var(--text-secondary)]"
-                        }`}></div>
-                        <span className={`text-sm ${
-                          t.status === "done" ? "text-[var(--text-tertiary)] line-through" : t.status === "skipped" ? "text-[var(--warning)]" : "text-[var(--text-primary)]"
-                        }`}>
+                        <div
+                          className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${
+                            t.status === "done"
+                              ? "bg-[#10b981]"
+                              : t.status === "skipped"
+                                ? "bg-[var(--warning)]"
+                                : "bg-[var(--text-secondary)]"
+                          }`}
+                        ></div>
+                        <span
+                          className={`text-sm ${
+                            t.status === "done"
+                              ? "text-[var(--text-tertiary)] line-through"
+                              : t.status === "skipped"
+                                ? "text-[var(--warning)]"
+                                : "text-[var(--text-primary)]"
+                          }`}
+                        >
                           {t.title}
                         </span>
                         {t.status === "pending" && (

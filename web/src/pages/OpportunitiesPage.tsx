@@ -121,7 +121,8 @@ export default function DeadlinesPage() {
           </p>
         ) : (
           deadlines.map((d) => {
-            const isPast = d.deadline && d.deadline.split('T')[0] < getLocalDateString();
+            const isPast =
+              d.deadline && d.deadline.split("T")[0] < getLocalDateString();
             return (
               <div
                 key={d.id}

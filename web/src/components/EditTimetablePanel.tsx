@@ -7,23 +7,23 @@ export function calculateDuration(timeLabel: string) {
   if (!timeLabel || !timeLabel.includes("-")) return null;
   const [start, end] = timeLabel.split("-").map((s) => s.trim());
   if (!start || !end) return null;
-  
+
   const [startH, startM] = start.split(":").map(Number);
   const [endH, endM] = end.split(":").map(Number);
-  
+
   if (isNaN(startH) || isNaN(endH)) return null;
-  
+
   let startTotalMins = startH * 60 + (startM || 0);
   let endTotalMins = endH * 60 + (endM || 0);
-  
+
   if (endTotalMins < startTotalMins) {
     endTotalMins += 24 * 60;
   }
-  
+
   const diff = endTotalMins - startTotalMins;
   const h = Math.floor(diff / 60);
   const m = diff % 60;
-  
+
   if (h > 0 && m > 0) return `${h}h ${m}m`;
   if (h > 0) return `${h}h`;
   if (m > 0) return `${m}m`;
@@ -64,13 +64,13 @@ export default function EditTimetablePanel({
 
   useEffect(() => {
     if (isJSONMode) {
-      const formatted = myRoutines.map(r => ({
+      const formatted = myRoutines.map((r) => ({
         id: r.id,
         title: r.title,
         description: r.description,
         time_label: r.time_label,
         days_of_week: r.days_of_week,
-        assigned_to: r.assigned_to
+        assigned_to: r.assigned_to,
       }));
       setJsonInput(JSON.stringify(formatted, null, 2));
     }
@@ -147,16 +147,18 @@ export default function EditTimetablePanel({
     setDescription(routine.description || "");
     setSelectedDays(routine.days_of_week);
     setAssignedTo(routine.assigned_to || "");
-    
+
     if (routine.time_label && routine.time_label.includes("-")) {
-      const [start, end] = routine.time_label.split("-").map((s: string) => s.trim());
+      const [start, end] = routine.time_label
+        .split("-")
+        .map((s: string) => s.trim());
       setStartTime(start || "");
       setEndTime(end || "");
     } else {
       setStartTime(routine.time_label || "");
       setEndTime("");
     }
-    
+
     // Switch to manual mode if in JSON mode
     setIsJSONMode(false);
   };
@@ -174,19 +176,24 @@ export default function EditTimetablePanel({
   const handleBulkCreate = async () => {
     try {
       setIsSubmitting(true);
-      
+
       let parsed;
       try {
         parsed = JSON.parse(jsonInput);
       } catch (err: any) {
         throw new Error("Failed to parse JSON: " + err.message);
       }
-      
+
       if (!Array.isArray(parsed)) throw new Error("Input must be a JSON array");
 
       for (const item of parsed) {
-        if (!item.title || !Array.isArray(item.days_of_week) || item.days_of_week.length === 0) continue;
-        
+        if (
+          !item.title ||
+          !Array.isArray(item.days_of_week) ||
+          item.days_of_week.length === 0
+        )
+          continue;
+
         const payload = {
           title: item.title,
           description: item.description || null,
@@ -259,7 +266,9 @@ export default function EditTimetablePanel({
           {/* Create Form */}
           <div className="space-y-4 p-4 border border-[var(--border-hairline)] rounded-lg bg-[var(--bg-surface)]">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium">{editingId ? "Edit Routine Block" : "Add Routine Block"}</h3>
+              <h3 className="text-sm font-medium">
+                {editingId ? "Edit Routine Block" : "Add Routine Block"}
+              </h3>
               {!editingId && (
                 <button
                   type="button"
@@ -309,91 +318,99 @@ export default function EditTimetablePanel({
                   <option value="Deep Work" />
                   <option value="Gaming" />
                 </datalist>
-                
+
                 <div className="grid grid-cols-2 gap-3">
-              <input
-                required
-                placeholder="Title (e.g. Wake up)"
-                value={title}
-                list="routine-titles"
-                onChange={(e) => setTitle(e.target.value)}
-                className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
-              />
-              <div className="flex items-center gap-1">
+                  <input
+                    required
+                    placeholder="Title (e.g. Wake up)"
+                    value={title}
+                    list="routine-titles"
+                    onChange={(e) => setTitle(e.target.value)}
+                    className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
+                  />
+                  <div className="flex items-center gap-1">
+                    <input
+                      placeholder="Start (HH:MM)"
+                      value={startTime}
+                      onChange={(e) => setStartTime(e.target.value)}
+                      onBlur={() => setStartTime(formatTimeInput(startTime))}
+                      className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
+                    />
+                    <span className="text-[var(--text-tertiary)]">-</span>
+                    <input
+                      placeholder="End (opt)"
+                      value={endTime}
+                      onChange={(e) => setEndTime(e.target.value)}
+                      onBlur={() => setEndTime(formatTimeInput(endTime))}
+                      className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
+                    />
+                  </div>
+                </div>
+
                 <input
-                  placeholder="Start (HH:MM)"
-                  value={startTime}
-                  onChange={(e) => setStartTime(e.target.value)}
-                  onBlur={() => setStartTime(formatTimeInput(startTime))}
-                  className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
+                  placeholder={
+                    title === "Study"
+                      ? "What to study? (e.g. Math Chapter 4)"
+                      : "Custom note (optional)"
+                  }
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                  className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
                 />
-                <span className="text-[var(--text-tertiary)]">-</span>
-                <input
-                  placeholder="End (opt)"
-                  value={endTime}
-                  onChange={(e) => setEndTime(e.target.value)}
-                  onBlur={() => setEndTime(formatTimeInput(endTime))}
-                  className="bg-[var(--bg-base)] border border-[var(--border-hairline)] px-2 py-2 rounded text-xs outline-none focus:border-[var(--accent)] font-mono w-full"
-                />
-              </div>
-            </div>
 
-            <input
-              placeholder={title === "Study" ? "What to study? (e.g. Math Chapter 4)" : "Custom note (optional)"}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
-            />
+                <div className="flex gap-1.5 justify-between">
+                  {DAYS.map((day) => (
+                    <button
+                      type="button"
+                      key={day}
+                      onClick={() => toggleDay(day)}
+                      className={`flex-1 py-1 text-[10px] uppercase font-mono rounded border transition-colors ${
+                        selectedDays.includes(day)
+                          ? "bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-base)]"
+                          : "border-[var(--border-hairline)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"
+                      }`}
+                    >
+                      {day.slice(0, 2)}
+                    </button>
+                  ))}
+                </div>
 
-            <div className="flex gap-1.5 justify-between">
-              {DAYS.map((day) => (
-                <button
-                  type="button"
-                  key={day}
-                  onClick={() => toggleDay(day)}
-                  className={`flex-1 py-1 text-[10px] uppercase font-mono rounded border transition-colors ${
-                    selectedDays.includes(day)
-                      ? "bg-[var(--text-primary)] border-[var(--text-primary)] text-[var(--bg-base)]"
-                      : "border-[var(--border-hairline)] text-[var(--text-secondary)] hover:border-[var(--text-primary)]"
-                  }`}
+                <select
+                  value={assignedTo}
+                  onChange={(e) => setAssignedTo(e.target.value)}
+                  className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
                 >
-                  {day.slice(0, 2)}
-                </button>
-              ))}
-            </div>
+                  <option value="">Assign to: Anyone (Shared)</option>
+                  {spaceMembers.map((m) => (
+                    <option key={m.user_id} value={m.user_id}>
+                      {m.username}
+                    </option>
+                  ))}
+                </select>
 
-            <select
-              value={assignedTo}
-              onChange={(e) => setAssignedTo(e.target.value)}
-              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
-            >
-              <option value="">Assign to: Anyone (Shared)</option>
-              {spaceMembers.map((m) => (
-                <option key={m.user_id} value={m.user_id}>
-                  {m.username}
-                </option>
-              ))}
-            </select>
-
-            <div className="flex gap-2">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="flex-1 bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity"
-              >
-                {editingId ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
-                {editingId ? "Save Changes" : "Add Routine"}
-              </button>
-              {editingId && (
-                <button
-                  type="button"
-                  onClick={cancelEdit}
-                  className="bg-[var(--bg-base)] border border-[var(--border-hairline)] text-[var(--text-secondary)] px-4 py-2 rounded text-sm font-medium hover:text-[var(--text-primary)] transition-colors"
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
+                <div className="flex gap-2">
+                  <button
+                    type="submit"
+                    disabled={isSubmitting}
+                    className="flex-1 bg-[var(--accent)] text-white py-2 rounded text-sm font-medium hover:opacity-90 flex items-center justify-center gap-2 disabled:opacity-50 transition-opacity"
+                  >
+                    {editingId ? (
+                      <Check className="w-4 h-4" />
+                    ) : (
+                      <Plus className="w-4 h-4" />
+                    )}
+                    {editingId ? "Save Changes" : "Add Routine"}
+                  </button>
+                  {editingId && (
+                    <button
+                      type="button"
+                      onClick={cancelEdit}
+                      className="bg-[var(--bg-base)] border border-[var(--border-hairline)] text-[var(--text-secondary)] px-4 py-2 rounded text-sm font-medium hover:text-[var(--text-primary)] transition-colors"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                </div>
               </form>
             )}
           </div>
@@ -405,7 +422,11 @@ export default function EditTimetablePanel({
               {myRoutines.length > 0 && (
                 <button
                   onClick={async () => {
-                    if (confirm("Are you sure you want to delete ALL routines? This cannot be undone.")) {
+                    if (
+                      confirm(
+                        "Are you sure you want to delete ALL routines? This cannot be undone.",
+                      )
+                    ) {
                       try {
                         await api.delete("/routines/all");
                         fetchData();
@@ -494,7 +515,9 @@ export default function EditTimetablePanel({
           {partnerRoutines.length > 0 && (
             <div className="space-y-3 pt-6 border-t border-[var(--border-hairline)]">
               <div className="flex items-center justify-between border-b border-[var(--border-hairline)] pb-2">
-                <h3 className="text-sm font-medium text-[var(--text-secondary)]">Partner's Active Routines</h3>
+                <h3 className="text-sm font-medium text-[var(--text-secondary)]">
+                  Partner's Active Routines
+                </h3>
               </div>
               {partnerRoutines.map((routine) => (
                 <div
@@ -514,7 +537,9 @@ export default function EditTimetablePanel({
                       {routine.days_of_week.join(", ")}
                     </p>
                   </div>
-                  <div className="text-xs text-[var(--text-tertiary)] italic">Read-Only</div>
+                  <div className="text-xs text-[var(--text-tertiary)] italic">
+                    Read-Only
+                  </div>
                 </div>
               ))}
             </div>

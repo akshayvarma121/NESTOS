@@ -9,10 +9,9 @@ export const getLogicalDate = (d: Date = new Date()) => {
 export const getLocalDateString = (d: Date = new Date()) => {
   const adjusted = getLogicalDate(d);
 
-  
   const year = adjusted.getFullYear();
-  const month = String(adjusted.getMonth() + 1).padStart(2, '0');
-  const day = String(adjusted.getDate()).padStart(2, '0');
+  const month = String(adjusted.getMonth() + 1).padStart(2, "0");
+  const day = String(adjusted.getDate()).padStart(2, "0");
   return `${year}-${month}-${day}`;
 };
 
@@ -42,5 +41,5 @@ export const formatTimeInput = (val: string): string => {
   if (hours > 23) hours = 23;
   if (minutes > 59) minutes = 59;
 
-  return `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  return `${String(hours).padStart(2, "0")}:${String(minutes).padStart(2, "0")}`;
 };

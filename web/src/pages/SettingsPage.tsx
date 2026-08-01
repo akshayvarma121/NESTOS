@@ -87,7 +87,7 @@ export default function SettingsPage() {
               </div>
               <span className="text-[var(--text-tertiary)]">→</span>
             </a>
-            
+
             <button
               onClick={() => supabase.auth.signOut()}
               className="w-full flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-red-500/50 hover:bg-red-500/5 transition-colors group"
@@ -131,11 +131,15 @@ export default function SettingsPage() {
             </div>
 
             <div className="pt-4 border-t border-red-900/30">
-              <h3 className="text-sm font-medium">Clear All Data (Factory Reset)</h3>
+              <h3 className="text-sm font-medium">
+                Clear All Data (Factory Reset)
+              </h3>
               <p className="text-xs text-[var(--text-secondary)] mt-1 mb-3">
-                This will permanently delete all your goals, tasks, routines, notes, captures, and vault entries.
-                Your account and partner connection will remain intact. Type{" "}
-                <span className="font-mono text-red-400">CLEAR</span> to confirm.
+                This will permanently delete all your goals, tasks, routines,
+                notes, captures, and vault entries. Your account and partner
+                connection will remain intact. Type{" "}
+                <span className="font-mono text-red-400">CLEAR</span> to
+                confirm.
               </p>
               <div className="flex gap-3">
                 <input

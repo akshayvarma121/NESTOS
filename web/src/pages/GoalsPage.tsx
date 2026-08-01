@@ -3,13 +3,24 @@ import { api } from "../lib/api";
 import GoalEditorPanel from "../components/GoalEditorPanel";
 import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
 import GoalJsonEditorModal from "../components/GoalJsonEditorModal";
-import { Target, Plus, Info, UploadCloud, Trash2, Code } from "lucide-react";
+import {
+  Target,
+  Plus,
+  Info,
+  UploadCloud,
+  Trash2,
+  Code,
+  RefreshCw,
+  FolderOpen,
+} from "lucide-react";
+import { usePullToRefresh } from "../lib/usePullToRefresh";
+import EmptyState from "../components/EmptyState";
 
 const categoryColors: Record<string, string> = {
-  academic: "bg-[var(--accent)]",
-  dsa: "bg-[var(--warning)]",
-  dev: "bg-[var(--success)]",
-  other: "bg-[var(--text-secondary)]",
+  academic: "bg-[#ff6b6b]",
+  dsa: "bg-[#ffeb3b]",
+  dev: "bg-[#2ed573]",
+  other: "bg-black",
 };
 
 export default function GoalsPage() {
@@ -19,10 +30,6 @@ export default function GoalsPage() {
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [jsonEditingGoal, setJsonEditingGoal] = useState<any>(null);
-
-  useEffect(() => {
-    fetchGoals();
-  }, []);
 
   const fetchGoals = async () => {
     try {
@@ -34,6 +41,12 @@ export default function GoalsPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchGoals();
+  }, []);
+
+  const { isRefreshing, pullProgress } = usePullToRefresh(fetchGoals);
 
   const handleCreate = async (goalData: any) => {
     if (editingGoal) {
@@ -56,7 +69,10 @@ export default function GoalsPage() {
   };
 
   const handleDeleteGoal = async (id: string) => {
-    if (!confirm("Are you sure you want to delete this goal and all its tasks?")) return;
+    if (
+      !confirm("Are you sure you want to delete this goal and all its tasks?")
+    )
+      return;
     try {
       await api.delete(`/macro-goals/${id}`);
       await fetchGoals();
@@ -82,13 +98,32 @@ export default function GoalsPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
+      {/* Pull to refresh indicator */}
+      {(pullProgress > 0 || isRefreshing) && (
+        <div className="flex justify-center -mt-4 mb-4">
+          <div
+            className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-full p-2 shadow-lg transition-transform"
+            style={{
+              transform: `translateY(${Math.min(pullProgress * 20, 20)}px) rotate(${pullProgress * 360}deg)`,
+              opacity: Math.max(pullProgress, 0.5),
+            }}
+          >
+            <RefreshCw
+              className={`w-5 h-5 text-[var(--accent)] ${isRefreshing ? "animate-spin" : ""}`}
+            />
+          </div>
+        </div>
+      )}
+
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Target className="w-5 h-5 text-[var(--accent)]" />
-          <h1 className="text-2xl font-semibold">Macro Goals</h1>
+          <Target className="w-8 h-8 text-black" />
+          <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+            Macro Goals
+          </h1>
           <div className="relative group cursor-help ml-2 mt-1">
             <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-            <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)] font-normal">
+            <div className="absolute left-0 top-full mt-2 w-64 p-4 bg-white brutal-border brutal-shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-sm text-black font-bold">
               Define your high-level macro goals. Break them down into small
               units (e.g. 50 chapters). The progress bar fills up as you
               complete scheduled tasks linked to this goal.
@@ -98,14 +133,14 @@ export default function GoalsPage() {
         <div className="flex items-center gap-2">
           <button
             onClick={() => setIsBulkOpen(true)}
-            className="border border-[var(--border-hairline)] bg-[var(--bg-surface-raised)] text-[var(--text-primary)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:border-[var(--text-secondary)] transition-colors"
+            className="brutal-btn bg-white text-black px-4 py-2 text-sm font-bold flex items-center gap-2"
           >
             <UploadCloud className="w-4 h-4" />
             Bulk JSON
           </button>
           <button
             onClick={openNewGoal}
-            className="bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 rounded-[4px] text-sm font-medium flex items-center gap-1.5 hover:bg-white transition-colors"
+            className="brutal-btn bg-[#a8e6cf] text-black px-4 py-2 text-sm font-black flex items-center gap-2 uppercase"
           >
             <Plus className="w-4 h-4" />
             New Goal
@@ -114,16 +149,20 @@ export default function GoalsPage() {
       </div>
 
       {goals.length === 0 ? (
-        <div className="text-center py-12 text-[var(--text-secondary)] border border-[var(--border-hairline)] rounded-lg border-dashed">
-          No goals yet. Create one to start slicing tasks.
-        </div>
+        <EmptyState
+          icon={FolderOpen}
+          title="No goals yet"
+          description="Create one to start slicing tasks and making progress."
+          actionLabel="New Goal"
+          onAction={openNewGoal}
+        />
       ) : (
         Object.entries(grouped).map(([category, catGoals]) => (
           <div key={category} className="space-y-3">
-            <h2 className="text-xs font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
+            <h2 className="text-sm font-black uppercase tracking-widest text-black/70 mb-2">
               {category}
             </h2>
-            <div className="grid gap-4 md:grid-cols-2">
+            <div className="grid gap-6 md:grid-cols-2">
               {(catGoals as any[]).map((goal: any) => {
                 const percent = Math.min(
                   100,
@@ -132,14 +171,14 @@ export default function GoalsPage() {
                 return (
                   <div
                     key={goal.id}
-                    className="p-4 rounded-lg bg-[var(--bg-surface)] border border-[var(--border-hairline)] space-y-3"
+                    className="p-5 bg-white brutal-border brutal-shadow-sm space-y-4 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow transition-transform duration-75"
                   >
                     <div className="flex justify-between items-start gap-3">
                       <div>
-                        <h3 className="font-medium text-sm text-[var(--text-primary)]">
+                        <h3 className="font-black text-lg text-black leading-tight">
                           {goal.title}
                         </h3>
-                        <span className="font-mono text-xs text-[var(--text-tertiary)]">
+                        <span className="font-bold text-xs text-black/60 uppercase tracking-wide">
                           {goal.completed_units}/{goal.total_units}{" "}
                           {goal.unit_label}
                         </span>
@@ -147,21 +186,34 @@ export default function GoalsPage() {
                       <div className="flex gap-1 items-center">
                         <button
                           onClick={() => setJsonEditingGoal(goal)}
-                          className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded transition-colors flex-shrink-0"
+                          className="p-2 text-black hover:bg-[#ffeb3b] brutal-border border-transparent hover:border-black transition-colors flex-shrink-0"
                           title="Edit JSON"
                         >
                           <Code className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openEditGoal(goal)}
-                          className="p-1.5 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-base)] rounded transition-colors flex-shrink-0"
+                          className="p-2 text-black hover:bg-[#a8e6cf] brutal-border border-transparent hover:border-black transition-colors flex-shrink-0"
                           title="Edit Goal"
                         >
-                          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="3"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            className="w-4 h-4"
+                          >
+                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path>
+                          </svg>
                         </button>
                         <button
                           onClick={() => handleDeleteGoal(goal.id)}
-                          className="p-1.5 text-[var(--text-tertiary)] hover:text-red-400 hover:bg-red-400/10 rounded transition-colors flex-shrink-0"
+                          className="p-2 text-black hover:bg-[#ff6b6b] brutal-border border-transparent hover:border-black transition-colors flex-shrink-0"
                           title="Delete Goal"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -169,15 +221,15 @@ export default function GoalsPage() {
                       </div>
                     </div>
 
-                    {/* Thin Progress Bar */}
-                    <div className="h-[2px] w-full bg-[var(--bg-base)] rounded-full overflow-hidden">
+                    {/* Thick Progress Bar */}
+                    <div className="h-4 w-full bg-[#fdfbf7] brutal-border overflow-hidden">
                       <div
-                        className={`h-full ${categoryColors[category] || categoryColors.other}`}
+                        className={`h-full ${categoryColors[category] || categoryColors.other} border-r-2 border-black`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
 
-                    <div className="text-xs text-[var(--text-tertiary)] flex justify-between">
+                    <div className="text-xs font-bold text-black flex justify-between uppercase">
                       <span>
                         Due {new Date(goal.deadline).toLocaleDateString()}
                       </span>

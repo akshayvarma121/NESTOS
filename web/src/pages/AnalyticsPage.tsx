@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import { ArrowLeft, Check, X, Calendar, Search, Activity, Target } from "lucide-react";
+import {
+  ArrowLeft,
+  Check,
+  X,
+  Calendar,
+  Search,
+  Activity,
+  Target,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
   LineChart,
@@ -25,11 +33,13 @@ export default function AnalyticsPage() {
     taskLogs?: any[];
     suggestion?: { text: string; type: "warning" | "success" | "info" };
   } | null>(null);
-  
+
   const [loading, setLoading] = useState(true);
   const [days, setDays] = useState(14);
   const [search, setSearch] = useState("");
-  const [partners, setPartners] = useState<{id: string, username: string}[]>([]);
+  const [partners, setPartners] = useState<{ id: string; username: string }[]>(
+    [],
+  );
   const [targetUserId, setTargetUserId] = useState<string>("");
 
   const fetchData = async () => {
@@ -39,7 +49,7 @@ export default function AnalyticsPage() {
       const [historyData, analyticsData, partnerData] = await Promise.all([
         api.get(`/routines/history?days=${days}${q}`),
         api.get(`/analytics?days=${days}${q}`),
-        api.get("/partner/space")
+        api.get("/partner/space"),
       ]);
       setLogs(historyData || []);
       setAnalytics(analyticsData || { routineTrends: [], sliceTrends: [] });
@@ -63,7 +73,9 @@ export default function AnalyticsPage() {
     return acc;
   }, {});
 
-  const filteredDates = Object.keys(groupedLogs).sort((a, b) => (a < b ? 1 : -1));
+  const filteredDates = Object.keys(groupedLogs).sort((a, b) =>
+    a < b ? 1 : -1,
+  );
 
   const matchSearch = (log: any) => {
     if (!search) return true;
@@ -75,13 +87,20 @@ export default function AnalyticsPage() {
   };
 
   // Calculate KPIs
-  const totalRoutinesDone = analytics?.routineTrends.reduce((sum, d) => sum + (d.done || 0), 0) || 0;
-  const totalRoutinesSkipped = analytics?.routineTrends.reduce((sum, d) => sum + (d.skipped || 0), 0) || 0;
-  const adherenceRate = totalRoutinesDone + totalRoutinesSkipped > 0 
-    ? Math.round((totalRoutinesDone / (totalRoutinesDone + totalRoutinesSkipped)) * 100) 
-    : 0;
+  const totalRoutinesDone =
+    analytics?.routineTrends.reduce((sum, d) => sum + (d.done || 0), 0) || 0;
+  const totalRoutinesSkipped =
+    analytics?.routineTrends.reduce((sum, d) => sum + (d.skipped || 0), 0) || 0;
+  const adherenceRate =
+    totalRoutinesDone + totalRoutinesSkipped > 0
+      ? Math.round(
+          (totalRoutinesDone / (totalRoutinesDone + totalRoutinesSkipped)) *
+            100,
+        )
+      : 0;
 
-  const totalSlicesDone = analytics?.sliceTrends.reduce((sum, d) => sum + (d.completed || 0), 0) || 0;
+  const totalSlicesDone =
+    analytics?.sliceTrends.reduce((sum, d) => sum + (d.completed || 0), 0) || 0;
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 relative pb-32">
@@ -109,8 +128,10 @@ export default function AnalyticsPage() {
                 className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg px-3 py-1.5 text-sm outline-none font-medium"
               >
                 <option value="">My Analytics</option>
-                {partners.map(p => (
-                  <option key={p.id} value={p.id}>{p.username}'s Analytics</option>
+                {partners.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.username}'s Analytics
+                  </option>
                 ))}
               </select>
             )}
@@ -174,7 +195,9 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <h3 className="font-semibold text-sm mb-1">
-                  {analytics.suggestion.type === "warning" ? "Burnout Warning" : "Great Job!"}
+                  {analytics.suggestion.type === "warning"
+                    ? "Burnout Warning"
+                    : "Great Job!"}
                 </h3>
                 <p className="text-sm opacity-90 leading-relaxed text-[var(--text-primary)]">
                   {analytics.suggestion.text}
@@ -227,28 +250,66 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
               {/* Routine Adherence Chart */}
               <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] p-6 rounded-xl shadow-sm">
-                <h2 className="text-sm font-semibold mb-6">Routine Adherence Over Time</h2>
+                <h2 className="text-sm font-semibold mb-6">
+                  Routine Adherence Over Time
+                </h2>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={analytics.routineTrends}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        tickFormatter={(tick) => new Date(tick).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                        stroke="var(--text-tertiary)" 
-                        fontSize={12} 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border-hairline)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(tick) =>
+                          new Date(tick).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                        stroke="var(--text-tertiary)"
+                        fontSize={12}
                         tickLine={false}
                         axisLine={false}
                         dy={10}
                       />
-                      <YAxis stroke="var(--text-tertiary)" fontSize={12} tickLine={false} axisLine={false} dx={-10} allowDecimals={false} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: 'var(--bg-surface-raised)', borderColor: 'var(--border-hairline)', borderRadius: '8px', color: 'var(--text-primary)' }}
-                        itemStyle={{ fontSize: '12px' }}
+                      <YAxis
+                        stroke="var(--text-tertiary)"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        dx={-10}
+                        allowDecimals={false}
                       />
-                      <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                      <Bar dataKey="done" name="Completed" stackId="a" fill="#10b981" radius={[0, 0, 4, 4]} />
-                      <Bar dataKey="skipped" name="Skipped" stackId="a" fill="var(--warning)" radius={[4, 4, 0, 0]} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "var(--bg-surface-raised)",
+                          borderColor: "var(--border-hairline)",
+                          borderRadius: "8px",
+                          color: "var(--text-primary)",
+                        }}
+                        itemStyle={{ fontSize: "12px" }}
+                      />
+                      <Legend
+                        iconType="circle"
+                        wrapperStyle={{ fontSize: "12px" }}
+                      />
+                      <Bar
+                        dataKey="done"
+                        name="Completed"
+                        stackId="a"
+                        fill="#10b981"
+                        radius={[0, 0, 4, 4]}
+                      />
+                      <Bar
+                        dataKey="skipped"
+                        name="Skipped"
+                        stackId="a"
+                        fill="var(--warning)"
+                        radius={[4, 4, 0, 0]}
+                      />
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -256,28 +317,69 @@ export default function AnalyticsPage() {
 
               {/* Macro Slices Area Chart */}
               <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] p-6 rounded-xl shadow-sm">
-                <h2 className="text-sm font-semibold mb-6">Macro Goal Execution</h2>
+                <h2 className="text-sm font-semibold mb-6">
+                  Macro Goal Execution
+                </h2>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <AreaChart data={analytics.sliceTrends}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border-hairline)" vertical={false} />
-                      <XAxis 
-                        dataKey="date" 
-                        tickFormatter={(tick) => new Date(tick).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
-                        stroke="var(--text-tertiary)" 
-                        fontSize={12} 
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border-hairline)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(tick) =>
+                          new Date(tick).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                        stroke="var(--text-tertiary)"
+                        fontSize={12}
                         tickLine={false}
                         axisLine={false}
                         dy={10}
                       />
-                      <YAxis stroke="var(--text-tertiary)" fontSize={12} tickLine={false} axisLine={false} dx={-10} allowDecimals={false} />
-                      <Tooltip 
-                        contentStyle={{ backgroundColor: 'var(--bg-surface-raised)', borderColor: 'var(--border-hairline)', borderRadius: '8px', color: 'var(--text-primary)' }}
-                        itemStyle={{ fontSize: '12px' }}
+                      <YAxis
+                        stroke="var(--text-tertiary)"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        dx={-10}
+                        allowDecimals={false}
                       />
-                      <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
-                      <Area type="monotone" dataKey="scheduled" name="Scheduled" stroke="var(--text-tertiary)" fill="var(--bg-surface-raised)" strokeWidth={2} />
-                      <Area type="monotone" dataKey="completed" name="Completed" stroke="#3b82f6" fill="#3b82f6" fillOpacity={0.2} strokeWidth={2} />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "var(--bg-surface-raised)",
+                          borderColor: "var(--border-hairline)",
+                          borderRadius: "8px",
+                          color: "var(--text-primary)",
+                        }}
+                        itemStyle={{ fontSize: "12px" }}
+                      />
+                      <Legend
+                        iconType="circle"
+                        wrapperStyle={{ fontSize: "12px" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="scheduled"
+                        name="Scheduled"
+                        stroke="var(--text-tertiary)"
+                        fill="var(--bg-surface-raised)"
+                        strokeWidth={2}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="completed"
+                        name="Completed"
+                        stroke="#3b82f6"
+                        fill="#3b82f6"
+                        fillOpacity={0.2}
+                        strokeWidth={2}
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </div>
@@ -314,11 +416,14 @@ export default function AnalyticsPage() {
                 const dayLogs = groupedLogs[dateStr].filter(matchSearch);
                 if (dayLogs.length === 0) return null;
 
-                const displayDate = new Date(dateStr).toLocaleDateString("en-US", {
-                  weekday: "long",
-                  month: "short",
-                  day: "numeric",
-                });
+                const displayDate = new Date(dateStr).toLocaleDateString(
+                  "en-US",
+                  {
+                    weekday: "long",
+                    month: "short",
+                    day: "numeric",
+                  },
+                );
 
                 return (
                   <section key={dateStr} className="space-y-4">
@@ -355,15 +460,21 @@ export default function AnalyticsPage() {
                                 {log.routine?.title || "Unknown Routine"}
                               </div>
                               <div className="text-[10px] font-mono text-[var(--text-secondary)]">
-                                {log.status === "done" ? "Completed" : "Skipped/Missed"} at{" "}
-                                {new Date(log.completed_at).toLocaleTimeString("en-US", {
-                                  hour: "2-digit",
-                                  minute: "2-digit",
-                                })}
+                                {log.status === "done"
+                                  ? "Completed"
+                                  : "Skipped/Missed"}{" "}
+                                at{" "}
+                                {new Date(log.completed_at).toLocaleTimeString(
+                                  "en-US",
+                                  {
+                                    hour: "2-digit",
+                                    minute: "2-digit",
+                                  },
+                                )}
                               </div>
                             </div>
                           </div>
-                          
+
                           {log.note && (
                             <div className="mt-2 sm:mt-0 sm:ml-auto flex-1 sm:max-w-md bg-[var(--bg-base)]/50 p-3 rounded-lg border border-[var(--border-hairline)]">
                               <div className="text-[10px] font-mono uppercase tracking-wider text-[var(--text-tertiary)] mb-1">
@@ -387,7 +498,7 @@ export default function AnalyticsPage() {
           <div className="flex items-center justify-between border-t border-[var(--border-hairline)] pt-8 mt-12">
             <h2 className="text-lg font-semibold">Task Log Book</h2>
           </div>
-          {(!analytics?.taskLogs || analytics.taskLogs.length === 0) ? (
+          {!analytics?.taskLogs || analytics.taskLogs.length === 0 ? (
             <div className="text-center text-[var(--text-secondary)] py-12 border border-dashed border-[var(--border-hairline)] rounded-xl">
               <Check className="w-8 h-8 text-[var(--text-tertiary)] mx-auto mb-3" />
               <p>No tasks completed in this period.</p>
@@ -408,7 +519,12 @@ export default function AnalyticsPage() {
                         {log.title}
                       </div>
                       <div className="text-[10px] font-mono text-[var(--text-secondary)]">
-                        Completed at {new Date(log.completed_at).toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })} on {new Date(log.completed_at).toLocaleDateString()}
+                        Completed at{" "}
+                        {new Date(log.completed_at).toLocaleTimeString(
+                          "en-US",
+                          { hour: "2-digit", minute: "2-digit" },
+                        )}{" "}
+                        on {new Date(log.completed_at).toLocaleDateString()}
                       </div>
                     </div>
                   </div>

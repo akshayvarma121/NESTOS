@@ -11,7 +11,11 @@ export default function ExpandableDescription({ text, maxLength = 80 }: Props) {
   if (!text) return null;
 
   if (text.length <= maxLength) {
-    return <div className="text-[11px] font-normal text-[var(--text-secondary)] italic mt-1">{text}</div>;
+    return (
+      <div className="text-[11px] font-normal text-[var(--text-secondary)] italic mt-1">
+        {text}
+      </div>
+    );
   }
 
   return (
