@@ -79,6 +79,7 @@ export default function FocusPage() {
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
   const [events, setEvents] = useState<any[]>([]);
+  const [holidays, setHolidays] = useState<any[]>([]);
 
   const [showFocusInput, setShowFocusInput] = useState(false);
   const [closeouts, setCloseouts] = useState<any[]>([]);
@@ -162,6 +163,7 @@ export default function FocusPage() {
       setIsRoutineLocked(lockData?.isLocked || false);
       setEvents(calendarData?.events || []);
       setCloseouts(calendarData?.closeouts || []);
+      setHolidays(calendarData?.holidays || []);
 
       if (taskData.length === 0) {
         const goalsData = await api.get("/macro-goals");
@@ -468,6 +470,7 @@ export default function FocusPage() {
                 selectedDateStr={selectedDateStr}
                 events={events}
                 closeouts={closeouts}
+                holidays={holidays}
                 onSelectDate={setSelectedDateStr}
                 onWeekChange={setCurrentCalendarDate}
               />

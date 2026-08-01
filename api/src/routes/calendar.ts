@@ -11,7 +11,19 @@ router.get("/", async (req: AuthRequest, res) => {
   // To keep it simple and robust, let's just return all closeouts and events for the shared space,
   // or limit to a specific date range if passed. For now, let's return all.
 
+  const yearToFetch = year || new Date().getFullYear();
+
   try {
+    // Fetch US holidays from Nager.Date as a fast public API option (Option A)
+    let publicHolidays = [];
+    try {
+      const holidayRes = await fetch(`https://date.nager.at/api/v3/PublicHolidays/${yearToFetch}/US`);
+      if (holidayRes.ok) {
+        publicHolidays = await holidayRes.json();
+      }
+    } catch (err) {
+      console.error("Failed to fetch public holidays:", err);
+    }
     const [eventsRes, closeoutsRes, tasksRes, macroGoalsRes, deadlinesRes] = await Promise.all([
       supabase
         .from("pos_events")
@@ -44,6 +56,7 @@ router.get("/", async (req: AuthRequest, res) => {
       scheduledTasks: tasksRes.data || [],
       macroGoals: macroGoalsRes.data || [],
       deadlines: deadlinesRes.data || [],
+      holidays: publicHolidays,
     });
   } catch (e: any) {
     res.status(500).json({ error: e.message });

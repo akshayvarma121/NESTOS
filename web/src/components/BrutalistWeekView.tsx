@@ -6,6 +6,7 @@ interface BrutalistWeekViewProps {
   selectedDateStr: string;
   events: any[];
   closeouts: any[];
+  holidays?: any[];
   onSelectDate: (dateStr: string) => void;
   onWeekChange: (newDate: Date) => void;
 }
@@ -15,6 +16,7 @@ export default function BrutalistWeekView({
   selectedDateStr,
   events,
   closeouts,
+  holidays = [],
   onSelectDate,
   onWeekChange,
 }: BrutalistWeekViewProps) {
@@ -93,6 +95,7 @@ export default function BrutalistWeekView({
         {days.map((d, i) => {
           const dateStr = getDateStr(d);
           const dayEvents = events.filter((e) => e.date === dateStr);
+          const dayHolidays = holidays.filter((h) => h.date === dateStr);
           const closeout = closeouts.find((c) => c.date === dateStr);
           const isSelected = selectedDateStr === dateStr;
           const isToday = isTodayDate(d);
@@ -133,14 +136,23 @@ export default function BrutalistWeekView({
                 </span>
               </div>
               
-              <div className="mt-auto flex justify-center gap-1 pt-2">
-                {dayEvents.map((e) => (
-                  <div
-                    key={e.id}
-                    className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#ffeb3b]" : "bg-[#ff6b6b]"}`}
-                    title={e.title}
-                  />
-                ))}
+              <div className="mt-auto flex flex-col items-center gap-1 pt-2">
+                <div className="flex justify-center gap-1">
+                  {dayEvents.map((e) => (
+                    <div
+                      key={e.id}
+                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#ffeb3b]" : "bg-[#ff6b6b]"}`}
+                      title={e.title}
+                    />
+                  ))}
+                  {dayHolidays.map((h, idx) => (
+                    <div
+                      key={`h-${idx}`}
+                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#ffb6c1]" : "bg-[#ffd32a]"}`}
+                      title={h.name}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           );

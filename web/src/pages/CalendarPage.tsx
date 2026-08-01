@@ -21,6 +21,7 @@ export default function CalendarPage() {
   const [scheduledTasks, setScheduledTasks] = useState<any[]>([]);
   const [macroGoals, setMacroGoals] = useState<any[]>([]);
   const [deadlines, setDeadlines] = useState<any[]>([]);
+  const [holidays, setHolidays] = useState<any[]>([]);
 
   // Modals
   const [selectedDate, setSelectedDate] = useState<string | null>(null);
@@ -37,6 +38,7 @@ export default function CalendarPage() {
       setScheduledTasks(data.scheduledTasks || []);
       setMacroGoals(data.macroGoals || []);
       setDeadlines(data.deadlines || []);
+      setHolidays(data.holidays || []);
     } catch (e) {
       console.error(e);
     } finally {
@@ -211,6 +213,7 @@ export default function CalendarPage() {
               const closeout = closeouts.find((c) => c.date === dateStr);
               const dayMacroGoals = macroGoals.filter((g) => g.deadline && g.deadline.startsWith(dateStr));
               const dayDeadlines = deadlines.filter((dl) => dl.deadline && dl.deadline.startsWith(dateStr));
+              const dayHolidays = holidays.filter((h) => h.date === dateStr);
               const isSelected = selectedDate === dateStr;
               const isToday = isTodayDate(d);
 
@@ -242,6 +245,15 @@ export default function CalendarPage() {
                   </div>
 
                   <div className="space-y-1 overflow-hidden h-[85px]">
+                    {/* Holidays */}
+                    {dayHolidays.map((h, idx) => (
+                      <div
+                        key={`hol-${idx}`}
+                        className="text-[9px] font-bold uppercase truncate bg-[#ffd32a] text-black px-1 py-0.5 rounded-sm flex items-center gap-1 opacity-80"
+                      >
+                        <Flag className="w-2.5 h-2.5 shrink-0" /> {h.name}
+                      </div>
+                    ))}
                     {/* Goal Deadlines */}
                     {dayMacroGoals.map((g) => (
                       <div
