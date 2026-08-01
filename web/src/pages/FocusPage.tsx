@@ -343,8 +343,6 @@ export default function FocusPage() {
                   })}
                 </span>
               )}
-
-
             </div>
           ))}
         </div>
@@ -949,7 +947,7 @@ export default function FocusPage() {
                       ? "Today's Horizon"
                       : "Focus Horizon"}
                   </span>
-                  <span className="text-[10px] font-bold bg-[#ffeb3b] brutal-border px-2 py-0.5">
+                  <span className="text-[10px] font-black text-black bg-[#ffeb3b] border border-black brutal-shadow-sm px-2 py-0.5">
                     {todayTasks.length} tasks
                   </span>
                 </h2>
