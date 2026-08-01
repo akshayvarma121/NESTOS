@@ -142,7 +142,7 @@ export default function AppLayout() {
       <div className="titlebar-drag-region" />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
+      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
         <Outlet />
       </main>
 
