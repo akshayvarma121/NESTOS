@@ -121,8 +121,8 @@ export default function FocusPage() {
     setRoutines([]);
     setPartnerRoutines([]);
     fetchFocusData();
-    // Fetch once on mount or when selectedDateStr/currentCalendarDate changes
-  }, [selectedDateStr, currentCalendarDate]);
+    // Fetch once on mount or when selectedDateStr changes
+  }, [selectedDateStr]);
 
   const fetchFocusData = async () => {
     setLoading(true);
