@@ -8,6 +8,7 @@ import CreateOpportunityPanel from "../components/CreateOpportunityPanel";
 import { Plus, Bell, X, WifiOff, Download } from "lucide-react";
 import { api } from "../lib/api";
 import { useHotkeys } from "../lib/useHotkeys";
+import { useSwipeNavigation } from "../lib/useSwipe";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -23,6 +24,7 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function AppLayout() {
+  useSwipeNavigation();
   const [showToast, setShowToast] = useState(false);
   
   // Global Modal States
