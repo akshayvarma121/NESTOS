@@ -15,11 +15,11 @@ export default function CreateOpportunityPanel({
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({
-    company: "",
-    role: "",
-    source_link: "",
+    title: "",
+    url: "",
     notes: "",
-    deadline: "",
+    date: "",
+    time: "23:59",
   });
 
   if (!isOpen) return null;
@@ -27,12 +27,16 @@ export default function CreateOpportunityPanel({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    // If deadline is empty string, send null
+    const isoString =
+      form.date && form.time
+        ? new Date(`${form.date}T${form.time}:00`).toISOString()
+        : null;
+
     const payload = {
-      title: form.company + (form.role ? ` - ${form.role}` : ""), // Quick mapping since the old code used company/role
-      url: form.source_link,
+      title: form.title,
+      url: form.url,
       notes: form.notes,
-      deadline: form.deadline ? new Date(form.deadline).toISOString() : null,
+      deadline: isoString,
     };
     try {
       await api.post("/opportunities", payload);
@@ -68,56 +72,55 @@ export default function CreateOpportunityPanel({
         >
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
-              Company
+              Title
             </label>
             <input
               required
               autoFocus
-              value={form.company}
-              onChange={(e) => setForm({ ...form, company: e.target.value })}
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
               className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
-              placeholder="e.g. Google"
+              placeholder="e.g. Register for conference"
             />
           </div>
 
           <div className="space-y-1.5">
             <label className="text-sm font-medium text-[var(--text-secondary)]">
-              Role
-            </label>
-            <input
-              required
-              value={form.role}
-              onChange={(e) => setForm({ ...form, role: e.target.value })}
-              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
-              placeholder="e.g. L3 Software Engineer"
-            />
-          </div>
-
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">
-              Source Link
+              URL (Optional)
             </label>
             <input
               type="url"
-              value={form.source_link}
-              onChange={(e) =>
-                setForm({ ...form, source_link: e.target.value })
-              }
+              value={form.url}
+              onChange={(e) => setForm({ ...form, url: e.target.value })}
               className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
-              placeholder="https://careers.google.com/..."
+              placeholder="https://..."
             />
           </div>
 
-          <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[var(--text-secondary)]">
-              Deadline (Optional)
-            </label>
-            <input
-              type="datetime-local"
-              value={form.deadline}
-              onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)] font-mono"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">
+                Date
+              </label>
+              <input
+                required
+                type="date"
+                value={form.date}
+                onChange={(e) => setForm({ ...form, date: e.target.value })}
+                className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-sm font-medium text-[var(--text-secondary)]">
+                Time
+              </label>
+              <input
+                type="time"
+                value={form.time}
+                onChange={(e) => setForm({ ...form, time: e.target.value })}
+                className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)]"
+              />
+            </div>
           </div>
 
           <div className="space-y-1.5">
