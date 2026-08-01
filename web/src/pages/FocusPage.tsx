@@ -7,7 +7,7 @@ import EditTimetablePanel, {
 } from "../components/EditTimetablePanel";
 import CountdownTimer from "../components/CountdownTimer";
 import ExpandableDescription from "../components/ExpandableDescription";
-import BrutalistCalendar from "../components/BrutalistCalendar";
+import BrutalistWeekView from "../components/BrutalistWeekView";
 import {
   getLocalDateString,
   getLocalDayName,
@@ -473,21 +473,21 @@ export default function FocusPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
+          <div className="flex flex-col xl:grid xl:grid-cols-[1fr_minmax(300px,_400px)] gap-16 items-start">
             {/* LEFT COLUMN: MAIN FOCUS */}
             <div className="space-y-8 min-w-0">
-              <BrutalistCalendar
+              <BrutalistWeekView
                 currentDate={currentCalendarDate}
                 selectedDateStr={selectedDateStr}
                 events={events}
                 closeouts={closeouts}
                 onSelectDate={setSelectedDateStr}
-                onMonthChange={setCurrentCalendarDate}
+                onWeekChange={setCurrentCalendarDate}
               />
 
               {/* SELECTED DATE EVENTS */}
-              <div className="bg-[var(--bg-surface-raised)] border-t-4 border-[var(--border-brutal)] brutal-shadow-sm p-4 space-y-4">
-                <h3 className="text-xs font-black uppercase tracking-widest text-[var(--text-primary)] border-b-2 border-[var(--border-brutal)] pb-2 flex justify-between">
+              <div className="space-y-4 pt-2">
+                <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)] border-b-2 border-[var(--border-hairline)] pb-2 flex justify-between">
                   <span>Events & Deadlines</span>
                   <span className="text-[var(--text-secondary)]">
                     {selectedDateStr}
@@ -555,7 +555,7 @@ export default function FocusPage() {
 
               {/* DAILY ROUTINE TIMETABLE */}
               <section className="space-y-4">
-                <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)] border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between">
+                <h2 className="text-3xl font-black uppercase tracking-tighter text-[var(--text-primary)] mb-4 flex items-center justify-between">
                   <span>Daily Routine</span>
                   <div className="flex items-center gap-3">
                     <NavLink
@@ -956,8 +956,8 @@ export default function FocusPage() {
 
             {/* RIGHT COLUMN: SIDEBAR */}
             <div className="space-y-6 min-w-0">
-              <div className="bg-[var(--bg-surface-raised)] border-t-4 border-[var(--border-brutal)] brutal-shadow p-6">
-                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-[var(--border-brutal)] pb-3 mb-6 flex items-center justify-between text-[var(--text-primary)]">
+              <div className="mb-12">
+                <h2 className="text-3xl font-black uppercase tracking-tighter mb-8 flex items-center justify-between text-[var(--text-primary)]">
                   <span>
                     {selectedDateStr === actualTodayStr
                       ? "Today's Horizon"
@@ -981,10 +981,10 @@ export default function FocusPage() {
               {/* OVERDUE */}
               {overdueTasks.length > 0 && (
                 <section className="space-y-4">
-                  <h2 className="text-sm font-black uppercase tracking-widest text-[#ff6b6b] border-b-2 border-[#ff6b6b] pb-2">
+                  <h2 className="text-2xl font-black uppercase tracking-tighter text-[#ff6b6b]">
                     Overdue Action Items
                   </h2>
-                  <div className="p-4 bg-[var(--bg-surface-raised)] brutal-border brutal-shadow-sm space-y-4">
+                  <div className="space-y-4">
                     {renderSubjectGroup(overdueGrouped)}
                   </div>
                 </section>
@@ -993,7 +993,7 @@ export default function FocusPage() {
               {/* UPCOMING */}
               {upcomingTasks.length > 0 && (
                 <section className="space-y-4">
-                  <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]/70 border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between">
+                  <h2 className="text-2xl font-black uppercase tracking-tighter text-[var(--text-primary)] flex items-center justify-between">
                     <span>Upcoming Horizon</span>
                     <span className="text-xs font-mono text-[var(--text-primary)]/50">
                       {upcomingTasks.length} tasks
@@ -1007,7 +1007,7 @@ export default function FocusPage() {
 
               {/* PRIVATE FOCUS */}
               <section className="space-y-4 pt-4">
-                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between text-[var(--text-primary)]">
+                <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center justify-between text-[var(--text-primary)]">
                   <span className="flex items-center gap-2">
                     Private Focus{" "}
                     <span className="text-[10px] bg-[var(--text-primary)] text-[var(--bg-base)] px-2 py-0.5 brutal-border border-transparent uppercase font-bold">
@@ -1015,7 +1015,7 @@ export default function FocusPage() {
                     </span>
                   </span>
                 </h2>
-                <div className="space-y-3 bg-[var(--bg-surface-raised)] brutal-border brutal-shadow-sm p-4">
+                <div className="space-y-4 pt-4">
                   {personalTodos.map((todo) => (
                     <div
                       key={todo.id}
@@ -1062,7 +1062,7 @@ export default function FocusPage() {
 
               {/* STICKY NOTES */}
               {dashboardNotes.length > 0 && (
-                <section className="grid grid-cols-2 gap-4">
+                <section className="flex flex-wrap gap-6">
                   {dashboardNotes.map((note) => {
                     const colorClass =
                       note.color === "yellow"
@@ -1076,7 +1076,7 @@ export default function FocusPage() {
                     return (
                       <div
                         key={note.id}
-                        className={`p-4 brutal-border brutal-shadow-sm flex flex-col gap-2 min-h-[100px] transform -rotate-1 hover:rotate-0 transition-transform ${colorClass}`}
+                        className={`p-4 brutal-border brutal-shadow-sm flex flex-col gap-2 min-h-[100px] transform -rotate-2 hover:rotate-0 hover:-translate-y-1 w-[180px] transition-transform ${colorClass}`}
                       >
                         <div className="flex items-center justify-between opacity-70">
                           <span className="text-[10px] font-black uppercase">
