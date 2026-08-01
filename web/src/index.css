@@ -48,7 +48,24 @@
     --danger: #ff4757;
     --warning: #ffa502;
     --success: #2ed573;
+    --border-brutal: #000000;
     color-scheme: light;
+  }
+
+  :root.dark {
+    --bg-base: #121212;
+    --bg-surface: #1e1e1e;
+    --bg-surface-raised: #2a2a2a;
+    --border-hairline: #ffffff;
+    --text-primary: #ffffff;
+    --text-secondary: #cccccc;
+    --text-tertiary: #aaaaaa;
+    --accent: #ff6b6b;
+    --danger: #ff4757;
+    --warning: #ffa502;
+    --success: #2ed573;
+    --border-brutal: #ffffff;
+    color-scheme: dark;
   }
 
   html,
@@ -72,36 +89,36 @@
 
   /* Neo-brutalist utility classes */
   .brutal-border {
-    border: 3px solid #000 !important;
+    border: 3px solid var(--border-brutal) !important;
     border-radius: 4px;
   }
 
   .brutal-shadow {
-    box-shadow: 4px 4px 0px #000 !important;
+    box-shadow: 4px 4px 0px var(--border-brutal) !important;
   }
 
   .brutal-shadow-sm {
-    box-shadow: 2px 2px 0px #000 !important;
+    box-shadow: 2px 2px 0px var(--border-brutal) !important;
   }
 
   .brutal-shadow-lg {
-    box-shadow: 6px 6px 0px #000 !important;
+    box-shadow: 6px 6px 0px var(--border-brutal) !important;
   }
 
   .brutal-btn {
-    border: 3px solid #000 !important;
+    border: 3px solid var(--border-brutal) !important;
     border-radius: 4px;
-    box-shadow: 4px 4px 0px #000 !important;
+    box-shadow: 4px 4px 0px var(--border-brutal) !important;
     @apply transition-transform duration-75;
   }
 
   .brutal-btn:hover {
     transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px #000 !important;
+    box-shadow: 2px 2px 0px var(--border-brutal) !important;
   }
 
   .brutal-btn:active {
     transform: translate(4px, 4px);
-    box-shadow: 0px 0px 0px #000 !important;
+    box-shadow: 0px 0px 0px var(--border-brutal) !important;
   }
 }

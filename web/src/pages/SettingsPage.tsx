@@ -53,16 +53,24 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg">
               <div>
-                <h3 className="text-sm font-medium">Light Mode</h3>
+                <h3 className="text-sm font-medium">Dark Mode</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  Toggle brutalist light mode theme.
+                  Toggle brutalist dark mode theme.
                 </p>
               </div>
               <button
                 onClick={() => {
-                  const isLight =
-                    document.documentElement.classList.toggle("light");
-                  localStorage.setItem("theme", isLight ? "light" : "dark");
+                  const isDark =
+                    document.documentElement.classList.contains("dark");
+                  if (isDark) {
+                    document.documentElement.classList.remove("dark");
+                    document.documentElement.classList.add("light");
+                    localStorage.setItem("theme", "light");
+                  } else {
+                    document.documentElement.classList.remove("light");
+                    document.documentElement.classList.add("dark");
+                    localStorage.setItem("theme", "dark");
+                  }
                 }}
                 className="px-3 py-1.5 bg-[var(--text-primary)] text-[var(--bg-base)] text-xs font-medium rounded hover:opacity-90 transition-opacity"
               >

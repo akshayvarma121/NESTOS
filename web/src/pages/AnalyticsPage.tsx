@@ -8,6 +8,8 @@ import {
   Search,
   Activity,
   Target,
+  Timer,
+  Clock,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import {
@@ -31,6 +33,7 @@ export default function AnalyticsPage() {
     routineTrends: any[];
     sliceTrends: any[];
     taskLogs?: any[];
+    focusSessions?: any[];
     suggestion?: { text: string; type: "warning" | "success" | "info" };
   } | null>(null);
 
@@ -101,6 +104,20 @@ export default function AnalyticsPage() {
 
   const totalSlicesDone =
     analytics?.sliceTrends.reduce((sum, d) => sum + (d.completed || 0), 0) || 0;
+
+  const totalFocusSessions = analytics?.focusSessions?.length || 0;
+  const totalFocusSeconds =
+    analytics?.focusSessions?.reduce(
+      (sum, s) => sum + (s.duration_seconds || 0),
+      0,
+    ) || 0;
+
+  const formatFocusTime = (totalSeconds: number) => {
+    const hrs = Math.floor(totalSeconds / 3600);
+    const mins = Math.floor((totalSeconds % 3600) / 60);
+    if (hrs > 0) return `${hrs}h ${mins}m`;
+    return `${mins}m`;
+  };
 
   return (
     <div className="p-6 md:p-8 max-w-5xl mx-auto space-y-8 relative pb-32">
@@ -241,6 +258,32 @@ export default function AnalyticsPage() {
                   Macro Slices Done
                 </p>
                 <div className="text-2xl font-bold">{totalSlicesDone}</div>
+              </div>
+            </div>
+
+            <div className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] p-5 rounded-xl flex items-center gap-4 shadow-sm">
+              <div className="w-12 h-12 rounded-full bg-[#f9a8d4]/10 text-[#f9a8d4] flex items-center justify-center flex-shrink-0">
+                <Timer className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
+                  Focus Sessions
+                </p>
+                <div className="text-2xl font-bold">{totalFocusSessions}</div>
+              </div>
+            </div>
+
+            <div className="bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] p-5 rounded-xl flex items-center gap-4 shadow-sm md:col-span-2 lg:col-span-1">
+              <div className="w-12 h-12 rounded-full bg-[#fbbf24]/10 text-[#fbbf24] flex items-center justify-center flex-shrink-0">
+                <Clock className="w-6 h-6" />
+              </div>
+              <div>
+                <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
+                  Total Focus Time
+                </p>
+                <div className="text-2xl font-bold">
+                  {formatFocusTime(totalFocusSeconds)}
+                </div>
               </div>
             </div>
           </div>

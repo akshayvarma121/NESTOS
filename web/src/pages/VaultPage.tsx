@@ -236,7 +236,7 @@ export default function VaultPage() {
 
           <button
             onClick={isSetup ? handleUnlock : handleSetup}
-            className="w-full py-4 bg-[var(--text-primary)] text-[var(--bg-base)] rounded-xl font-medium hover:bg-white active:scale-[0.98] transition-transform"
+            className="w-full py-4 bg-[var(--text-primary)] text-[var(--bg-base)] rounded-xl font-medium hover:bg-[var(--bg-surface-raised)] active:scale-[0.98] transition-transform"
           >
             {isSetup ? "Unlock" : "Set PIN"}
           </button>
@@ -267,7 +267,7 @@ export default function VaultPage() {
         </div>
         <button
           onClick={() => setVaultToken(null)}
-          className="text-sm font-medium px-3 py-1.5 bg-[var(--bg-surface-raised)] rounded hover:text-white transition-colors"
+          className="text-sm font-medium px-3 py-1.5 bg-[var(--bg-surface-raised)] rounded hover:text-[var(--bg-base)] transition-colors"
         >
           Lock Now
         </button>
@@ -316,7 +316,7 @@ export default function VaultPage() {
       {/* FAB for Vault only appears when unlocked */}
       <button
         onClick={() => setIsAdding(true)}
-        className="fixed bottom-[100px] lg:bottom-12 right-6 lg:right-12 w-14 h-14 bg-[var(--accent)] text-white rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-40"
+        className="fixed bottom-[100px] lg:bottom-12 right-6 lg:right-12 w-14 h-14 bg-[var(--accent)] text-[var(--bg-base)] rounded-full shadow-lg flex items-center justify-center hover:scale-105 transition-transform z-40"
       >
         <Plus className="w-6 h-6" />
       </button>
@@ -372,7 +372,7 @@ export default function VaultPage() {
                 <button
                   type="button"
                   onClick={() => setShowValue(!showValue)}
-                  className="text-xs hover:text-white"
+                  className="text-xs hover:text-[var(--bg-base)]"
                 >
                   {showValue ? "Hide" : "Show"}
                 </button>
@@ -399,7 +399,7 @@ export default function VaultPage() {
       </div>
       {isAdding && (
         <div
-          className="fixed inset-0 bg-black/40 z-[90] backdrop-blur-sm"
+          className="fixed inset-0 bg-[var(--text-primary)]/40 z-[90] backdrop-blur-sm"
           onClick={() => setIsAdding(false)}
         />
       )}
