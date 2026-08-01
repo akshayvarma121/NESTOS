@@ -518,7 +518,7 @@ export default function FocusPage() {
                               title,
                               date: selectedDateStr,
                             });
-                            setEvents((prev) => [...prev, res.data]);
+                            setEvents((prev) => [...prev, res]);
                             setShowEventInput(false);
                           } catch (err) {
                             console.error("Failed to add event");
@@ -530,7 +530,7 @@ export default function FocusPage() {
                 ) : (
                   <button
                     onClick={() => setShowEventInput(true)}
-                    className="mt-2 text-xs font-black uppercase text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1"
+                    className="mt-2 bg-[var(--text-primary)] text-[var(--bg-base)] px-3 py-1.5 text-xs font-black uppercase brutal-border brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px] transition-transform"
                   >
                     + Add Event
                   </button>
