@@ -6,6 +6,7 @@ import QuickCapturePanel from "../components/QuickCapturePanel";
 import PrivacyBanner from "../components/PrivacyBanner";
 import { Plus, Bell, X, WifiOff, Download } from "lucide-react";
 import { api } from "../lib/api";
+import { useHotkeys } from "../lib/useHotkeys";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -50,6 +51,10 @@ export default function AppLayout() {
     };
     window.addEventListener("vault_copy", handleVaultCopy);
 
+    // Quick Capture Listener
+    const handleQuickCapture = () => setIsCaptureOpen(true);
+    window.addEventListener("open_quick_capture", handleQuickCapture);
+
     // PWA Install Prompt Listener
     const handleBeforeInstallPrompt = (e: any) => {
       e.preventDefault();
@@ -72,6 +77,7 @@ export default function AppLayout() {
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("milestone_reached", handleMilestone);
       window.removeEventListener("vault_copy", handleVaultCopy);
+      window.removeEventListener("open_quick_capture", handleQuickCapture);
       window.removeEventListener(
         "beforeinstallprompt",
         handleBeforeInstallPrompt,
@@ -114,95 +120,24 @@ export default function AppLayout() {
     }
   };
 
+  useHotkeys("c", () => {
+    setIsCaptureOpen(true);
+  });
+
   return (
     <div className="flex h-[100dvh] w-full bg-[var(--bg-base)] overflow-hidden">
-      {/* Offline Banner */}
-      {isOffline && (
-        <div className="fixed top-0 left-0 right-0 bg-[var(--bg-surface-raised)] border-b border-[var(--border-hairline)] px-4 py-1.5 flex items-center justify-center gap-2 z-[60]">
-          <WifiOff className="w-3.5 h-3.5 text-[var(--text-secondary)]" />
-          <span className="text-xs text-[var(--text-secondary)] font-medium">
-            Offline — showing last synced data
-          </span>
-        </div>
-      )}
-
       {/* Desktop Sidebar (hidden on mobile) */}
-      <div className="hidden lg:flex w-[240px] flex-shrink-0 border-r border-[var(--border-hairline)] bg-[var(--bg-surface)] pt-6">
+      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-6 transition-all duration-300 relative z-20">
         <DesktopSidebar />
       </div>
 
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
-        {/* Contextual PWA Install Banner */}
-        {deferredPrompt && (
-          <div className="mx-6 mb-6 p-4 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[var(--bg-surface-raised)] rounded-lg">
-                <Download className="w-5 h-5 text-[var(--text-primary)]" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">Install NestOS App</p>
-                <p className="text-xs text-[var(--text-secondary)]">
-                  Add to your home screen for a faster, full-screen experience.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={handleInstallClick}
-                className="flex-1 sm:flex-none bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-2 rounded-md text-sm font-medium hover:bg-white transition-colors"
-              >
-                Install
-              </button>
-              <button
-                onClick={() => setDeferredPrompt(null)}
-                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
-        {/* Contextual Push Banner */}
-        {showPushBanner && (
-          <div className="mx-6 mb-6 p-4 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-2">
-            <div className="flex items-center gap-3">
-              <div className="p-2 bg-[var(--bg-surface-raised)] rounded-lg">
-                <Bell className="w-5 h-5 text-[var(--text-primary)]" />
-              </div>
-              <div>
-                <p className="text-sm font-medium">
-                  Get a morning briefing on your phone?
-                </p>
-                <p className="text-xs text-[var(--text-secondary)]">
-                  Plus alerts for upcoming application deadlines.
-                </p>
-              </div>
-            </div>
-            <div className="flex items-center gap-3 w-full sm:w-auto">
-              <button
-                onClick={handleSubscribe}
-                disabled={subscribing}
-                className="flex-1 sm:flex-none bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-2 rounded-md text-sm font-medium hover:bg-white transition-colors"
-              >
-                {subscribing ? "Enabling..." : "Enable"}
-              </button>
-              <button
-                onClick={dismissPush}
-                className="p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-          </div>
-        )}
-
         <Outlet />
       </main>
 
       {/* Mobile Bottom Tabs (hidden on desktop) */}
-      <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t border-[var(--border-hairline)] bg-[var(--bg-surface-raised)] pb-safe z-40">
+      <div className="lg:hidden fixed bottom-0 left-0 right-0 border-t-4 border-black bg-[var(--bg-surface-raised)] pb-safe z-40">
         <MobileBottomTabs />
       </div>
 
@@ -217,20 +152,97 @@ export default function AppLayout() {
 
       {/* Non-blocking Milestone Toast */}
       {showToast && (
-        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-3 rounded-lg shadow-2xl z-50 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300">
-          <span className="text-sm font-medium">
+        <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-3 brutal-border brutal-shadow-lg z-50 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300">
+          <span className="text-sm font-bold">
             New milestone captured — draft a post?
           </span>
           <a
             href="/captures"
             onClick={() => setShowToast(false)}
-            className="text-xs bg-[var(--bg-base)] text-[var(--text-primary)] px-2 py-1 rounded"
+            className="text-xs bg-[var(--bg-base)] text-[var(--text-primary)] px-2 py-1 rounded hover:scale-[1.02] transition-transform"
           >
             View
           </a>
         </div>
       )}
 
+      {/* Floating Toast Container (Bottom Right Desktop, Top Mobile) */}
+      <div className="fixed top-4 right-4 left-4 lg:top-auto lg:left-auto lg:bottom-6 lg:right-6 z-[60] flex flex-col gap-3 pointer-events-none">
+        {/* Offline Banner */}
+        {isOffline && (
+          <div className="bg-[#ffeb3b] brutal-border brutal-shadow px-4 py-3 flex items-center justify-center gap-2 pointer-events-auto animate-in fade-in slide-in-from-top-2 lg:slide-in-from-bottom-2">
+            <WifiOff className="w-5 h-5 text-black" />
+            <span className="text-sm text-black font-bold">
+              Offline — showing last synced data
+            </span>
+          </div>
+        )}
+
+        {/* Contextual PWA Install Banner */}
+        {deferredPrompt && (
+          <div className="p-4 bg-[#a8e6cf] brutal-border brutal-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pointer-events-auto animate-in fade-in slide-in-from-top-2 lg:slide-in-from-bottom-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white brutal-border">
+                <Download className="w-6 h-6 text-black" />
+              </div>
+              <div>
+                <p className="text-base font-bold text-black">Install Nest</p>
+                <p className="text-xs font-medium text-black/80 hidden sm:block">
+                  Add to home screen.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleInstallClick}
+                className="flex-1 sm:flex-none bg-black text-white px-4 py-2 brutal-border text-sm font-bold hover:translate-x-1 hover:translate-y-1 transition-transform"
+              >
+                Install
+              </button>
+              <button
+                onClick={() => setDeferredPrompt(null)}
+                className="p-1.5 text-black hover:bg-black hover:text-white brutal-border transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Contextual Push Banner */}
+        {showPushBanner && !deferredPrompt && (
+          <div className="p-4 bg-[#ffb6c1] brutal-border brutal-shadow flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pointer-events-auto animate-in fade-in slide-in-from-top-2 lg:slide-in-from-bottom-2">
+            <div className="flex items-center gap-3">
+              <div className="p-2 bg-white brutal-border">
+                <Bell className="w-6 h-6 text-black" />
+              </div>
+              <div>
+                <p className="text-base font-bold text-black">
+                  Morning briefings?
+                </p>
+                <p className="text-xs font-medium text-black/80 hidden sm:block">
+                  Get alerts on your phone.
+                </p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 w-full sm:w-auto">
+              <button
+                onClick={handleSubscribe}
+                disabled={subscribing}
+                className="flex-1 sm:flex-none bg-black text-white px-4 py-2 brutal-border text-sm font-bold hover:translate-x-1 hover:translate-y-1 transition-transform"
+              >
+                {subscribing ? "..." : "Enable"}
+              </button>
+              <button
+                onClick={dismissPush}
+                className="p-1.5 text-black hover:bg-black hover:text-white brutal-border transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 }

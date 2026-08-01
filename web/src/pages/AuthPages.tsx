@@ -27,7 +27,7 @@ export function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] px-6">
       <div className="w-full max-w-sm">
-        <h1 className="text-3xl font-semibold mb-2 text-center">NestOS</h1>
+        <h1 className="text-3xl font-semibold mb-2 text-center">Nest</h1>
         <p className="text-[var(--text-secondary)] text-center mb-8">
           Sign in to your personal OS
         </p>
@@ -125,7 +125,7 @@ export function RegisterPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-[var(--bg-base)] px-6">
       <div className="w-full max-w-sm">
-        <h1 className="text-3xl font-semibold mb-2 text-center">Join NestOS</h1>
+        <h1 className="text-3xl font-semibold mb-2 text-center">Join Nest</h1>
         <p className="text-[var(--text-secondary)] text-center mb-8">
           Create your personal OS
         </p>

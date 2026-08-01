@@ -13,7 +13,7 @@
   --color-warning: #e5a445;
   --color-success: #3dd68c;
 
-  --font-sans: "Inter", system-ui, sans-serif;
+  --font-sans: "Outfit", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", monospace;
 
   /* Spacing scale: 4px base unit */
@@ -35,33 +35,19 @@
 }
 
 @layer base {
-  :root {
-    --bg-base: #000000;
-    --bg-surface: #0a0a0a;
-    --bg-surface-raised: #141414;
-    --border-hairline: #333333;
-    --text-primary: #ffffff;
-    --text-secondary: #a3a3a3;
-    --text-tertiary: #525252;
-    --accent: #4b7bff;
-    --danger: #e5484d;
-    --warning: #e5a445;
-    --success: #3dd68c;
-    color-scheme: dark;
-  }
-
+  :root,
   :root.light {
-    --bg-base: #ffffff;
+    --bg-base: #fdfbf7;
     --bg-surface: #ffffff;
     --bg-surface-raised: #ffffff;
     --border-hairline: #000000;
     --text-primary: #000000;
-    --text-secondary: #525252;
-    --text-tertiary: #a3a3a3;
-    --accent: #4b7bff;
-    --danger: #e5484d;
-    --warning: #e5a445;
-    --success: #3dd68c;
+    --text-secondary: #333333;
+    --text-tertiary: #555555;
+    --accent: #ff6b6b;
+    --danger: #ff4757;
+    --warning: #ffa502;
+    --success: #2ed573;
     color-scheme: light;
   }
 
@@ -79,14 +65,43 @@
     }
   }
 
-  /* Fix for input date/time icons on dark backgrounds if color-scheme isn't respected by some browsers */
   input[type="date"],
   input[type="time"] {
     color: var(--text-primary);
   }
 
-  /* No shadows, just hairline border */
-  * {
-    box-shadow: none !important;
+  /* Neo-brutalist utility classes */
+  .brutal-border {
+    border: 3px solid #000 !important;
+    border-radius: 4px;
+  }
+
+  .brutal-shadow {
+    box-shadow: 4px 4px 0px #000 !important;
+  }
+
+  .brutal-shadow-sm {
+    box-shadow: 2px 2px 0px #000 !important;
+  }
+
+  .brutal-shadow-lg {
+    box-shadow: 6px 6px 0px #000 !important;
+  }
+
+  .brutal-btn {
+    border: 3px solid #000 !important;
+    border-radius: 4px;
+    box-shadow: 4px 4px 0px #000 !important;
+    @apply transition-transform duration-75;
+  }
+
+  .brutal-btn:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #000 !important;
+  }
+
+  .brutal-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0px 0px 0px #000 !important;
   }
 }

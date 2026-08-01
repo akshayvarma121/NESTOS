@@ -47,11 +47,11 @@ export default defineConfig({
         ]
       },
       manifest: {
-        name: 'NestOS',
-        short_name: 'NestOS',
+        name: 'Nest',
+        short_name: 'Nest',
         description: 'Personal productivity and tracking dashboard',
-        theme_color: '#09090b',
-        background_color: '#09090b',
+        theme_color: '#fdfbf7',
+        background_color: '#fdfbf7',
         display: 'standalone',
         orientation: 'any',
         start_url: '/',

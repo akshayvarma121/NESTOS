@@ -11,7 +11,6 @@ import VaultPage from "./pages/VaultPage";
 import PartnerPage from "./pages/PartnerPage";
 import SettingsPage from "./pages/SettingsPage";
 import SharedPartnerPage from "./pages/SharedPartnerPage";
-import CalendarPage from "./pages/CalendarPage";
 import NotesPage from "./pages/NotesPage";
 import PomodoroPage from "./pages/PomodoroPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
@@ -31,45 +30,44 @@ export default function App() {
   return (
     <AuthProvider>
       <BrowserRouter>
-          <Routes>
-            {/* Public Auth Routes */}
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/shared/:token" element={<SharedPartnerPage />} />
+        <Routes>
+          {/* Public Auth Routes */}
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/register" element={<RegisterPage />} />
+          <Route path="/shared/:token" element={<SharedPartnerPage />} />
 
-            {/* Protected App Routes */}
-            <Route
-              path="/"
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<Navigate to="/focus" replace />} />
-              <Route path="focus" element={<FocusPage />} />
-              <Route path="routines-history" element={<AnalyticsPage />} />
-              <Route path="backlog" element={<BacklogPage />} />
-              <Route path="goals" element={<GoalsPage />} />
-              <Route path="opportunities" element={<OpportunitiesPage />} />
-              <Route path="captures" element={<CapturesPage />} />
-              <Route path="calendar" element={<CalendarPage />} />
-              <Route path="vault" element={<VaultPage />} />
-              <Route path="notes" element={<NotesPage />} />
-              <Route path="partner" element={<PartnerPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
+          {/* Protected App Routes */}
+          <Route
+            path="/"
+            element={
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            }
+          >
+            <Route index element={<Navigate to="/focus" replace />} />
+            <Route path="focus" element={<FocusPage />} />
+            <Route path="routines-history" element={<AnalyticsPage />} />
+            <Route path="backlog" element={<BacklogPage />} />
+            <Route path="goals" element={<GoalsPage />} />
+            <Route path="opportunities" element={<OpportunitiesPage />} />
+            <Route path="captures" element={<CapturesPage />} />
+            <Route path="vault" element={<VaultPage />} />
+            <Route path="notes" element={<NotesPage />} />
+            <Route path="partner" element={<PartnerPage />} />
+            <Route path="settings" element={<SettingsPage />} />
+          </Route>
 
-            {/* Independent Protected Route for Pomodoro (No AppLayout) */}
-            <Route 
-              path="/pomodoro" 
-              element={
-                <ProtectedRoute>
-                  <PomodoroPage />
-                </ProtectedRoute>
-              } 
-            />
-          </Routes>
+          {/* Independent Protected Route for Pomodoro (No AppLayout) */}
+          <Route
+            path="/pomodoro"
+            element={
+              <ProtectedRoute>
+                <PomodoroPage />
+              </ProtectedRoute>
+            }
+          />
+        </Routes>
       </BrowserRouter>
     </AuthProvider>
   );

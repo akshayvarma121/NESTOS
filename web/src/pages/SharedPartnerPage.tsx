@@ -60,8 +60,8 @@ export default function SharedPartnerPage() {
     <div className="min-h-screen bg-[var(--bg-base)] text-[var(--text-primary)] p-6 md:p-12 font-sans selection:bg-[var(--accent)] selection:text-white">
       <div className="max-w-3xl mx-auto space-y-12">
         <header className="space-y-2">
-          <h1 className="text-2xl font-semibold tracking-tight">
-            NestOS Tracker
+          <h1 className="text-3xl font-black tracking-widest uppercase">
+            Nest Tracker
           </h1>
           <p className="text-[var(--text-secondary)] text-sm">
             Real-time progress shared with {partner_name}.
@@ -69,10 +69,10 @@ export default function SharedPartnerPage() {
         </header>
 
         <section className="space-y-4">
-          <h2 className="text-sm font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
+          <h2 className="text-sm font-black uppercase tracking-widest text-black/70">
             Today's Schedule
           </h2>
-          <div className="p-6 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl flex items-center gap-6">
+          <div className="p-6 bg-white brutal-border brutal-shadow-sm flex items-center gap-6">
             <div className="flex-1">
               <div className="flex justify-between text-sm mb-2">
                 <span className="font-medium">
@@ -94,10 +94,10 @@ export default function SharedPartnerPage() {
         </section>
 
         <section className="space-y-4">
-          <h2 className="text-sm font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
+          <h2 className="text-sm font-black uppercase tracking-widest text-black/70">
             Macro Goals
           </h2>
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid gap-6 sm:grid-cols-2">
             {goals_progress.map((goal: any, idx: number) => {
               let accentColor = "var(--text-primary)";
               if (goal.category === "dsa") accentColor = "var(--accent)";
@@ -106,7 +106,7 @@ export default function SharedPartnerPage() {
               return (
                 <div
                   key={idx}
-                  className="p-5 bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl space-y-4 hover:border-[var(--text-secondary)] transition-colors"
+                  className="p-5 bg-white brutal-border brutal-shadow-sm space-y-4 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow transition-transform duration-75"
                 >
                   <div>
                     <span className="text-[10px] uppercase font-mono tracking-wider text-[var(--text-tertiary)] mb-1 block">

@@ -4,8 +4,6 @@ import {
   Calendar as CalendarIcon,
   ListTodo,
   Target,
-  Lightbulb,
-  Inbox,
   Menu,
   Users,
   Settings,
@@ -14,20 +12,19 @@ import {
   X,
   Timer,
   PieChart,
+  Lightbulb,
+  Plus,
 } from "lucide-react";
 
-const mainTabs = [
-  { name: "Focus", path: "/focus", icon: Target },
-  { name: "Calendar", path: "/calendar", icon: CalendarIcon },
-  { name: "Backlog", path: "/backlog", icon: ListTodo },
-  { name: "Dates", path: "/opportunities", icon: Lightbulb },
-];
+const mainTabs = [{ name: "Focus", path: "/focus", icon: Target }];
+
+const secondaryTabs = [{ name: "Backlog", path: "/backlog", icon: ListTodo }];
 
 const moreTabs = [
   { name: "Pomodoro", path: "/pomodoro", icon: Timer },
+  { name: "Dates", path: "/opportunities", icon: Lightbulb },
   { name: "Analytics", path: "/routines-history", icon: PieChart },
   { name: "Goals", path: "/goals", icon: BarChart2 },
-  { name: "Captures", path: "/captures", icon: Inbox },
   { name: "Notes", path: "/notes", icon: ListTodo },
   { name: "Vault", path: "/vault", icon: Lock },
   { name: "Partner", path: "/partner", icon: Users },
@@ -37,6 +34,17 @@ const moreTabs = [
 export default function MobileBottomTabs() {
   const [showMore, setShowMore] = useState(false);
 
+  const triggerHaptic = () => {
+    if (navigator.vibrate) {
+      navigator.vibrate(10);
+    }
+  };
+
+  const handleQuickCapture = () => {
+    triggerHaptic();
+    window.dispatchEvent(new Event("open_quick_capture"));
+  };
+
   return (
     <>
       <div className="flex justify-around items-center h-[60px] px-2 bg-[var(--bg-surface-raised)] relative z-50">
@@ -44,12 +52,46 @@ export default function MobileBottomTabs() {
           <NavLink
             key={tab.name}
             to={tab.path}
-            onClick={() => setShowMore(false)}
+            onClick={() => {
+              triggerHaptic();
+              setShowMore(false);
+            }}
             className={({ isActive }) =>
-              `flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ${
+              `flex-1 flex flex-col items-center justify-center h-full min-h-[44px] transition-colors border-t-[3px] ${
                 isActive
-                  ? "text-[var(--accent)]"
-                  : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+                  ? "border-black text-black"
+                  : "border-transparent text-black/50 hover:text-black"
+              }`
+            }
+          >
+            <tab.icon className="w-5 h-5 mb-1" />
+            <span className="text-[10px] font-medium">{tab.name}</span>
+          </NavLink>
+        ))}
+
+        {/* Floating Quick Capture Button */}
+        <div className="flex-1 flex justify-center items-center">
+          <button
+            onClick={handleQuickCapture}
+            className="w-12 h-12 brutal-border brutal-shadow bg-[#ff6b6b] text-black flex flex-col items-center justify-center -translate-y-4 hover:translate-y-[-14px] active:translate-y-[-12px] active:shadow-none transition-transform"
+          >
+            <Plus className="w-6 h-6" />
+          </button>
+        </div>
+
+        {secondaryTabs.map((tab) => (
+          <NavLink
+            key={tab.name}
+            to={tab.path}
+            onClick={() => {
+              triggerHaptic();
+              setShowMore(false);
+            }}
+            className={({ isActive }) =>
+              `flex-1 flex flex-col items-center justify-center h-full min-h-[44px] transition-colors border-t-[3px] ${
+                isActive
+                  ? "border-black text-black"
+                  : "border-transparent text-black/50 hover:text-black"
               }`
             }
           >
@@ -59,11 +101,14 @@ export default function MobileBottomTabs() {
         ))}
 
         <button
-          onClick={() => setShowMore(!showMore)}
-          className={`flex-1 flex flex-col items-center justify-center h-full min-h-[44px] ${
+          onClick={() => {
+            triggerHaptic();
+            setShowMore(!showMore);
+          }}
+          className={`flex-1 flex flex-col items-center justify-center h-full min-h-[44px] transition-colors border-t-[3px] ${
             showMore
-              ? "text-[var(--accent)]"
-              : "text-[var(--text-tertiary)] hover:text-[var(--text-secondary)]"
+              ? "border-black text-black"
+              : "border-transparent text-black/50 hover:text-black"
           }`}
         >
           {showMore ? (
@@ -78,26 +123,29 @@ export default function MobileBottomTabs() {
       {showMore && (
         <>
           <div
-            className="fixed inset-0 bg-black/50 z-30"
+            className="fixed inset-0 bg-black/80 z-30 transition-opacity"
             onClick={() => setShowMore(false)}
           />
-          <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+60px)] left-0 right-0 bg-[var(--bg-surface-raised)] border-t border-[var(--border-hairline)] z-40 p-4 animate-in slide-in-from-bottom-2">
-            <div className="grid grid-cols-3 gap-4">
+          <div className="fixed bottom-[calc(env(safe-area-inset-bottom)+60px)] left-0 right-0 bg-white brutal-border brutal-shadow-lg z-40 p-4 animate-in slide-in-from-bottom-2 m-2">
+            <div className="grid grid-cols-4 gap-4">
               {moreTabs.map((tab) => (
                 <NavLink
                   key={tab.name}
                   to={tab.path}
-                  onClick={() => setShowMore(false)}
+                  onClick={() => {
+                    triggerHaptic();
+                    setShowMore(false);
+                  }}
                   className={({ isActive }) =>
-                    `flex flex-col items-center justify-center p-3 rounded-xl gap-2 ${
+                    `flex flex-col items-center justify-center p-3 gap-2 transition-all duration-75 brutal-border ${
                       isActive
-                        ? "bg-[var(--bg-base)] text-[var(--accent)] border border-[var(--border-hairline)]"
-                        : "text-[var(--text-secondary)] hover:bg-[var(--bg-base)]"
+                        ? "bg-[#ffeb3b] text-black brutal-shadow-sm translate-x-[2px] translate-y-[2px]"
+                        : "text-black border-transparent hover:border-black hover:brutal-shadow-sm hover:-translate-x-[2px] hover:-translate-y-[2px]"
                     }`
                   }
                 >
                   <tab.icon className="w-6 h-6" />
-                  <span className="text-xs font-medium">{tab.name}</span>
+                  <span className="text-[10px] font-medium">{tab.name}</span>
                 </NavLink>
               ))}
             </div>
