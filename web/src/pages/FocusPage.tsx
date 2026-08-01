@@ -400,9 +400,18 @@ export default function FocusPage() {
               </div>
             </div>
           </h1>
-          <p className="text-[var(--text-secondary)] font-medium max-w-xl text-sm md:text-base border-l-4 border-[#ff6b6b] pl-3">
-            Here is what you have going on today.
-          </p>
+          {new Date().getHours() < 4 ? (
+            <div className="mt-4 inline-flex items-center gap-2 bg-[#ff6b6b] text-black border-2 border-black brutal-shadow-sm px-3 py-1.5">
+              <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
+              <p className="text-xs font-black uppercase tracking-wider">
+                Grace Period: Lock in tasks by 4:00 AM
+              </p>
+            </div>
+          ) : (
+            <p className="text-[var(--text-secondary)] font-medium max-w-xl text-sm md:text-base border-l-4 border-[#ff6b6b] pl-3">
+              Here is what you have going on today.
+            </p>
+          )}
         </div>
 
         <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
