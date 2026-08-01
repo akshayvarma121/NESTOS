@@ -74,8 +74,9 @@
     font-size: 14px;
     line-height: 1.4;
     padding-top: env(titlebar-area-height, 0);
-    overflow: hidden; /* Prevent double scrollbars */
-    overscroll-behavior: none; /* Prevent native mobile pull-to-refresh and horizontal swiping */
+    overflow-x: hidden; /* Prevent double scrollbars and horizontal scroll */
+    overscroll-behavior-y: auto; /* Allow native pull-to-refresh */
+    overscroll-behavior-x: none; /* Prevent browser swipe back/forward */
   }
 
   @media (max-width: 1023px) {

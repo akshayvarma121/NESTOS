@@ -26,7 +26,7 @@ const secondaryTabs = [{ name: "Backlog", path: "/backlog", icon: ListTodo }];
 const moreTabs = [
   { name: "Timer", path: "/timer", icon: Timer },
   { name: "Goals", path: "/goals", icon: BarChart2 },
-  { name: "Dates", path: "/opportunities", icon: Lightbulb },
+  { name: "Deadlines", path: "/opportunities", icon: Lightbulb },
   { name: "Notes", path: "/notes", icon: ListTodo },
   { name: "Analytics", path: "/routines-history", icon: PieChart },
   { name: "Partner", path: "/partner", icon: Users, badge: "BETA" },
