@@ -13,6 +13,7 @@ import {
   getLocalDayName,
   getLogicalDate,
 } from "../lib/dateUtils";
+import { useAuth } from "../contexts/AuthContext";
 
 const categoryColors: Record<string, string> = {
   academic: "bg-[var(--accent)]",
@@ -63,6 +64,7 @@ function InlineEdit({
 }
 
 export default function FocusPage() {
+  const { user } = useAuth();
   const [tasks, setTasks] = useState<any[]>([]);
   const [routines, setRoutines] = useState<any[]>([]);
   const [partnerRoutines, setPartnerRoutines] = useState<any[]>([]);
@@ -379,30 +381,65 @@ export default function FocusPage() {
     ));
   };
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return "Good morning";
+    if (hour < 18) return "Good afternoon";
+    return "Good evening";
+  };
+
+  const firstName =
+    user?.user_metadata?.name?.split(" ")[0] ||
+    user?.email?.split("@")[0] ||
+    "User";
+
+  // Parse the selected date string (YYYY-MM-DD) carefully to avoid timezone shifts
+  const [year, month, day] = selectedDateStr.split("-").map(Number);
+  const displayDate = new Date(year, month - 1, day);
+
   return (
     <div className="p-4 md:p-8 max-w-[1600px] mx-auto relative pb-32">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <div className="flex items-center gap-3 mb-1">
-            <h1 className="text-3xl font-black uppercase tracking-widest text-black">
-              Focus Dashboard
-            </h1>
-            <div className="relative group cursor-help">
-              <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-              <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded-lg shadow-xl opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-secondary)]">
+          <div className="inline-block bg-[#ffeb3b] text-black border-2 border-black brutal-shadow-sm px-3 py-1 mb-4">
+            <p className="text-xs font-black font-mono uppercase tracking-[0.2em]">
+              {displayDate.toLocaleDateString("en-US", {
+                weekday: "long",
+                month: "long",
+                day: "numeric",
+              })}
+            </p>
+          </div>
+          <h1 className="text-4xl md:text-5xl font-black tracking-tight text-[var(--text-primary)] mb-3 flex items-center gap-3">
+            {getGreeting()}, {firstName}.
+            <div className="relative group/info cursor-help inline-flex translate-y-1">
+              <Info className="w-5 h-5 text-[var(--text-tertiary)] hover:text-[#ff6b6b] transition-colors" />
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-64 p-3 bg-[var(--bg-surface-raised)] border-2 border-[var(--border-brutal)] rounded-lg brutal-shadow opacity-0 group-hover/info:opacity-100 pointer-events-none transition-opacity z-50 text-xs font-medium text-[var(--text-primary)] text-center">
                 This page shows your daily tasks, timetable, and upcoming
                 deadlines. Tasks are automatically pulled from your Goals or
-                Backlog. Private tasks are strictly hidden from partners.
+                Backlog.
               </div>
             </div>
-          </div>
+          </h1>
+          <p className="text-[var(--text-secondary)] font-medium max-w-xl text-sm md:text-base border-l-4 border-[#ff6b6b] pl-3">
+            Here is what you have going on today.
+          </p>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex items-center gap-4 w-full md:w-auto justify-between md:justify-end">
+          <div className="flex flex-col items-start md:items-end">
+            <span className="text-[10px] font-black font-mono uppercase tracking-[0.2em] text-[var(--text-tertiary)]">
+              Active View
+            </span>
+            <span className="text-sm font-bold text-black bg-[#a8e6cf] px-2 py-0.5 mt-1 border-2 border-black brutal-shadow-sm rotate-[-2deg]">
+              Dashboard
+            </span>
+          </div>
+          <div className="w-px h-10 bg-[var(--border-hairline)] hidden md:block" />
           <button
             onClick={() => setIsTimetableOpen(true)}
-            className="brutal-btn bg-[#2ed573] text-black px-6 py-3 text-sm font-black uppercase tracking-wider"
+            className="brutal-btn bg-[#2ed573] text-black px-6 py-3 text-sm font-black uppercase tracking-wider flex-shrink-0"
           >
             Timetable Editor
           </button>
@@ -451,9 +488,9 @@ export default function FocusPage() {
               {/* UPCOMING */}
               {upcomingTasks.length > 0 && (
                 <section className="space-y-4">
-                  <h2 className="text-sm font-black uppercase tracking-widest text-black/70 border-b-2 border-black pb-2 flex items-center justify-between">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]/70 border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between">
                     <span>Upcoming Horizon</span>
-                    <span className="text-xs font-mono text-black/50">
+                    <span className="text-xs font-mono text-[var(--text-primary)]/50">
                       {upcomingTasks.length} tasks
                     </span>
                   </h2>
@@ -469,7 +506,7 @@ export default function FocusPage() {
                   <h2 className="text-sm font-black uppercase tracking-widest text-[#ff6b6b] border-b-2 border-[#ff6b6b] pb-2">
                     Overdue Action Items
                   </h2>
-                  <div className="p-4 bg-white brutal-border brutal-shadow-sm space-y-4">
+                  <div className="p-4 bg-[var(--bg-surface-raised)] brutal-border brutal-shadow-sm space-y-4">
                     {renderSubjectGroup(overdueGrouped)}
                   </div>
                 </section>
@@ -504,7 +541,7 @@ export default function FocusPage() {
                             {note.creator?.username || "You"}
                           </span>
                         </div>
-                        <p className="text-sm font-bold text-black whitespace-pre-wrap">
+                        <p className="text-sm font-bold text-[var(--text-primary)] whitespace-pre-wrap">
                           {note.content}
                         </p>
                       </div>
@@ -515,16 +552,16 @@ export default function FocusPage() {
 
               {/* DAILY ROUTINE TIMETABLE */}
               <section className="space-y-4">
-                <h2 className="text-sm font-black uppercase tracking-widest text-black border-b-2 border-black pb-2 flex items-center justify-between">
+                <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)] border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between">
                   <span>Daily Routine</span>
                   <div className="flex items-center gap-3">
                     <NavLink
                       to="/routines-history"
-                      className="text-[10px] uppercase font-bold brutal-border bg-white px-2 py-1 text-black hover:bg-black hover:text-white transition-colors"
+                      className="text-[10px] uppercase font-bold brutal-border bg-[var(--bg-surface-raised)] px-2 py-1 text-[var(--text-primary)] hover:bg-[var(--text-primary)] hover:text-[var(--bg-base)] transition-colors"
                     >
                       Analytics
                     </NavLink>
-                    <span className="text-xs font-mono font-bold text-black/50">
+                    <span className="text-xs font-mono font-bold text-[var(--text-primary)]/50">
                       Timeline
                     </span>
                   </div>
@@ -627,20 +664,20 @@ export default function FocusPage() {
                             <div
                               className={`absolute -left-[29px] top-4 w-3 h-3 border-2 z-10 transition-colors ${
                                 isCurrent
-                                  ? "bg-[#ff6b6b] border-black brutal-shadow-sm"
+                                  ? "bg-[#ff6b6b] border-[var(--border-brutal)] brutal-shadow-sm"
                                   : isPast
-                                    ? "bg-black border-black"
-                                    : "bg-white border-black"
+                                    ? "bg-[var(--text-primary)] border-[var(--border-brutal)]"
+                                    : "bg-[var(--bg-surface-raised)] border-[var(--border-brutal)]"
                               }`}
                             />
 
                             <div
                               className={`flex flex-col p-4 brutal-border transition-colors ${
                                 isCurrent
-                                  ? "brutal-shadow-sm bg-white"
+                                  ? "brutal-shadow-sm bg-[var(--bg-surface-raised)]"
                                   : routine.status !== "pending"
-                                    ? "bg-black/5 border-black/30"
-                                    : "bg-white hover:brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px]"
+                                    ? "bg-[var(--text-primary)]/5 border-[var(--border-brutal)]/30"
+                                    : "bg-[var(--bg-surface-raised)] hover:brutal-shadow-sm hover:translate-x-[-2px] hover:translate-y-[-2px]"
                               }`}
                             >
                               <div className="flex items-center gap-4">
@@ -743,10 +780,10 @@ export default function FocusPage() {
                                   <div
                                     className={`text-base font-black flex items-center gap-2 ${
                                       routine.status === "done"
-                                        ? "line-through text-black/40"
+                                        ? "line-through text-[var(--text-primary)]/40"
                                         : routine.status === "skipped"
                                           ? "text-[#ff6b6b]"
-                                          : "text-black"
+                                          : "text-[var(--text-primary)]"
                                     }`}
                                   >
                                     {routine.title}
@@ -764,17 +801,17 @@ export default function FocusPage() {
                                     )}
                                     {isCurrent &&
                                       routine.status === "pending" && (
-                                        <span className="text-[10px] font-black uppercase bg-[#ff6b6b] text-white px-2 py-0.5 brutal-border border-white">
+                                        <span className="text-[10px] font-black uppercase bg-[#ff6b6b] text-[var(--bg-base)] px-2 py-0.5 brutal-border border-white">
                                           Current
                                         </span>
                                       )}
                                   </div>
                                   <div className="flex items-center gap-2 mt-1">
-                                    <span className="text-[11px] font-bold text-black/60 uppercase">
+                                    <span className="text-[11px] font-bold text-[var(--text-primary)]/60 uppercase">
                                       {routine.time_label || "Anytime"}
                                     </span>
                                     {calculateDuration(routine.time_label) && (
-                                      <span className="text-[11px] font-black uppercase text-[#ffeb3b] bg-black px-2 py-0.5 brutal-border">
+                                      <span className="text-[11px] font-black uppercase text-[#ffeb3b] bg-[var(--text-primary)] px-2 py-0.5 brutal-border">
                                         {calculateDuration(routine.time_label)}
                                       </span>
                                     )}
@@ -916,8 +953,8 @@ export default function FocusPage() {
 
             {/* COLUMN 3: TODAY'S TASKS & PRIVATE FOCUS */}
             <div className="space-y-6">
-              <div className="bg-white brutal-border brutal-shadow p-6">
-                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-black pb-3 mb-6 flex items-center justify-between text-black">
+              <div className="bg-[var(--bg-surface-raised)] brutal-border brutal-shadow p-6">
+                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-[var(--border-brutal)] pb-3 mb-6 flex items-center justify-between text-[var(--text-primary)]">
                   <span>
                     {selectedDateStr === actualTodayStr
                       ? "Today's Horizon"
@@ -928,7 +965,7 @@ export default function FocusPage() {
                   </span>
                 </h2>
                 {todayTasks.length === 0 ? (
-                  <p className="text-sm font-bold text-black/60 italic">
+                  <p className="text-sm font-bold text-[var(--text-primary)]/60 italic">
                     Nothing scheduled for this date.
                   </p>
                 ) : (
@@ -940,15 +977,15 @@ export default function FocusPage() {
 
               {/* PRIVATE FOCUS */}
               <section className="space-y-4 pt-4">
-                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-black pb-2 flex items-center justify-between text-black">
+                <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between text-[var(--text-primary)]">
                   <span className="flex items-center gap-2">
                     Private Focus{" "}
-                    <span className="text-[10px] bg-black text-white px-2 py-0.5 brutal-border border-transparent uppercase font-bold">
+                    <span className="text-[10px] bg-[var(--text-primary)] text-[var(--bg-base)] px-2 py-0.5 brutal-border border-transparent uppercase font-bold">
                       Only You
                     </span>
                   </span>
                 </h2>
-                <div className="space-y-3 bg-white brutal-border brutal-shadow-sm p-4">
+                <div className="space-y-3 bg-[var(--bg-surface-raised)] brutal-border brutal-shadow-sm p-4">
                   {personalTodos.map((todo) => (
                     <div
                       key={todo.id}
@@ -956,18 +993,18 @@ export default function FocusPage() {
                     >
                       <button
                         onClick={() => togglePersonalTodo(todo.id, todo.status)}
-                        className={`w-5 h-5 flex-shrink-0 brutal-border flex items-center justify-center transition-colors ${
+                        className={`w-6 h-6 rounded-md flex items-center justify-center border-2 border-[var(--border-brutal)] flex-shrink-0 transition-colors ${
                           todo.status === "done"
-                            ? "bg-black"
-                            : "hover:bg-[#a8e6cf]"
+                            ? "bg-[#2ed573] text-black"
+                            : "bg-[var(--bg-surface-raised)]"
                         }`}
                       >
                         {todo.status === "done" && (
-                          <Check className="w-4 h-4 text-white" />
+                          <Check className="w-4 h-4 text-[var(--bg-base)]" />
                         )}
                       </button>
                       <div
-                        className={`flex-1 text-sm font-bold ${todo.status === "done" ? "text-black/40 line-through" : "text-black"}`}
+                        className={`flex-1 text-sm font-bold ${todo.status === "done" ? "text-[var(--text-primary)]/40 line-through" : "text-[var(--text-primary)]"}`}
                       >
                         {todo.title}
                       </div>
@@ -982,7 +1019,7 @@ export default function FocusPage() {
                   <input
                     type="text"
                     placeholder="Add a private to-do... (Press Enter)"
-                    className="w-full bg-transparent outline-none text-sm font-bold text-black placeholder-black/40 pt-3 border-t-2 border-black mt-3"
+                    className="w-full bg-transparent outline-none text-sm font-bold text-[var(--text-primary)] placeholder-black/40 pt-3 border-t-2 border-[var(--border-brutal)] mt-3"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         addPersonalTodo(e.currentTarget.value);
