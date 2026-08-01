@@ -75,8 +75,8 @@ export default function DesktopSidebar() {
       >
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[var(--text-primary)] border-2 border-[var(--text-primary)] flex items-center justify-center translate-y-[-2px]">
-              <span className="font-black text-[var(--bg-base)] text-lg leading-none">
+            <div className="w-8 h-8 bg-[#ffeb3b] brutal-border brutal-shadow-sm flex items-center justify-center translate-y-[-2px]">
+              <span className="font-black text-black text-lg leading-none">
                 N
               </span>
             </div>
