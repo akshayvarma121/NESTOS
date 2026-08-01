@@ -131,6 +131,9 @@ export default function AppLayout() {
         <DesktopSidebar />
       </div>
 
+      {/* WCO Drag Region */}
+      <div className="titlebar-drag-region" />
+
       {/* Main Content Area */}
       <main className="flex-1 overflow-y-auto pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
         <Outlet />
