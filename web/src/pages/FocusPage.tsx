@@ -404,7 +404,7 @@ export default function FocusPage() {
             <div className="mt-4 inline-flex items-center gap-2 bg-[#ff6b6b] text-black border-2 border-black brutal-shadow-sm px-3 py-1.5">
               <span className="w-2 h-2 rounded-full bg-black animate-pulse" />
               <p className="text-xs font-black uppercase tracking-wider">
-                Grace Period: Lock in tasks by 4:00 AM
+                Late night? Lock in tasks before 4:00 AM.
               </p>
             </div>
           ) : (

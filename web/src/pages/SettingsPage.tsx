@@ -56,7 +56,9 @@ export default function SettingsPage() {
               <div>
                 <h3 className="text-sm font-medium">Theme</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
-                  Toggle brutalist dark mode theme.
+                  {document.documentElement.classList.contains("dark") 
+                    ? "Currently using the dark theme." 
+                    : "Currently using the light theme."}
                 </p>
               </div>
               <button
