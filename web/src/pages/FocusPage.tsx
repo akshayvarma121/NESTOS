@@ -367,7 +367,7 @@ export default function FocusPage() {
   };
 
   const firstName =
-    user?.user_metadata?.name?.split(" ")[0] ||
+    user?.user_metadata?.name ||
     user?.email?.split("@")[0] ||
     "User";
 

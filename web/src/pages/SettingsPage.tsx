@@ -2,8 +2,10 @@ import { useState } from "react";
 import { api } from "../lib/api";
 import { supabase } from "../lib/supabase";
 import { LogOut } from "lucide-react";
+import { useAuth } from "../contexts/AuthContext";
 
 export default function SettingsPage() {
+  const { user } = useAuth();
   const [resetConfirm, setResetConfirm] = useState("");
   const [resettingVault, setResettingVault] = useState(false);
   const [clearDataConfirm, setClearDataConfirm] = useState("");
@@ -87,6 +89,39 @@ export default function SettingsPage() {
         <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4">Account</h2>
           <div className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
+              <div>
+                <h3 className="text-sm font-medium">Display Name</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  How you want to be greeted in the app.
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  id="displayNameInput"
+                  defaultValue={user?.user_metadata?.name || ""}
+                  placeholder="Your Name"
+                  className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-md px-3 py-1.5 text-sm outline-none focus:border-[var(--text-primary)] w-full md:w-48"
+                />
+                <button
+                  onClick={async () => {
+                    const input = document.getElementById("displayNameInput") as HTMLInputElement;
+                    if (!input.value.trim()) return;
+                    try {
+                      await supabase.auth.updateUser({ data: { name: input.value.trim() } });
+                      alert("Name updated successfully! Refresh the page to see changes.");
+                    } catch (e: any) {
+                      alert("Failed to update name: " + e.message);
+                    }
+                  }}
+                  className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-3 py-1.5 rounded-md text-xs hover:opacity-90 transition-opacity whitespace-nowrap brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
+                >
+                  Save
+                </button>
+              </div>
+            </div>
+
             <a
               href="/partner"
               className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg hover:border-[var(--text-primary)] transition-colors"
