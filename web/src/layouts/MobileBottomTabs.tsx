@@ -27,7 +27,7 @@ const moreTabs = [
   { name: "Dates", path: "/opportunities", icon: Lightbulb },
   { name: "Notes", path: "/notes", icon: ListTodo },
   { name: "Analytics", path: "/routines-history", icon: PieChart },
-  { name: "Partner", path: "/partner", icon: Users },
+  { name: "Partner", path: "/partner", icon: Users, badge: "BETA" },
   { name: "Vault", path: "/vault", icon: Lock },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
@@ -145,7 +145,14 @@ export default function MobileBottomTabs() {
                     }`
                   }
                 >
-                  <tab.icon className="w-6 h-6" />
+                  <div className="relative">
+                    <tab.icon className="w-6 h-6" />
+                    {tab.badge && (
+                      <span className="absolute -top-2 -right-4 text-[8px] font-black uppercase bg-[#ff6b6b] text-white px-1 rounded shadow-sm border border-black">
+                        {tab.badge}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-[10px] font-medium">{tab.name}</span>
                 </NavLink>
               ))}

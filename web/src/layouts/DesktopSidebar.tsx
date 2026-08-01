@@ -46,7 +46,7 @@ const navGroups = [
   {
     label: "System",
     items: [
-      { name: "Partner", path: "/partner", icon: Users },
+      { name: "Partner", path: "/partner", icon: Users, badge: "BETA" },
       { name: "Vault", path: "/vault", icon: Lock },
       { name: "Settings", path: "/settings", icon: Settings },
     ],
@@ -75,8 +75,8 @@ export default function DesktopSidebar() {
       >
         {!isCollapsed && (
           <div className="flex items-center gap-2">
-            <div className="w-8 h-8 bg-[#ffeb3b] brutal-border brutal-shadow-sm flex items-center justify-center translate-y-[-2px]">
-              <span className="font-black text-black text-lg leading-none">
+            <div className="w-8 h-8 bg-[var(--text-primary)] border-2 border-[var(--text-primary)] flex items-center justify-center translate-y-[-2px]">
+              <span className="font-black text-[var(--bg-base)] text-lg leading-none">
                 N
               </span>
             </div>
@@ -125,7 +125,16 @@ export default function DesktopSidebar() {
                   }
                 >
                   <item.icon className="w-4 h-4 flex-shrink-0" />
-                  {!isCollapsed && <span>{item.name}</span>}
+                  {!isCollapsed && (
+                    <div className="flex items-center justify-between flex-1">
+                      <span>{item.name}</span>
+                      {item.badge && (
+                        <span className="text-[10px] font-black uppercase bg-[#ff6b6b] text-white px-1.5 py-0.5 rounded border border-black shadow-sm">
+                          {item.badge}
+                        </span>
+                      )}
+                    </div>
+                  )}
                 </NavLink>
               ))}
             </div>
