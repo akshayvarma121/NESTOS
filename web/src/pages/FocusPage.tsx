@@ -78,6 +78,8 @@ export default function FocusPage() {
   const [isRoutineLocked, setIsRoutineLocked] = useState(false);
   const [currentTimeStr, setCurrentTimeStr] = useState("");
   const [events, setEvents] = useState<any[]>([]);
+  const [showEventInput, setShowEventInput] = useState(false);
+  const [showFocusInput, setShowFocusInput] = useState(false);
   const [closeouts, setCloseouts] = useState<any[]>([]);
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
 
@@ -192,23 +194,6 @@ export default function FocusPage() {
       prev.map((t) => (t.id === id ? { ...t, title: newTitle } : t)),
     );
     await api.patch(`/micro-tasks/${id}`, { title: newTitle });
-  };
-
-  const changeAssignee = async (id: string, assignee_id: string | null) => {
-    setTasks((prev) =>
-      prev.map((t) => {
-        if (t.id === id) {
-          const member = spaceMembers.find((m) => m.user_id === assignee_id);
-          return {
-            ...t,
-            assigned_to: assignee_id,
-            assignee: member ? { username: member.username } : null,
-          };
-        }
-        return t;
-      }),
-    );
-    await api.patch(`/micro-tasks/${id}`, { assigned_to: assignee_id });
   };
 
   const togglePersonalTodo = async (id: string, currentStatus: string) => {
@@ -359,21 +344,7 @@ export default function FocusPage() {
                 </span>
               )}
 
-              {/* Assignee Dropdown */}
-              <select
-                className={`text-xs bg-[var(--bg-surface-raised)] border border-[var(--border-hairline)] rounded px-1.5 py-0.5 outline-none hover:border-[var(--text-secondary)] transition-colors ${task.status === "done" ? "opacity-50 pointer-events-none" : ""}`}
-                value={task.assigned_to || ""}
-                onChange={(e) =>
-                  changeAssignee(task.id, e.target.value || null)
-                }
-              >
-                <option value="">Anyone</option>
-                {spaceMembers.map((m) => (
-                  <option key={m.user_id} value={m.user_id}>
-                    {m.username}
-                  </option>
-                ))}
-              </select>
+
             </div>
           ))}
         </div>
@@ -531,26 +502,41 @@ export default function FocusPage() {
                   )}
                 </div>
 
-                <input
-                  type="text"
-                  placeholder="Mark a new date... (Press Enter)"
-                  className="w-full bg-[var(--bg-surface)] outline-none text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] p-3 border-2 border-[var(--border-brutal)] focus:border-[var(--accent)] transition-colors"
-                  onKeyDown={async (e) => {
-                    if (e.key === "Enter" && e.currentTarget.value.trim()) {
-                      const title = e.currentTarget.value.trim();
-                      e.currentTarget.value = "";
-                      try {
-                        const res = await api.post("/calendar/events", {
-                          title,
-                          date: selectedDateStr,
-                        });
-                        setEvents((prev) => [...prev, res.data]);
-                      } catch (err) {
-                        console.error("Failed to add event");
-                      }
-                    }
-                  }}
-                />
+                {showEventInput ? (
+                  <div className="relative mt-2">
+                    <input
+                      type="text"
+                      autoFocus
+                      placeholder="Mark a new date... (Press Enter)"
+                      className="w-full bg-[var(--bg-surface-raised)] outline-none text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] p-3 border-b-2 border-[var(--accent)] transition-colors shadow-lg"
+                      onBlur={() => setShowEventInput(false)}
+                      onKeyDown={async (e) => {
+                        if (e.key === "Escape") setShowEventInput(false);
+                        if (e.key === "Enter" && e.currentTarget.value.trim()) {
+                          const title = e.currentTarget.value.trim();
+                          e.currentTarget.value = "";
+                          try {
+                            const res = await api.post("/calendar/events", {
+                              title,
+                              date: selectedDateStr,
+                            });
+                            setEvents((prev) => [...prev, res.data]);
+                            setShowEventInput(false);
+                          } catch (err) {
+                            console.error("Failed to add event");
+                          }
+                        }
+                      }}
+                    />
+                  </div>
+                ) : (
+                  <button
+                    onClick={() => setShowEventInput(true)}
+                    className="mt-2 text-xs font-black uppercase text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1"
+                  >
+                    + Add Event
+                  </button>
+                )}
               </div>
 
               {/* DAILY ROUTINE TIMETABLE */}
