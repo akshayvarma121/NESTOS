@@ -8,6 +8,7 @@ export default function SettingsPage() {
   const [resettingVault, setResettingVault] = useState(false);
   const [clearDataConfirm, setClearDataConfirm] = useState("");
   const [clearingData, setClearingData] = useState(false);
+  const [themeTick, setThemeTick] = useState(0);
 
   const handleVaultReset = async () => {
     if (resetConfirm !== "DELETE") return;
@@ -53,15 +54,14 @@ export default function SettingsPage() {
           <div className="space-y-4">
             <div className="flex items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg">
               <div>
-                <h3 className="text-sm font-medium">Dark Mode</h3>
+                <h3 className="text-sm font-medium">Theme</h3>
                 <p className="text-xs text-[var(--text-secondary)] mt-1">
                   Toggle brutalist dark mode theme.
                 </p>
               </div>
               <button
                 onClick={() => {
-                  const isDark =
-                    document.documentElement.classList.contains("dark");
+                  const isDark = document.documentElement.classList.contains("dark");
                   if (isDark) {
                     document.documentElement.classList.remove("dark");
                     document.documentElement.classList.add("light");
@@ -71,10 +71,12 @@ export default function SettingsPage() {
                     document.documentElement.classList.add("dark");
                     localStorage.setItem("theme", "dark");
                   }
+                  // Force a re-render
+                  setThemeTick((prev) => prev + 1);
                 }}
-                className="px-3 py-1.5 bg-[var(--text-primary)] text-[var(--bg-base)] text-xs font-medium rounded hover:opacity-90 transition-opacity"
+                className="px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-base)] text-xs font-bold uppercase tracking-wider brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
               >
-                Toggle Theme
+                {document.documentElement.classList.contains("dark") ? "Switch to Light Mode" : "Switch to Dark Mode"}
               </button>
             </div>
           </div>
