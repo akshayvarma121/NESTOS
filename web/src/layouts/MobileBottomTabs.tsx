@@ -21,13 +21,13 @@ const mainTabs = [{ name: "Focus", path: "/focus", icon: Target }];
 const secondaryTabs = [{ name: "Backlog", path: "/backlog", icon: ListTodo }];
 
 const moreTabs = [
-  { name: "Pomodoro", path: "/pomodoro", icon: Timer },
-  { name: "Dates", path: "/opportunities", icon: Lightbulb },
-  { name: "Analytics", path: "/routines-history", icon: PieChart },
+  { name: "Timer", path: "/timer", icon: Timer },
   { name: "Goals", path: "/goals", icon: BarChart2 },
+  { name: "Dates", path: "/opportunities", icon: Lightbulb },
   { name: "Notes", path: "/notes", icon: ListTodo },
-  { name: "Vault", path: "/vault", icon: Lock },
+  { name: "Analytics", path: "/routines-history", icon: PieChart },
   { name: "Partner", path: "/partner", icon: Users },
+  { name: "Vault", path: "/vault", icon: Lock },
   { name: "Settings", path: "/settings", icon: Settings },
 ];
 

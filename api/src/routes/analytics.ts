@@ -8,52 +8,62 @@ router.use(requireAuth);
 router.get("/", async (req: AuthRequest, res) => {
   const days = parseInt(req.query.days as string) || 14;
   const target_user_id = req.query.target_user_id as string;
-  
-  const uid = target_user_id && req.sharedSpaceIds!.includes(target_user_id) 
-    ? target_user_id 
-    : req.user!.id;
+
+  const uid =
+    target_user_id && req.sharedSpaceIds!.includes(target_user_id)
+      ? target_user_id
+      : req.user!.id;
 
   const cutoffDate = new Date();
   cutoffDate.setDate(cutoffDate.getDate() - days);
   const cutoffStr = cutoffDate.toISOString().split("T")[0];
 
   try {
-    const [logsRes, closeoutsRes, microTasksRes, personalRes] = await Promise.all([
-      // Routine Logs (done vs skipped)
-      supabase
-        .from("pos_routine_logs")
-        .select("date, status")
-        .eq("user_id", uid)
-        .gte("date", cutoffStr),
+    const [logsRes, closeoutsRes, microTasksRes, personalRes, sessionsRes] =
+      await Promise.all([
+        // Routine Logs (done vs skipped)
+        supabase
+          .from("pos_routine_logs")
+          .select("date, status")
+          .eq("user_id", uid)
+          .gte("date", cutoffStr),
 
-      // Daily Closeouts (macro slices scheduled vs completed)
-      supabase
-        .from("pos_daily_closeouts")
-        .select("date, total_scheduled, total_completed")
-        .eq("user_id", uid)
-        .gte("date", cutoffStr),
+        // Daily Closeouts (macro slices scheduled vs completed)
+        supabase
+          .from("pos_daily_closeouts")
+          .select("date, total_scheduled, total_completed")
+          .eq("user_id", uid)
+          .gte("date", cutoffStr),
 
-      // Micro Tasks completed
-      supabase
-        .from("pos_micro_tasks")
-        .select("title, completed_at, status")
-        .eq("user_id", uid)
-        .not("completed_at", "is", null)
-        .gte("completed_at", cutoffDate.toISOString())
-        .order("completed_at", { ascending: false }),
+        // Micro Tasks completed
+        supabase
+          .from("pos_micro_tasks")
+          .select("title, completed_at, status")
+          .eq("user_id", uid)
+          .not("completed_at", "is", null)
+          .gte("completed_at", cutoffDate.toISOString())
+          .order("completed_at", { ascending: false }),
 
-      // Personal Todos completed
-      supabase
-        .from("pos_personal_todos")
-        .select("title, completed_at, status")
-        .eq("user_id", uid)
-        .not("completed_at", "is", null)
-        .gte("completed_at", cutoffDate.toISOString())
-        .order("completed_at", { ascending: false }),
-    ]);
+        // Personal Todos completed
+        supabase
+          .from("pos_personal_todos")
+          .select("title, completed_at, status")
+          .eq("user_id", uid)
+          .not("completed_at", "is", null)
+          .gte("completed_at", cutoffDate.toISOString())
+          .order("completed_at", { ascending: false }),
+
+        // Focus sessions
+        supabase
+          .from("pos_focus_sessions")
+          .select("mode, duration_seconds, created_at")
+          .eq("user_id", uid)
+          .gte("created_at", cutoffDate.toISOString()),
+      ]);
 
     const logs = logsRes.data || [];
     const closeouts = closeoutsRes.data || [];
+    const focusSessions = sessionsRes.data || [];
 
     // Aggregate Routine Data per day
     const routineStats: Record<string, { done: number; skipped: number }> = {};
@@ -89,29 +99,46 @@ router.get("/", async (req: AuthRequest, res) => {
       totalRoutinesSkipped += stat.skipped;
     }
     const totalRoutines = totalRoutinesDone + totalRoutinesSkipped;
-    const adherenceRate = totalRoutines > 0 ? (totalRoutinesDone / totalRoutines) * 100 : 0;
-    
-    let suggestion = { text: "Keep tracking your routines to get AI suggestions.", type: "info" as "warning" | "success" | "info" };
+    const adherenceRate =
+      totalRoutines > 0 ? (totalRoutinesDone / totalRoutines) * 100 : 0;
+
+    let suggestion = {
+      text: "Keep tracking your routines to get AI suggestions.",
+      type: "info" as "warning" | "success" | "info",
+    };
     if (totalRoutines > 5) {
       if (adherenceRate < 60) {
-        suggestion = { text: "Burnout Warning: Your routine adherence is dropping below 60%. Consider reviewing your timetable and dropping overly ambitious routines.", type: "warning" };
+        suggestion = {
+          text: "Burnout Warning: Your routine adherence is dropping below 60%. Consider reviewing your timetable and dropping overly ambitious routines.",
+          type: "warning",
+        };
       } else if (adherenceRate > 85) {
-        suggestion = { text: "Great Job: You are maintaining a highly consistent rhythm. Keep up the excellent work!", type: "success" };
+        suggestion = {
+          text: "Great Job: You are maintaining a highly consistent rhythm. Keep up the excellent work!",
+          type: "success",
+        };
       } else {
-        suggestion = { text: "You are doing okay, but there is room for improvement. Try to stick to your scheduled routines more closely.", type: "info" };
+        suggestion = {
+          text: "You are doing okay, but there is room for improvement. Try to stick to your scheduled routines more closely.",
+          type: "info",
+        };
       }
     }
 
     const taskLogs = [
       ...(microTasksRes.data || []).map((t: any) => ({ ...t, type: "macro" })),
       ...(personalRes.data || []).map((t: any) => ({ ...t, type: "personal" })),
-    ].sort((a, b) => new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime());
+    ].sort(
+      (a, b) =>
+        new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(),
+    );
 
     res.json({
       routineTrends: aggregatedRoutines,
       sliceTrends: formattedCloseouts,
       suggestion,
       taskLogs,
+      focusSessions,
     });
   } catch (error: any) {
     res.status(500).json({ error: error.message });
