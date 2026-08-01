@@ -75,6 +75,7 @@
     line-height: 1.4;
     padding-top: env(titlebar-area-height, 0);
     overflow: hidden; /* Prevent double scrollbars */
+    overscroll-behavior: none; /* Prevent native mobile pull-to-refresh and horizontal swiping */
   }
 
   @media (max-width: 1023px) {
