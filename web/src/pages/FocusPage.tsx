@@ -8,6 +8,7 @@ import EditTimetablePanel, {
 import CountdownTimer from "../components/CountdownTimer";
 import ExpandableDescription from "../components/ExpandableDescription";
 import BrutalistWeekView from "../components/BrutalistWeekView";
+import ConfirmModal from "../components/ConfirmModal";
 import {
   getLocalDateString,
   getLocalDayName,
@@ -82,6 +83,13 @@ export default function FocusPage() {
   const [showFocusInput, setShowFocusInput] = useState(false);
   const [closeouts, setCloseouts] = useState<any[]>([]);
   const [currentCalendarDate, setCurrentCalendarDate] = useState(new Date());
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    onConfirm: () => void;
+    title: string;
+    message: string;
+  }>({ isOpen: false, onConfirm: () => {}, title: "", message: "" });
 
   const [selectedDateStr, setSelectedDateStr] = useState(getLocalDateString());
   const [actualTodayStr, setActualTodayStr] = useState(getLocalDateString());
@@ -828,20 +836,21 @@ export default function FocusPage() {
                             <button
                               disabled={!isLockTime}
                               onClick={async () => {
-                                if (
-                                  !confirm(
-                                    "Are you sure? You cannot edit today's routines after saving.",
-                                  )
-                                )
-                                  return;
-                                try {
-                                  await api.post("/routines/day/lock", {
-                                    date: selectedDateStr,
-                                  });
-                                  setIsRoutineLocked(true);
-                                } catch (err) {
-                                  console.error(err);
-                                }
+                                setConfirmModal({
+                                  isOpen: true,
+                                  title: "Lock Routine?",
+                                  message: "Are you sure? You cannot edit today's routines after saving.",
+                                  onConfirm: async () => {
+                                    try {
+                                      await api.post("/routines/day/lock", {
+                                        date: selectedDateStr,
+                                      });
+                                      setIsRoutineLocked(true);
+                                    } catch (err) {
+                                      console.error(err);
+                                    }
+                                  }
+                                });
                               }}
                               className={`w-full py-2.5 text-xs font-medium uppercase tracking-wider rounded-xl transition-opacity ${
                                 isLockTime
@@ -1052,6 +1061,14 @@ export default function FocusPage() {
         isOpen={isTimetableOpen}
         onClose={() => setIsTimetableOpen(false)}
         onUpdate={fetchFocusData}
+      />
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
       />
     </div>
   );

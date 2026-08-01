@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { X, Plus, Trash2, Edit2, Check } from "lucide-react";
+import ConfirmModal from "./ConfirmModal";
 import { formatTimeInput } from "../lib/dateUtils";
 
 export function calculateDuration(timeLabel: string) {
@@ -50,6 +51,12 @@ export default function EditTimetablePanel({
 
   // New / Edit Routine Form State
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    onConfirm: () => void;
+    title: string;
+    message: string;
+  }>({ isOpen: false, onConfirm: () => {}, title: "", message: "" });
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startTime, setStartTime] = useState("");
@@ -421,20 +428,21 @@ export default function EditTimetablePanel({
               <h3 className="text-sm font-medium">My Active Routines</h3>
               {myRoutines.length > 0 && (
                 <button
-                  onClick={async () => {
-                    if (
-                      confirm(
-                        "Are you sure you want to delete ALL routines? This cannot be undone.",
-                      )
-                    ) {
-                      try {
-                        await api.delete("/routines/all");
-                        fetchData();
-                        onUpdate();
-                      } catch (e) {
-                        console.error(e);
+                  onClick={() => {
+                    setConfirmModal({
+                      isOpen: true,
+                      title: "Reset Timetable?",
+                      message: "Are you sure you want to delete ALL routines? This cannot be undone.",
+                      onConfirm: async () => {
+                        try {
+                          await api.delete("/routines/all");
+                          fetchData();
+                          onUpdate();
+                        } catch (e) {
+                          console.error(e);
+                        }
                       }
-                    }
+                    });
                   }}
                   className="text-xs text-red-500 hover:text-red-400 font-medium transition-colors"
                 >
@@ -546,6 +554,14 @@ export default function EditTimetablePanel({
           )}
         </div>
       </div>
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title={confirmModal.title}
+        message={confirmModal.message}
+        onConfirm={confirmModal.onConfirm}
+        onCancel={() => setConfirmModal({ ...confirmModal, isOpen: false })}
+      />
     </>
   );
 }

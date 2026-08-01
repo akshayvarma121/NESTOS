@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import GoalEditorPanel from "../components/GoalEditorPanel";
 import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
 import GoalJsonEditorModal from "../components/GoalJsonEditorModal";
+import ConfirmModal from "../components/ConfirmModal";
 import {
   Target,
   Plus,
@@ -30,6 +31,11 @@ export default function GoalsPage() {
   const [editingGoal, setEditingGoal] = useState<any>(null);
   const [isBulkOpen, setIsBulkOpen] = useState(false);
   const [jsonEditingGoal, setJsonEditingGoal] = useState<any>(null);
+
+  const [confirmModal, setConfirmModal] = useState<{
+    isOpen: boolean;
+    goalId: string | null;
+  }>({ isOpen: false, goalId: null });
 
   const fetchGoals = async () => {
     try {
@@ -68,18 +74,17 @@ export default function GoalsPage() {
     setIsPanelOpen(true);
   };
 
-  const handleDeleteGoal = async (id: string) => {
-    if (
-      !confirm("Are you sure you want to delete this goal and all its tasks?")
-    )
-      return;
+  const executeDelete = async (id: string) => {
     try {
       await api.delete(`/macro-goals/${id}`);
       await fetchGoals();
     } catch (err) {
       console.error(err);
-      alert("Failed to delete goal.");
     }
+  };
+
+  const handleDeleteGoal = (id: string) => {
+    setConfirmModal({ isOpen: true, goalId: id });
   };
 
   if (loading)
@@ -264,6 +269,20 @@ export default function GoalsPage() {
         onClose={() => setJsonEditingGoal(null)}
         onSuccess={fetchGoals}
         goal={jsonEditingGoal}
+      />
+
+      <ConfirmModal
+        isOpen={confirmModal.isOpen}
+        title="Delete Goal?"
+        message="Are you sure you want to delete this goal and all its tasks? This action cannot be undone."
+        confirmText="Delete"
+        danger={true}
+        onCancel={() => setConfirmModal({ isOpen: false, goalId: null })}
+        onConfirm={() => {
+          if (confirmModal.goalId) {
+            executeDelete(confirmModal.goalId);
+          }
+        }}
       />
     </div>
   );
