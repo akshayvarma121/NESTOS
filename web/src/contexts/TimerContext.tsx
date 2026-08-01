@@ -4,8 +4,8 @@ import React, {
   useState,
   useEffect,
   useRef,
-  ReactNode,
 } from "react";
+import type { ReactNode } from "react";
 import { api } from "../lib/api";
 
 type TimerMode = "stopwatch" | "pomodoro";
