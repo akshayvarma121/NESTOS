@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ReactLenis } from "lenis/react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { LoginPage, RegisterPage } from "./pages/AuthPages";
 import { TimerProvider } from "./contexts/TimerContext";
@@ -30,11 +31,12 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 
 export default function App() {
   return (
-    <AuthProvider>
-      <TimerProvider>
-        <BrowserRouter>
-          <FloatingTimerPill />
-          <Routes>
+    <ReactLenis root>
+      <AuthProvider>
+        <TimerProvider>
+          <BrowserRouter>
+            <FloatingTimerPill />
+            <Routes>
             {/* Public Auth Routes */}
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
@@ -75,5 +77,6 @@ export default function App() {
         </BrowserRouter>
       </TimerProvider>
     </AuthProvider>
+    </ReactLenis>
   );
 }

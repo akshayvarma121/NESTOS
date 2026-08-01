@@ -145,14 +145,18 @@ export default function BrutalistWeekView({
                       title={e.title}
                     />
                   ))}
-                  {dayHolidays.map((h, idx) => (
-                    <div
-                      key={`h-${idx}`}
-                      className={`w-1.5 h-1.5 rounded-full ${isSelected ? "bg-[#ffb6c1]" : "bg-[#ffd32a]"}`}
-                      title={h.name}
-                    />
-                  ))}
                 </div>
+                {dayHolidays.map((h, idx) => (
+                  <div
+                    key={`h-${idx}`}
+                    className={`mt-1 text-[8px] font-black uppercase truncate max-w-full px-1 py-0.5 text-center ${
+                      isSelected ? "bg-[var(--bg-base)] text-[var(--text-primary)]" : "bg-[#ffd32a] text-black"
+                    }`}
+                    title={h.name}
+                  >
+                    {h.name}
+                  </div>
+                ))}
               </div>
             </div>
           );
