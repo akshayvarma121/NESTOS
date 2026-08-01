@@ -473,8 +473,8 @@ export default function FocusPage() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr_350px] gap-8 items-start">
-            {/* COLUMN 1: CALENDAR & UPCOMING/OVERDUE */}
+          <div className="grid grid-cols-1 lg:grid-cols-[1fr_400px] gap-8 items-start">
+            {/* LEFT COLUMN: MAIN FOCUS */}
             <div className="space-y-8 min-w-0">
               <BrutalistCalendar
                 currentDate={currentCalendarDate}
@@ -484,71 +484,6 @@ export default function FocusPage() {
                 onSelectDate={setSelectedDateStr}
                 onMonthChange={setCurrentCalendarDate}
               />
-
-              {/* UPCOMING */}
-              {upcomingTasks.length > 0 && (
-                <section className="space-y-4">
-                  <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]/70 border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between">
-                    <span>Upcoming Horizon</span>
-                    <span className="text-xs font-mono text-[var(--text-primary)]/50">
-                      {upcomingTasks.length} tasks
-                    </span>
-                  </h2>
-                  <div className="space-y-6">
-                    {renderSubjectGroup(upcomingGrouped)}
-                  </div>
-                </section>
-              )}
-
-              {/* OVERDUE */}
-              {overdueTasks.length > 0 && (
-                <section className="space-y-4">
-                  <h2 className="text-sm font-black uppercase tracking-widest text-[#ff6b6b] border-b-2 border-[#ff6b6b] pb-2">
-                    Overdue Action Items
-                  </h2>
-                  <div className="p-4 bg-[var(--bg-surface-raised)] brutal-border brutal-shadow-sm space-y-4">
-                    {renderSubjectGroup(overdueGrouped)}
-                  </div>
-                </section>
-              )}
-            </div>
-
-            {/* COLUMN 2: DAILY ROUTINE & STICKY NOTES */}
-            <div className="space-y-8 min-w-0">
-              {/* STICKY NOTES */}
-              {dashboardNotes.length > 0 && (
-                <section className="grid grid-cols-2 gap-4">
-                  {dashboardNotes.map((note) => {
-                    const colorClass =
-                      note.color === "yellow"
-                        ? "bg-[#ffeb3b]"
-                        : note.color === "pink"
-                          ? "bg-[#ffb6c1]"
-                          : note.color === "blue"
-                            ? "bg-[#a8e6cf]"
-                            : "bg-[#2ed573]";
-
-                    return (
-                      <div
-                        key={note.id}
-                        className={`p-4 brutal-border brutal-shadow-sm flex flex-col gap-2 min-h-[100px] transform -rotate-1 hover:rotate-0 transition-transform ${colorClass}`}
-                      >
-                        <div className="flex items-center justify-between opacity-70">
-                          <span className="text-[10px] font-black uppercase">
-                            Sticky
-                          </span>
-                          <span className="text-[10px] font-bold">
-                            {note.creator?.username || "You"}
-                          </span>
-                        </div>
-                        <p className="text-sm font-bold text-[var(--text-primary)] whitespace-pre-wrap">
-                          {note.content}
-                        </p>
-                      </div>
-                    );
-                  })}
-                </section>
-              )}
 
               {/* DAILY ROUTINE TIMETABLE */}
               <section className="space-y-4">
@@ -780,7 +715,7 @@ export default function FocusPage() {
                                   <div
                                     className={`text-base font-black flex items-center gap-2 ${
                                       routine.status === "done"
-                                        ? "line-through text-[var(--text-primary)]/40"
+                                        ? "line-through text-[var(--text-tertiary)]"
                                         : routine.status === "skipped"
                                           ? "text-[#ff6b6b]"
                                           : "text-[var(--text-primary)]"
@@ -920,7 +855,7 @@ export default function FocusPage() {
                   <h2 className="text-sm font-medium border-b border-[var(--border-hairline)] pb-2 flex items-center justify-between text-[var(--text-secondary)]">
                     <span>Partner's Timeline</span>
                   </h2>
-                  <div className="relative border-l-2 border-[var(--border-hairline)] ml-3 space-y-8 opacity-70">
+                  <div className="relative border-l-2 border-[var(--border-hairline)] ml-3 space-y-8">
                     {partnerRoutines.map((routine, idx) => (
                       <div key={routine.id} className="relative pl-6">
                         <div className="absolute -left-[5px] top-1.5 w-2 h-2 rounded-full bg-[var(--border-hairline)] ring-4 ring-[var(--bg-base)]" />
@@ -951,8 +886,8 @@ export default function FocusPage() {
               )}
             </div>
 
-            {/* COLUMN 3: TODAY'S TASKS & PRIVATE FOCUS */}
-            <div className="space-y-6">
+            {/* RIGHT COLUMN: SIDEBAR */}
+            <div className="space-y-6 min-w-0">
               <div className="bg-[var(--bg-surface-raised)] brutal-border brutal-shadow p-6">
                 <h2 className="text-sm font-black uppercase tracking-widest border-b-2 border-[var(--border-brutal)] pb-3 mb-6 flex items-center justify-between text-[var(--text-primary)]">
                   <span>
@@ -974,6 +909,33 @@ export default function FocusPage() {
                   </div>
                 )}
               </div>
+
+              {/* OVERDUE */}
+              {overdueTasks.length > 0 && (
+                <section className="space-y-4">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-[#ff6b6b] border-b-2 border-[#ff6b6b] pb-2">
+                    Overdue Action Items
+                  </h2>
+                  <div className="p-4 bg-[var(--bg-surface-raised)] brutal-border brutal-shadow-sm space-y-4">
+                    {renderSubjectGroup(overdueGrouped)}
+                  </div>
+                </section>
+              )}
+
+              {/* UPCOMING */}
+              {upcomingTasks.length > 0 && (
+                <section className="space-y-4">
+                  <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)]/70 border-b-2 border-[var(--border-brutal)] pb-2 flex items-center justify-between">
+                    <span>Upcoming Horizon</span>
+                    <span className="text-xs font-mono text-[var(--text-primary)]/50">
+                      {upcomingTasks.length} tasks
+                    </span>
+                  </h2>
+                  <div className="space-y-6">
+                    {renderSubjectGroup(upcomingGrouped)}
+                  </div>
+                </section>
+              )}
 
               {/* PRIVATE FOCUS */}
               <section className="space-y-4 pt-4">
@@ -1004,7 +966,7 @@ export default function FocusPage() {
                         )}
                       </button>
                       <div
-                        className={`flex-1 text-sm font-bold ${todo.status === "done" ? "text-[var(--text-primary)]/40 line-through" : "text-[var(--text-primary)]"}`}
+                        className={`flex-1 text-sm font-bold ${todo.status === "done" ? "text-[var(--text-tertiary)] line-through" : "text-[var(--text-primary)]"}`}
                       >
                         {todo.title}
                       </div>
@@ -1019,7 +981,7 @@ export default function FocusPage() {
                   <input
                     type="text"
                     placeholder="Add a private to-do... (Press Enter)"
-                    className="w-full bg-transparent outline-none text-sm font-bold text-[var(--text-primary)] placeholder-black/40 pt-3 border-t-2 border-[var(--border-brutal)] mt-3"
+                    className="w-full bg-transparent outline-none text-sm font-bold text-[var(--text-primary)] placeholder-[var(--text-tertiary)] pt-3 border-t-2 border-[var(--border-brutal)] mt-3"
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         addPersonalTodo(e.currentTarget.value);
@@ -1029,6 +991,41 @@ export default function FocusPage() {
                   />
                 </div>
               </section>
+
+              {/* STICKY NOTES */}
+              {dashboardNotes.length > 0 && (
+                <section className="grid grid-cols-2 gap-4">
+                  {dashboardNotes.map((note) => {
+                    const colorClass =
+                      note.color === "yellow"
+                        ? "bg-[#ffeb3b]"
+                        : note.color === "pink"
+                          ? "bg-[#ffb6c1]"
+                          : note.color === "blue"
+                            ? "bg-[#a8e6cf]"
+                            : "bg-[#2ed573]";
+
+                    return (
+                      <div
+                        key={note.id}
+                        className={`p-4 brutal-border brutal-shadow-sm flex flex-col gap-2 min-h-[100px] transform -rotate-1 hover:rotate-0 transition-transform ${colorClass}`}
+                      >
+                        <div className="flex items-center justify-between opacity-70">
+                          <span className="text-[10px] font-black uppercase">
+                            Sticky
+                          </span>
+                          <span className="text-[10px] font-bold">
+                            {note.creator?.username || "You"}
+                          </span>
+                        </div>
+                        <p className="text-sm font-bold text-[var(--text-primary)] whitespace-pre-wrap">
+                          {note.content}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </section>
+              )}
             </div>
           </div>
         </>
