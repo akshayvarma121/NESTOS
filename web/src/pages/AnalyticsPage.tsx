@@ -480,7 +480,7 @@ export default function AnalyticsPage() {
                         itemStyle={{ fontSize: "12px" }}
                         formatter={(value: number) => {
                           const mins = Math.floor(value / 60);
-                          return [\`\${mins}m\`, "Focus Time"];
+                          return [`${mins}m`, "Focus Time"];
                         }}
                         labelFormatter={(label) =>
                           new Date(label).toLocaleDateString(undefined, {
