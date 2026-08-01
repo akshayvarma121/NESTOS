@@ -133,9 +133,24 @@ router.get("/", async (req: AuthRequest, res) => {
         new Date(b.completed_at).getTime() - new Date(a.completed_at).getTime(),
     );
 
+    // Aggregate Focus Time per day
+    const focusStats: Record<string, number> = {};
+    for (const s of focusSessions) {
+      const d = s.created_at.split("T")[0];
+      if (!focusStats[d]) focusStats[d] = 0;
+      focusStats[d] += s.duration_seconds;
+    }
+    const focusTrends = Object.keys(focusStats)
+      .sort((a, b) => (a > b ? 1 : -1))
+      .map((date) => ({
+        date,
+        duration_seconds: focusStats[date],
+      }));
+
     res.json({
       routineTrends: aggregatedRoutines,
       sliceTrends: formattedCloseouts,
+      focusTrends,
       suggestion,
       taskLogs,
       focusSessions,

@@ -35,6 +35,7 @@ export default function AnalyticsPage() {
   const [analytics, setAnalytics] = useState<{
     routineTrends: any[];
     sliceTrends: any[];
+    focusTrends?: any[];
     taskLogs?: any[];
     focusSessions?: any[];
     suggestion?: { text: string; type: "warning" | "success" | "info" };
@@ -260,7 +261,7 @@ export default function AnalyticsPage() {
               </div>
               <div>
                 <p className="text-xs font-mono uppercase tracking-wider text-[var(--text-tertiary)]">
-                  Macro Slices Done
+                  Daily Slices Done
                 </p>
                 <div className="text-2xl font-bold">{totalSlicesDone}</div>
               </div>
@@ -363,10 +364,10 @@ export default function AnalyticsPage() {
                 </div>
               </div>
 
-              {/* Macro Slices Area Chart */}
+              {/* Daily Slices Area Chart */}
               <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] p-6 rounded-xl shadow-sm">
                 <h2 className="text-sm font-semibold mb-6">
-                  Macro Goal Execution
+                  Daily Slices Execution
                 </h2>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
@@ -425,6 +426,76 @@ export default function AnalyticsPage() {
                         name="Completed"
                         stroke="#3b82f6"
                         fill="#3b82f6"
+                        fillOpacity={0.2}
+                        strokeWidth={2}
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                </div>
+              </div>
+
+              {/* Focus Time Area Chart */}
+              <div className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] p-6 rounded-xl shadow-sm md:col-span-2">
+                <h2 className="text-sm font-semibold mb-6">
+                  Focus Time Trends (Minutes)
+                </h2>
+                <div className="h-64">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={analytics.focusTrends || []}>
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        stroke="var(--border-hairline)"
+                        vertical={false}
+                      />
+                      <XAxis
+                        dataKey="date"
+                        tickFormatter={(tick) =>
+                          new Date(tick).toLocaleDateString(undefined, {
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                        stroke="var(--text-tertiary)"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        dy={10}
+                      />
+                      <YAxis
+                        tickFormatter={(tick) => Math.round(tick / 60).toString()}
+                        stroke="var(--text-tertiary)"
+                        fontSize={12}
+                        tickLine={false}
+                        axisLine={false}
+                        dx={-10}
+                        allowDecimals={false}
+                      />
+                      <Tooltip
+                        contentStyle={{
+                          backgroundColor: "var(--bg-surface-raised)",
+                          borderColor: "var(--border-hairline)",
+                          borderRadius: "8px",
+                          color: "var(--text-primary)",
+                        }}
+                        itemStyle={{ fontSize: "12px" }}
+                        formatter={(value: number) => {
+                          const mins = Math.floor(value / 60);
+                          return [\`\${mins}m\`, "Focus Time"];
+                        }}
+                        labelFormatter={(label) =>
+                          new Date(label).toLocaleDateString(undefined, {
+                            weekday: "long",
+                            month: "short",
+                            day: "numeric",
+                          })
+                        }
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="duration_seconds"
+                        name="Focus Time"
+                        stroke="#8b5cf6"
+                        fill="#8b5cf6"
                         fillOpacity={0.2}
                         strokeWidth={2}
                       />

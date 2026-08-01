@@ -205,7 +205,7 @@ export default function BacklogPage() {
           <div className="flex flex-col">
             <div className="flex items-center">
               <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
-                Canvas Backlog
+                Backlog
               </h1>
               <div className="relative group cursor-help ml-2 mt-1">
                 <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />

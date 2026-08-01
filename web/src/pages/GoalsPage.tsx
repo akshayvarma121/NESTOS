@@ -128,7 +128,7 @@ export default function GoalsPage() {
           <div className="flex items-center gap-3">
             <Target className="w-8 h-8 text-[var(--text-primary)]" />
             <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
-              Macro Goals
+              Goals
             </h1>
             <div className="relative group cursor-help ml-2 mt-1">
               <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
