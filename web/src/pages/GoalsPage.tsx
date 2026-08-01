@@ -126,13 +126,13 @@ export default function GoalsPage() {
       <div className="flex items-center justify-between">
         <div className="flex flex-col">
           <div className="flex items-center gap-3">
-            <Target className="w-8 h-8 text-black" />
-            <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+            <Target className="w-8 h-8 text-[var(--text-primary)]" />
+            <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
               Macro Goals
             </h1>
             <div className="relative group cursor-help ml-2 mt-1">
               <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-              <div className="absolute left-0 top-full mt-2 w-64 p-4 bg-white brutal-border brutal-shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-sm text-black font-bold">
+              <div className="absolute left-0 top-full mt-2 w-64 p-4 bg-[var(--bg-surface-raised)] border-2 border-[var(--border-brutal)] brutal-shadow-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-sm text-[var(--text-primary)] font-bold">
                 Define your high-level macro goals. Break them down into small
                 units (e.g. 50 chapters). The progress bar fills up as you
                 complete action items.

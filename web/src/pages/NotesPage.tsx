@@ -92,9 +92,9 @@ export default function NotesPage() {
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto pb-32">
       <div className="flex items-center gap-3 mb-8">
-        <StickyNote className="w-8 h-8 text-black" />
+        <StickyNote className="w-8 h-8 text-[var(--text-primary)]" />
         <div className="flex flex-col">
-          <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+          <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
             Notes & Stickies
           </h1>
           <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">

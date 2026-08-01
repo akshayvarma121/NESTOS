@@ -246,7 +246,7 @@ export default function VaultPage() {
         <div>
           <div className="flex items-center gap-3 mb-8">
             <div className="flex flex-col">
-              <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+              <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
                 Vault
               </h1>
               <p className="text-sm font-bold text-[var(--text-secondary)] mt-1">

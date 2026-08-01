@@ -201,15 +201,15 @@ export default function BacklogPage() {
     <div className="p-6 md:p-8 max-w-6xl mx-auto h-[calc(100vh-80px)] flex flex-col">
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-2">
-          <ListTodo className="w-8 h-8 text-black" />
+          <ListTodo className="w-8 h-8 text-[var(--text-primary)]" />
           <div className="flex flex-col">
             <div className="flex items-center">
-              <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+              <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
                 Canvas Backlog
               </h1>
               <div className="relative group cursor-help ml-2 mt-1">
                 <Info className="w-4 h-4 text-[var(--text-tertiary)] hover:text-[var(--text-primary)] transition-colors" />
-                <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-white border-2 border-black rounded-none brutal-shadow opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-black font-bold">
+                <div className="absolute left-0 top-full mt-2 w-64 p-3 bg-[var(--bg-surface-raised)] border-2 border-[var(--border-brutal)] rounded-none brutal-shadow opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-50 text-xs text-[var(--text-primary)] font-bold">
                   A brain dump for micro-tasks. Items here are not scheduled yet.
                   You can pick tasks from here during your morning planning or
                   assign them to a macro goal later.

@@ -135,7 +135,7 @@ export default function AnalyticsPage() {
         </NavLink>
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-black uppercase tracking-wider text-black">
+            <h1 className="text-3xl font-black uppercase tracking-wider text-[var(--text-primary)]">
               Productivity Analytics
             </h1>
             <p className="text-[var(--text-secondary)] text-sm font-bold mt-1">
