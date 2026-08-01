@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { supabase } from "../supabase.js";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
-import Holidays from "date-holidays";
+import ical from "node-ical";
 
 const router = Router();
 router.use(requireAuth);
@@ -15,19 +15,39 @@ router.get("/", async (req: AuthRequest, res) => {
   const yearToFetch = year ? parseInt(year as string) : new Date().getFullYear();
   const userCountry = req.user?.user_metadata?.country || "US";
 
+  const countryMapping: Record<string, string> = {
+    IN: "indian",
+    US: "usa",
+    GB: "uk",
+    CA: "canadian",
+    AU: "australian",
+    DE: "german",
+  };
+
   try {
     let publicHolidays: any[] = [];
     try {
-      const hd = new Holidays(userCountry);
-      const hols = hd.getHolidays(yearToFetch);
-      if (hols && hols.length > 0) {
-        publicHolidays = hols.map((h: any) => ({
-          date: h.date.split(" ")[0], // e.g. "2026-01-26"
-          name: h.name,
-        }));
+      const gName = countryMapping[userCountry] || "usa";
+      const url = `https://calendar.google.com/calendar/ical/en.${gName}%23holiday%40group.v.calendar.google.com/public/basic.ics`;
+      const data = await ical.async.fromURL(url);
+      
+      for (const k in data) {
+        const ev = data[k];
+        if (ev.type === "VEVENT" && ev.start) {
+          const d = ev.start as Date;
+          if (d.getFullYear() === yearToFetch) {
+            const yy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, "0");
+            const dd = String(d.getDate()).padStart(2, "0");
+            publicHolidays.push({
+              date: `${yy}-${mm}-${dd}`,
+              name: ev.summary,
+            });
+          }
+        }
       }
     } catch (err) {
-      console.error("Failed to generate public holidays:", err);
+      console.error("Failed to generate public holidays via ICS:", err);
     }
     const [eventsRes, closeoutsRes, tasksRes, macroGoalsRes, deadlinesRes] = await Promise.all([
       supabase
