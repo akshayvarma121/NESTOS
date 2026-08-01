@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { api } from "../lib/api";
-import { Check, Info, X, Calendar as CalendarIcon } from "lucide-react";
+import { Check, Info, X, Calendar as CalendarIcon, ExternalLink } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import EditTimetablePanel, {
   calculateDuration,
@@ -969,6 +969,55 @@ export default function FocusPage() {
                   </h2>
                   <div className="space-y-6">
                     {renderSubjectGroup(upcomingGrouped)}
+                  </div>
+                </section>
+              )}
+
+              {/* UPCOMING DEADLINES */}
+              {activeDeadlines.length > 0 && (
+                <section className="space-y-4 pt-4">
+                  <h2 className="text-2xl font-black uppercase tracking-tighter flex items-center justify-between text-[var(--text-primary)]">
+                    <span className="flex items-center gap-2">
+                      Upcoming Deadlines
+                    </span>
+                    <NavLink
+                      to="/opportunities"
+                      className="text-[10px] font-bold uppercase bg-[var(--text-primary)] text-[var(--bg-base)] px-2 py-1 brutal-border"
+                    >
+                      View All
+                    </NavLink>
+                  </h2>
+                  <div className="space-y-3 pt-2">
+                    {activeDeadlines.map((d) => (
+                      <div
+                        key={d.id}
+                        className="p-4 bg-[#ffb6c1] text-black brutal-border brutal-shadow-sm transition-transform hover:-translate-y-1"
+                      >
+                        <div className="flex items-start justify-between gap-4">
+                          <h3 className="text-sm font-black uppercase tracking-wider leading-tight">
+                            {d.title}
+                          </h3>
+                          {d.url && (
+                            <a
+                              href={d.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="shrink-0 p-1 bg-black text-white hover:bg-black/80 rounded"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                        <div className="text-xs font-bold mt-1 opacity-80 font-mono">
+                          {new Date(d.deadline).toLocaleString()}
+                        </div>
+                        {d.notes && (
+                          <div className="text-sm font-bold mt-2 opacity-90 line-clamp-2">
+                            {d.notes}
+                          </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
                 </section>
               )}

@@ -97,6 +97,19 @@ export default function CreateOpportunityPanel({
             />
           </div>
 
+          <div className="space-y-1.5">
+            <label className="text-sm font-medium text-[var(--text-secondary)]">
+              Description (Optional)
+            </label>
+            <textarea
+              value={form.notes}
+              onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              className="w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-md px-3 py-2 text-sm outline-none focus:border-[var(--accent)] resize-none"
+              placeholder="Notes, details, etc."
+              rows={3}
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
               <label className="text-sm font-medium text-[var(--text-secondary)]">

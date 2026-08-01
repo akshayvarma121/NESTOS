@@ -12,6 +12,7 @@ export default function DeadlinesPage() {
 
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
+  const [notes, setNotes] = useState("");
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
 
@@ -41,10 +42,12 @@ export default function DeadlinesPage() {
     await api.post("/deadlines", {
       title,
       url: url || null,
+      notes: notes || null,
       deadline: deadlineDate,
     });
     setTitle("");
     setUrl("");
+    setNotes("");
     setDate("");
     setTime("");
     fetchDeadlines();
@@ -102,6 +105,13 @@ export default function DeadlinesPage() {
             onChange={(e) => setUrl(e.target.value)}
             className="md:col-span-2 w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)]"
           />
+          <textarea
+            placeholder="Description (optional)"
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            className="md:col-span-2 w-full bg-[var(--bg-base)] border border-[var(--border-hairline)] px-3 py-2 rounded text-sm outline-none focus:border-[var(--accent)] resize-none"
+            rows={2}
+          />
           <input
             required
             type="date"
@@ -152,10 +162,15 @@ export default function DeadlinesPage() {
                     )}
                   </div>
                   <p
-                    className={`text-xs font-mono ${isPast ? "text-red-400" : "text-[var(--text-secondary)]"}`}
+                    className={`text-xs font-mono mb-1 ${isPast ? "text-red-400" : "text-[var(--text-secondary)]"}`}
                   >
                     {new Date(d.deadline).toLocaleString()}
                   </p>
+                  {d.notes && (
+                    <p className="text-xs text-[var(--text-tertiary)] line-clamp-2">
+                      {d.notes}
+                    </p>
+                  )}
                 </div>
                 {d.url && (
                   <a
