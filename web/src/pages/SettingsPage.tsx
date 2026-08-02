@@ -4,6 +4,7 @@ import { supabase } from "../lib/supabase";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "../lib/toast";
+import { AvatarPicker, UserAvatar } from "../components/AvatarPicker";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export default function SettingsPage() {
   const [clearDataConfirm, setClearDataConfirm] = useState("");
   const [clearingData, setClearingData] = useState(false);
   const [themeTick, setThemeTick] = useState(0);
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
 
   const triggerTestNotification = async (type: string) => {
     try {
@@ -53,6 +55,13 @@ export default function SettingsPage() {
 
   return (
     <div className="p-6 md:p-8 max-w-2xl mx-auto">
+      {showAvatarPicker && (
+        <AvatarPicker
+          currentAvatarStyle={user?.user_metadata?.avatarStyle}
+          currentAvatarSeed={user?.user_metadata?.avatarSeed}
+          onClose={() => setShowAvatarPicker(false)}
+        />
+      )}
       <div className="mb-8">
         <h1 className="text-2xl font-semibold mb-1">Settings</h1>
         <p className="text-[var(--text-secondary)] text-sm">
@@ -91,6 +100,30 @@ export default function SettingsPage() {
                 className="px-4 py-2 bg-[var(--text-primary)] text-[var(--bg-base)] text-xs font-bold uppercase tracking-wider brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all"
               >
                 {document.documentElement.classList.contains("dark") ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              </button>
+            </div>
+
+            {/* Avatar */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
+              <div className="flex items-center gap-4">
+                <UserAvatar
+                  avatarStyle={user?.user_metadata?.avatarStyle}
+                  avatarSeed={user?.user_metadata?.avatarSeed}
+                  initials={(user?.user_metadata?.name || user?.email || "?").substring(0, 2).toUpperCase()}
+                  size="lg"
+                />
+                <div>
+                  <h3 className="text-sm font-medium">Avatar</h3>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
+                    Choose how you appear across the app.
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowAvatarPicker(true)}
+                className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-4 py-2 text-xs uppercase tracking-wider brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all whitespace-nowrap"
+              >
+                Change Avatar
               </button>
             </div>
           </div>

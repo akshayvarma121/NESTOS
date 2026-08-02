@@ -1,6 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import { useAuth } from "../contexts/AuthContext";
+import { UserAvatar } from "../components/AvatarPicker";
 import {
   Calendar as CalendarIcon,
   ListTodo,
@@ -154,9 +155,12 @@ export default function DesktopSidebar() {
           }
         >
           <div className="flex items-center gap-3 overflow-hidden">
-            <div className="w-9 h-9 flex-shrink-0 bg-[#d5ff66] text-[#172000] border-2 border-black flex items-center justify-center rounded-full font-black text-xs">
-              {initials}
-            </div>
+            <UserAvatar
+              avatarStyle={user?.user_metadata?.avatarStyle}
+              avatarSeed={user?.user_metadata?.avatarSeed}
+              initials={initials}
+              size="md"
+            />
             {!isCollapsed && (
               <div className="min-w-0 flex-1">
                 <p className="text-sm font-bold text-[var(--text-primary)] truncate">
