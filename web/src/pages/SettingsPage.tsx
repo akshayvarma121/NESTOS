@@ -14,6 +14,52 @@ export default function SettingsPage() {
   const [clearingData, setClearingData] = useState(false);
   const [themeTick, setThemeTick] = useState(0);
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
+  const [notifStatus, setNotifStatus] = useState<"unknown"|"granted"|"denied"|"default">("unknown");
+  const [subscribing, setSubscribing] = useState(false);
+
+  // Check notification permission on mount
+  useState(() => {
+    if ("Notification" in window) {
+      setNotifStatus(Notification.permission as any);
+    }
+  });
+
+  const handleEnableNotifications = async () => {
+    setSubscribing(true);
+    try {
+      const permission = await Notification.requestPermission();
+      setNotifStatus(permission as any);
+      const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+      if (permission === "granted" && VAPID_PUBLIC_KEY) {
+        const reg = await navigator.serviceWorker.ready;
+        // Unsubscribe any stale sub first
+        const existing = await reg.pushManager.getSubscription();
+        if (existing) await existing.unsubscribe();
+        const subscription = await reg.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        });
+        await api.post("/push/subscribe", subscription.toJSON());
+        toast("Notifications enabled. You're all set.", "success");
+        localStorage.removeItem("push_dismissed");
+      } else if (permission === "denied") {
+        toast("Permission denied. Reset notifications in your browser site settings.", "error");
+      } else if (!VAPID_PUBLIC_KEY) {
+        toast("VAPID key missing — check Vercel environment variables.", "error");
+      }
+    } catch (e: any) {
+      toast("Failed to subscribe: " + e.message, "error");
+    } finally {
+      setSubscribing(false);
+    }
+  };
+
+  function urlBase64ToUint8Array(base64String: string) {
+    const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+    const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+    const rawData = window.atob(base64);
+    return Uint8Array.from([...rawData].map((c) => c.charCodeAt(0)));
+  }
 
   const triggerTestNotification = async (type: string) => {
     try {
@@ -235,6 +281,25 @@ export default function SettingsPage() {
         <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4">Notifications Setup</h2>
           <div className="space-y-4">
+            {/* Enable row */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
+              <div>
+                <h3 className="text-sm font-medium">Push Notifications</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Status: <span className={`font-bold ${
+                    notifStatus === "granted" ? "text-green-500" :
+                    notifStatus === "denied" ? "text-red-500" : "text-[var(--text-tertiary)]"
+                  }`}>{notifStatus === "unknown" ? "checking..." : notifStatus}</span>
+                </p>
+              </div>
+              <button
+                onClick={handleEnableNotifications}
+                disabled={subscribing}
+                className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-4 py-2 text-xs uppercase tracking-wider brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all whitespace-nowrap disabled:opacity-50"
+              >
+                {subscribing ? "Enabling..." : "Enable Notifications"}
+              </button>
+            </div>
             <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
               <div>
                 <h3 className="text-sm font-medium">Test Push Notifications</h3>
