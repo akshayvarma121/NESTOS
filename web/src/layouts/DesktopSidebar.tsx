@@ -21,7 +21,18 @@ import {
 } from "lucide-react";
 import LiveUsersCounter from "../components/LiveUsersCounter";
 
-const navGroups = [
+type NavGroup = {
+  label: string;
+  items: {
+    name: string;
+    path: string;
+    icon: any;
+    tourId?: string;
+    badge?: string;
+  }[];
+};
+
+const navGroups: NavGroup[] = [
   {
     label: "Execution",
     items: [
