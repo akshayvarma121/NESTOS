@@ -2,14 +2,14 @@ import { useState } from "react";
 import { supabase } from "../lib/supabase";
 import { toast } from "../lib/toast";
 
-// DiceBear styles that look great in Neo-Brutalist context
+// DiceBear styles that look great in Neo-Brutalist context and dark mode
 const AVATAR_STYLES = [
-  { style: "bottts-neutral", label: "Robo" },
+  { style: "adventurer-neutral", label: "Person 1" },
+  { style: "notionists", label: "Person 2" },
+  { style: "micah", label: "Person 3" },
+  { style: "avataaars", label: "Person 4" },
+  { style: "pixel-art", label: "Pixel" },
   { style: "shapes", label: "Shapes" },
-  { style: "identicon", label: "Grid" },
-  { style: "rings", label: "Rings" },
-  { style: "pixel-art-neutral", label: "Pixel" },
-  { style: "lorelei-neutral", label: "Minimal" },
 ];
 
 // A fixed set of seeds for each style — gives the "gallery" feel

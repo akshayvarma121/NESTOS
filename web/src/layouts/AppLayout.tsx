@@ -151,7 +151,7 @@ export default function AppLayout() {
   return (
     <div className="flex min-h-[100dvh] w-full bg-[var(--bg-base)]">
       {/* Desktop Sidebar (hidden on mobile) */}
-      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-6 sticky top-0 h-[100dvh] z-20">
+      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-6 sticky top-0 self-start h-[100dvh] z-20">
         <DesktopSidebar />
       </div>
 
