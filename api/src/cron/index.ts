@@ -97,21 +97,26 @@ cron.schedule("* * * * *", async () => {
     const { data: { users }, error } = await supabase.auth.admin.listUsers({ perPage: 1000 });
     if (error || !users) return;
 
-    // We fetch routines and deadlines in one go
-    // For routines, we filter client side to avoid heavy JSON filtering in DB
-    const [routinesRes, deadlinesRes, goalsRes] = await Promise.all([
+    // We fetch routines, deadlines, and settings in one go
+    const [routinesRes, deadlinesRes, goalsRes, settingsRes] = await Promise.all([
       supabase.from("pos_routines").select("id, user_id, title, time_label, days_of_week, last_notified_date"),
       supabase.from("pos_deadlines").select("id, user_id, title, deadline").eq("alerted", false).not("deadline", "is", null),
-      supabase.from("pos_macro_goals").select("id, user_id, title, deadline").eq("alerted", false).not("deadline", "is", null)
+      supabase.from("pos_macro_goals").select("id, user_id, title, deadline").eq("alerted", false).not("deadline", "is", null),
+      supabase.from("pos_settings").select("user_id, key, value").in("key", ["morning_briefing_time", "evening_briefing_time"])
     ]);
 
     const allRoutines = routinesRes.data || [];
     const allDeadlines = deadlinesRes.data || [];
     const allGoals = goalsRes.data || [];
+    const allSettings = settingsRes.data || [];
 
     const routinesToUpdate: string[] = [];
     const deadlinesToUpdate: string[] = [];
     const goalsToUpdate: string[] = [];
+    
+    // Arrays for day summaries
+    const morningUsers: { id: string, tz: string }[] = [];
+    const eveningUsers: { id: string, tz: string }[] = [];
 
     // Process each user
     for (const u of users) {
@@ -139,7 +144,7 @@ cron.schedule("* * * * *", async () => {
         if (routineStart === localFutureTimeStr) {
           await sendPushToUser(u.id, {
             title: "Routine Starting Soon",
-            body: \`"\${r.title}" starts in 15 minutes (\${routineStart})\`,
+            body: `"${r.title}" starts in 15 minutes (${routineStart})`,
             url: "/focus",
           });
           routinesToUpdate.push(r.id);
@@ -155,7 +160,7 @@ cron.schedule("* * * * *", async () => {
         if (deadlineDate > now && deadlineDate <= twentyFourHoursFromNow) {
           await sendPushToUser(u.id, {
             title: "Deadline Approaching",
-            body: \`"\${d.title}" is due soon!\`,
+            body: `"${d.title}" is due soon!`,
             url: "/backlog",
           });
           deadlinesToUpdate.push(d.id);
@@ -168,10 +173,58 @@ cron.schedule("* * * * *", async () => {
         if (deadlineDate > now && deadlineDate <= twentyFourHoursFromNow) {
           await sendPushToUser(u.id, {
             title: "Goal Deadline Approaching",
-            body: \`"\${g.title}" is due soon!\`,
+            body: `"${g.title}" is due soon!`,
             url: "/goals",
           });
           goalsToUpdate.push(g.id);
+        }
+      }
+
+      // --- BRIEFINGS CHECK ---
+      const userSettings = allSettings.filter(s => s.user_id === u.id);
+      const morningTime = userSettings.find(s => s.key === "morning_briefing_time")?.value || "07:00";
+      const eveningTime = userSettings.find(s => s.key === "evening_briefing_time")?.value || "21:00";
+
+      if (localTimeStr === morningTime) {
+        morningUsers.push({ id: u.id, tz });
+      } else if (localTimeStr === eveningTime) {
+        eveningUsers.push({ id: u.id, tz });
+      }
+    }
+
+    // --- EXECUTE BRIEFINGS ---
+    if (morningUsers.length > 0 || eveningUsers.length > 0) {
+      const targetUserIds = [...morningUsers, ...eveningUsers].map(u => u.id);
+      const { data: activeTasks } = await supabase
+        .from("pos_micro_tasks")
+        .select("id, user_id, scheduled_date, status")
+        .in("user_id", targetUserIds)
+        .eq("status", "pending")
+        .not("scheduled_date", "is", null);
+
+      if (activeTasks) {
+        for (const u of morningUsers) {
+          const localDateStr = getLocalDayString(now, u.tz);
+          const pendingToday = activeTasks.filter(t => t.user_id === u.id && t.scheduled_date === localDateStr).length;
+          
+          const message = pendingToday > 0 
+            ? `You have ${pendingToday} pending tasks scheduled for today. Time to get to work!`
+            : `No tasks scheduled for today. Enjoy your day!`;
+          
+          await sendPushToUser(u.id, { title: "Morning Briefing", body: message, url: "/today" });
+        }
+
+        for (const u of eveningUsers) {
+          const localDateStr = getLocalDayString(now, u.tz);
+          const pendingToday = activeTasks.filter(t => t.user_id === u.id && t.scheduled_date === localDateStr).length;
+          
+          if (pendingToday > 0) {
+            await sendPushToUser(u.id, { 
+              title: "Day Deadline Approaching", 
+              body: `You still have ${pendingToday} tasks left today. Finish them before the day closes!`, 
+              url: "/today" 
+            });
+          }
         }
       }
     }
@@ -251,7 +304,7 @@ cron.schedule("*/4 * * * *", async () => {
   const pingUrl = process.env.RENDER_EXTERNAL_URL || process.env.API_URL;
   if (pingUrl) {
     try {
-      await fetch(\`\${pingUrl}/health\`);
+      await fetch(`${pingUrl}/health`);
     } catch (err) { }
   }
 });
