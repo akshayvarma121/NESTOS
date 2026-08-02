@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { guidanceRegistry, GuidanceEntry } from "../lib/guidanceRegistry";
+import { guidanceRegistry, type GuidanceEntry } from "../lib/guidanceRegistry";
 import { useHelp } from "../contexts/HelpContext";
 import { Search, Mail, RefreshCw, Play } from "lucide-react";
 

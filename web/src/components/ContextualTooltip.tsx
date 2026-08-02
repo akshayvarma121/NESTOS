@@ -1,4 +1,4 @@
-import { ReactNode, useState, useEffect } from "react";
+import { useState, useEffect, type ReactNode } from "react";
 import { useHelp } from "../contexts/HelpContext";
 import { guidanceRegistry } from "../lib/guidanceRegistry";
 import { X } from "lucide-react";

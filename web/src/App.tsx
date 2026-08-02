@@ -34,6 +34,15 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   return children;
 }
 
+function PublicRoute({ children }: { children: ReactNode }) {
+  const { session, loading } = useAuth();
+
+  if (loading) return <div className="p-6">Loading...</div>;
+  if (session) return <Navigate to="/focus" replace />;
+
+  return children;
+}
+
 export default function App() {
   useEffect(() => {
     const isStandalone =
@@ -91,9 +100,9 @@ export default function App() {
               <Routes>
 
                 {/* Public Auth Routes */}
-                <Route path="/" element={<LandingPage />} />
-                <Route path="/login" element={<LoginPage />} />
-                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/" element={<PublicRoute><LandingPage /></PublicRoute>} />
+                <Route path="/login" element={<PublicRoute><LoginPage /></PublicRoute>} />
+                <Route path="/register" element={<PublicRoute><RegisterPage /></PublicRoute>} />
                 <Route path="/shared/:token" element={<SharedPartnerPage />} />
 
                 {/* Protected App Routes */}
