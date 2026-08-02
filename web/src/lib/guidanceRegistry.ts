@@ -22,8 +22,50 @@ export const guidanceRegistry: Record<string, GuidanceEntry> = {
   goal_engine: {
     id: "goal_engine",
     title: "Goal Engine",
-    text: "Slice macro goals into micro-tasks here, then pull them into your Backlog or schedule them for today.",
+    text: "Slice macro goals into micro-tasks. You can even import goals instantly using the JSON format (see docs for schema).",
     group: "Planning",
+  },
+  calendar_deadlines: {
+    id: "calendar_deadlines",
+    title: "Calendar & Deadlines",
+    text: "Track your hard deadlines here. If a task must be done on a specific day, lock it in the calendar.",
+    group: "Planning",
+  },
+  notes_scratchpad: {
+    id: "notes_scratchpad",
+    title: "Notes Tab",
+    text: "A quick scratchpad for your daily thoughts, meeting notes, or temporary dumps that don't belong in tasks.",
+    group: "Execution",
+  },
+  analytics_dashboard: {
+    id: "analytics_dashboard",
+    title: "Analytics",
+    text: "At midnight, the system automatically calculates your adherence score. No manual self-reporting. Just the hard truth.",
+    group: "System",
+  },
+  partner_beta: {
+    id: "partner_beta",
+    title: "Partner Sync (Beta)",
+    text: "Link your account with a partner to keep each other accountable. Note: This feature is currently in Beta and under testing.",
+    group: "System",
+  },
+  vault_intro: {
+    id: "vault_intro",
+    title: "The Vault",
+    text: "A separate encrypted space with its own PIN. It auto-locks when you leave. Forgetting the PIN triggers a factory reset of this space.",
+    group: "System",
+  },
+  settings_overview: {
+    id: "settings_overview",
+    title: "Settings",
+    text: "Configure your themes, layout preferences, timezone, and manage your account details here.",
+    group: "System",
+  },
+  help_page: {
+    id: "help_page",
+    title: "Help & Guidance",
+    text: "You are here! Access all system documentation. You can reset tooltips or restart this tour anytime from this page.",
+    group: "System",
   },
 
   // Contextual Tooltips
@@ -45,16 +87,10 @@ export const guidanceRegistry: Record<string, GuidanceEntry> = {
     text: "You cannot edit routines after 11PM. Commit to the plan or accept the failure.",
     group: "Planning",
   },
-  vault_intro: {
-    id: "vault_intro",
-    title: "The Vault",
-    text: "A separate encrypted space with its own PIN. It auto-locks when you leave. Forgetting the PIN triggers a factory reset of this space.",
-    group: "System",
-  },
   partner_privacy: {
     id: "partner_privacy",
-    title: "Partner Sync",
-    text: "Invite a partner using a token. You control exactly what is shared and what stays completely private.",
+    title: "Partner Settings",
+    text: "You control exactly what is shared and what stays completely private from your partner.",
     group: "System",
   },
 };

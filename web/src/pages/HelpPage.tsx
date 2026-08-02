@@ -54,18 +54,30 @@ export default function HelpPage() {
             <h3 className="font-black font-mono uppercase tracking-widest text-sm mb-4 text-[var(--text-primary)]">
               Reset State
             </h3>
-            <button
-              onClick={startTour}
-              className="w-full flex items-center justify-center gap-3 bg-[var(--bg-surface-raised)] text-[var(--text-primary)] border border-[var(--border-hairline)] p-3 font-bold uppercase tracking-wider hover:bg-[var(--bg-base)] transition-colors"
-            >
-              <Play className="w-5 h-5" /> Restart Intro Tour
-            </button>
-            <button
-              onClick={resetAll}
-              className="w-full flex items-center justify-center gap-3 bg-[var(--danger)] text-white border border-[var(--danger)] p-3 font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
-            >
-              <RefreshCw className="w-5 h-5" /> Reset All Tooltips
-            </button>
+            
+            <div>
+              <button
+                onClick={startTour}
+                className="w-full flex items-center justify-center gap-3 bg-[var(--bg-surface-raised)] text-[var(--text-primary)] border border-[var(--border-hairline)] p-3 font-bold uppercase tracking-wider hover:bg-[var(--bg-base)] transition-colors mb-2"
+              >
+                <Play className="w-5 h-5" /> Restart Intro Tour
+              </button>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold">
+                Replays the main sequential app walkthrough. Use this to review the overall system flow.
+              </p>
+            </div>
+
+            <div className="pt-2 border-t border-[var(--border-hairline)]">
+              <button
+                onClick={resetAll}
+                className="w-full flex items-center justify-center gap-3 bg-[var(--danger)] text-white border border-[var(--danger)] p-3 font-bold uppercase tracking-wider hover:opacity-90 transition-opacity mb-2 mt-4"
+              >
+                <RefreshCw className="w-5 h-5" /> Reset All Tooltips
+              </button>
+              <p className="text-[10px] text-[var(--text-secondary)] font-bold">
+                Restores dismissed inline hints (like the JSON upload hint). These are contextual popups, separate from the main tour.
+              </p>
+            </div>
           </div>
 
           {/* Contact */}

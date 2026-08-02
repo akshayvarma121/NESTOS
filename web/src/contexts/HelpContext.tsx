@@ -16,7 +16,18 @@ type HelpContextType = {
 
 const HelpContext = createContext<HelpContextType | null>(null);
 
-const TOUR_STEPS = ["focus_dashboard", "backlog_philosophy", "goal_engine"];
+const TOUR_STEPS = [
+  "focus_dashboard",
+  "backlog_philosophy",
+  "goal_engine",
+  "calendar_deadlines",
+  "notes_scratchpad",
+  "analytics_dashboard",
+  "partner_beta",
+  "vault_intro",
+  "settings_overview",
+  "help_page"
+];
 
 export function HelpProvider({ children }: { children: ReactNode }) {
   const [hasOnboarded, setHasOnboarded] = useState(true); // Default true until loaded

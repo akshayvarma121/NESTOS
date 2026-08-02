@@ -8,6 +8,13 @@ const TOUR_ROUTES: Record<string, string> = {
   focus_dashboard: "/focus",
   backlog_philosophy: "/backlog",
   goal_engine: "/goals",
+  calendar_deadlines: "/calendar",
+  notes_scratchpad: "/notes",
+  analytics_dashboard: "/routines-history",
+  partner_beta: "/partner",
+  vault_intro: "/vault",
+  settings_overview: "/settings",
+  help_page: "/help"
 };
 
 export default function BrutalistTour() {

@@ -25,33 +25,33 @@ const navGroups = [
   {
     label: "Execution",
     items: [
-      { name: "Focus", path: "/focus", icon: Target },
+      { name: "Focus", path: "/focus", icon: Target, tourId: "focus_dashboard" },
       { name: "Timer", path: "/timer", icon: Timer },
     ],
   },
   {
     label: "Planning",
     items: [
-      { name: "Calendar", path: "/calendar", icon: CalendarIcon },
-      { name: "Backlog", path: "/backlog", icon: ListTodo },
-      { name: "Goals", path: "/goals", icon: BarChart2 },
+      { name: "Calendar", path: "/calendar", icon: CalendarIcon, tourId: "calendar_deadlines" },
+      { name: "Backlog", path: "/backlog", icon: ListTodo, tourId: "backlog_philosophy" },
+      { name: "Goals", path: "/goals", icon: BarChart2, tourId: "goal_engine" },
       { name: "Deadlines", path: "/opportunities", icon: Lightbulb },
     ],
   },
   {
     label: "Knowledge",
     items: [
-      { name: "Notes", path: "/notes", icon: ListTodo },
-      { name: "Analytics", path: "/routines-history", icon: PieChart },
+      { name: "Notes", path: "/notes", icon: ListTodo, tourId: "notes_scratchpad" },
+      { name: "Analytics", path: "/routines-history", icon: PieChart, tourId: "analytics_dashboard" },
     ],
   },
   {
     label: "System",
     items: [
-      { name: "Partner", path: "/partner", icon: Users, badge: "BETA" },
-      { name: "Vault", path: "/vault", icon: Lock },
-      { name: "Settings", path: "/settings", icon: Settings },
-      { name: "Help", path: "/help", icon: HelpCircle },
+      { name: "Partner", path: "/partner", icon: Users, badge: "BETA", tourId: "partner_beta" },
+      { name: "Vault", path: "/vault", icon: Lock, tourId: "vault_intro" },
+      { name: "Settings", path: "/settings", icon: Settings, tourId: "settings_overview" },
+      { name: "Help", path: "/help", icon: HelpCircle, tourId: "help_page" },
     ],
   },
 ];
@@ -116,6 +116,7 @@ export default function DesktopSidebar() {
                 <NavLink
                   key={item.name}
                   to={item.path}
+                  data-tour={item.tourId}
                   title={isCollapsed ? item.name : undefined}
                   className={({ isActive }) =>
                     `flex items-center text-sm font-bold transition-all duration-75 border-2 rounded-lg ${
