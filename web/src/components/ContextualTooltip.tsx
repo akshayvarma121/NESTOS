@@ -52,15 +52,15 @@ export default function ContextualTooltip({
       {children}
       {isVisible && (
         <div
-          className={`absolute z-50 w-64 p-3 bg-[#a8e6cf] text-black border-2 border-black brutal-shadow animate-in fade-in slide-in-from-${position}-2 ${positionClasses[position]}`}
+          className={`absolute z-50 w-64 p-3 bg-[var(--bg-surface-raised)] text-[var(--text-primary)] border-2 border-[var(--border-hairline)] shadow-[4px_4px_0px_0px_var(--border-hairline)] animate-in fade-in slide-in-from-${position}-2 ${positionClasses[position]}`}
         >
           <div className="flex justify-between items-start mb-2">
-            <h4 className="font-black font-mono text-[10px] uppercase tracking-widest">
+            <h4 className="font-black font-mono text-[10px] uppercase tracking-widest text-[var(--text-secondary)]">
               {guidance.title}
             </h4>
             <button
               onClick={handleDismiss}
-              className="p-1 hover:bg-black hover:text-white border-2 border-transparent hover:border-black transition-colors"
+              className="p-1 hover:bg-[var(--bg-base)] hover:text-[var(--text-primary)] border-2 border-transparent hover:border-[var(--border-hairline)] transition-colors text-[var(--text-secondary)]"
               title="Dismiss"
             >
               <X className="w-3 h-3" />

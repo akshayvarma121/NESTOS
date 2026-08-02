@@ -88,8 +88,8 @@ export default function BrutalistTour() {
           targetRect
             ? {
                 // Position it below or above the target depending on space
-                top: targetRect.bottom + 24 > window.innerHeight - 200 
-                     ? targetRect.top - 200 
+                top: targetRect.bottom + 24 > window.innerHeight - 220 
+                     ? Math.max(16, targetRect.top - 220) 
                      : targetRect.bottom + 24,
                 left: Math.max(16, Math.min(targetRect.left, window.innerWidth - 340))
               }
