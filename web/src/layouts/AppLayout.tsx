@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from "react-router-dom";
+import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import DesktopSidebar from "./DesktopSidebar";
 import MobileBottomTabs from "./MobileBottomTabs";
 import { useState, useEffect } from "react";
@@ -9,6 +9,8 @@ import { Plus, Bell, X, WifiOff, Download } from "lucide-react";
 import { api } from "../lib/api";
 import { useHotkeys } from "../lib/useHotkeys";
 import { useSwipeNavigation } from "../lib/useSwipe";
+import { useAuth } from "../contexts/AuthContext";
+import { UserAvatar } from "../components/AvatarPicker";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -24,6 +26,10 @@ function urlBase64ToUint8Array(base64String: string) {
 }
 
 export default function AppLayout() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const name = user?.user_metadata?.name || user?.email || "User";
+  const initials = name.substring(0, 2).toUpperCase();
   useSwipeNavigation();
   const [showMilestoneToast, setShowMilestoneToast] = useState(false);
   const [toastMsg, setToastMsg] = useState<{message: string, type: "info"|"success"|"error", id: number} | null>(null);
@@ -151,8 +157,26 @@ export default function AppLayout() {
       {/* WCO Drag Region */}
       <div className="titlebar-drag-region" />
 
+      {/* Mobile Top Header (hidden on desktop) */}
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-12 z-30 bg-[var(--bg-surface-raised)] border-b-2 border-black flex items-center justify-between px-4">
+        <div className="flex items-center gap-2">
+          <div className="w-6 h-6 bg-[#ffeb3b] border-2 border-black flex items-center justify-center">
+            <span className="font-black text-black text-xs leading-none">N</span>
+          </div>
+          <span className="text-sm font-black tracking-widest uppercase">Nest</span>
+        </div>
+        <button onClick={() => navigate("/settings")} className="flex items-center">
+          <UserAvatar
+            avatarStyle={user?.user_metadata?.avatarStyle}
+            avatarSeed={user?.user_metadata?.avatarSeed}
+            initials={initials}
+            size="sm"
+          />
+        </button>
+      </div>
+
       {/* Main Content Area */}
-      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6 lg:pt-6 pt-[60px]">
         <Outlet />
       </main>
 
