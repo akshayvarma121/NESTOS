@@ -18,9 +18,10 @@ export default function SettingsPage() {
   const triggerTestNotification = async (type: string) => {
     try {
       await api.post("/push/test-trigger", { type });
-      toast("Test notification dispatched!", "success");
+      toast("Push sent! Check your OS notifications.", "success");
     } catch (e: any) {
-      toast("Failed to trigger test: " + e.message, "error");
+      const msg = e?.response?.data?.error || e.message;
+      toast(msg, "error");
     }
   };
 
