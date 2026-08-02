@@ -168,11 +168,11 @@ export default function CalendarPage() {
     : [];
 
   return (
-    <div className="p-6 md:p-8 max-w-7xl mx-auto space-y-8 flex flex-col pb-32">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <CalendarIcon className="w-8 h-8 text-[var(--text-primary)]" />
-          <h1 className="text-4xl font-black uppercase tracking-tighter">Calendar Horizon</h1>
+    <div className="p-3 md:p-8 max-w-7xl mx-auto space-y-4 md:space-y-8 flex flex-col pb-32 overflow-x-hidden">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="flex items-center gap-2 md:gap-3 flex-wrap">
+          <CalendarIcon className="w-6 h-6 md:w-8 md:h-8 text-[var(--text-primary)] shrink-0" />
+          <h1 className="text-2xl md:text-4xl font-black uppercase tracking-tighter shrink-0">Calendar</h1>
           <button
             onClick={handleManualSync}
             disabled={loading}
@@ -207,9 +207,10 @@ export default function CalendarPage() {
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div
               key={day}
-              className="p-3 text-center text-xs font-black uppercase tracking-widest text-[var(--text-primary)] border-r-2 border-[var(--border-brutal)] last:border-r-0"
+              className="p-1 md:p-3 text-center text-[10px] md:text-xs font-black uppercase md:tracking-widest text-[var(--text-primary)] border-r-2 border-[var(--border-brutal)] last:border-r-0 truncate"
             >
-              {day}
+              <span className="hidden md:inline">{day}</span>
+              <span className="md:hidden">{day.charAt(0)}</span>
             </div>
           ))}
         </div>
