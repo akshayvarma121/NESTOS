@@ -24,6 +24,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+      
+      // Sync Timezone
+      if (session?.user) {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (session.user.user_metadata?.timezone !== tz) {
+          supabase.auth.updateUser({ data: { timezone: tz } });
+        }
+      }
     });
 
     const {
@@ -32,6 +40,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       setSession(session);
       setUser(session?.user ?? null);
       setLoading(false);
+
+      if (_event === "SIGNED_IN" && session?.user) {
+        const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        if (session.user.user_metadata?.timezone !== tz) {
+          supabase.auth.updateUser({ data: { timezone: tz } });
+        }
+      }
     });
 
     return () => subscription.unsubscribe();
