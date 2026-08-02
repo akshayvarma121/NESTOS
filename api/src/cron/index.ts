@@ -143,7 +143,7 @@ cron.schedule("* * * * *", async () => {
         // Notify if routine is exactly 15 minutes away
         if (routineStart === localFutureTimeStr) {
           await sendPushToUser(u.id, {
-            title: "Heads up! 👀",
+            title: "Heads up!",
             body: `Your routine "${r.title}" kicks off in 15 mins. Get ready.`,
             url: "/focus",
           });
@@ -159,7 +159,7 @@ cron.schedule("* * * * *", async () => {
         const deadlineDate = new Date(d.deadline);
         if (deadlineDate > now && deadlineDate <= twentyFourHoursFromNow) {
           await sendPushToUser(u.id, {
-            title: "Tick Tock ⏳",
+            title: "Tick Tock",
             body: `"${d.title}" is due soon. Don't drop the ball on this one.`,
             url: "/backlog",
           });
@@ -172,7 +172,7 @@ cron.schedule("* * * * *", async () => {
         const deadlineDate = new Date(g.deadline);
         if (deadlineDate > now && deadlineDate <= twentyFourHoursFromNow) {
           await sendPushToUser(u.id, {
-            title: "Goal Deadline 🎯",
+            title: "Goal Deadline",
             body: `Your goal "${g.title}" is due soon. Time to push through!`,
             url: "/goals",
           });
@@ -208,8 +208,8 @@ cron.schedule("* * * * *", async () => {
           const pendingToday = activeTasks.filter(t => t.user_id === u.id && t.scheduled_date === localDateStr).length;
           
           const message = pendingToday > 0 
-            ? `Rise and grind! You've got ${pendingToday} missions lined up for today. Let's crush them. ☕`
-            : `Your schedule is completely clear today. Enjoy the freedom! 🕊️`;
+            ? `Rise and grind! You've got ${pendingToday} missions lined up for today. Let's crush them.`
+            : `Your schedule is completely clear today. Enjoy the freedom!`;
           
           await sendPushToUser(u.id, { title: "Morning Check-in", body: message, url: "/today" });
         }
@@ -220,7 +220,7 @@ cron.schedule("* * * * *", async () => {
           
           if (pendingToday > 0) {
             await sendPushToUser(u.id, { 
-              title: "Day's Almost Up 🌙", 
+              title: "Day's Almost Up", 
               body: `You still have ${pendingToday} tasks hanging around. Wrap 'em up before midnight!`, 
               url: "/today" 
             });
@@ -246,7 +246,7 @@ cron.schedule("* * * * *", async () => {
         const backlogCount = backlogTasks ? backlogTasks.length : 0;
         if (backlogCount > 0) {
           await sendPushToUser(u.id, {
-            title: "Backlog Check 📦",
+            title: "Backlog Check",
             body: `You've got ${backlogCount} tasks rotting in your backlog. Check your analytics and clean house.`,
             url: "/analytics"
           });

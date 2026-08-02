@@ -213,13 +213,13 @@ export default function SettingsPage() {
                   onClick={() => triggerTestNotification("backlog")}
                   className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-md text-xs hover:border-[var(--text-primary)] transition-colors"
                 >
-                  Test Backlog 📦
+                  Test Backlog
                 </button>
                 <button
                   onClick={() => triggerTestNotification("morning")}
                   className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-md text-xs hover:border-[var(--text-primary)] transition-colors"
                 >
-                  Test Morning ☕
+                  Test Morning
                 </button>
               </div>
             </div>
