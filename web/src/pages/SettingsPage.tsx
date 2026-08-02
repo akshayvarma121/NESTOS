@@ -101,7 +101,7 @@ export default function SettingsPage() {
   };
 
   return (
-    <div className="p-6 md:p-8 max-w-2xl mx-auto">
+    <div className="px-4 py-6 md:px-8 md:py-8 max-w-2xl mx-auto w-full overflow-x-hidden">
       {showAvatarPicker && (
         <AvatarPicker
           currentAvatarStyle={user?.user_metadata?.avatarStyle}

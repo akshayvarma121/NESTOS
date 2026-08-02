@@ -176,7 +176,7 @@ export default function AppLayout() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6 lg:pt-6 pt-[60px]">
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6 lg:pt-6 pt-[60px] overflow-x-hidden min-w-0">
         <Outlet />
       </main>
 
