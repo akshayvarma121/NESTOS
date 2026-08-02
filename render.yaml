@@ -18,8 +18,8 @@ services:
       - key: DATABASE_SESSION_URL
         sync: false
       - key: VAPID_PUBLIC_KEY
-        value: BGORfzUeR-cwkiGC92fjkxOk_eHHC4EqMai1ucmD05Vaumoj1foXYoEbHxE8GPbjpX61mBto-_xv7YzPpkef1Wo
+        sync: false
       - key: VAPID_PRIVATE_KEY
-        value: 87VYpnCaZw9cjr3YEyqIH78MTJp_WlbMyrxIx-xk1n8
+        sync: false
       - key: RENDER_EXTERNAL_URL
-        value: https://nestos.onrender.com
+        sync: false
