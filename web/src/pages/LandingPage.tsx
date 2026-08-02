@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 
 /* ─── Scroll-reveal hook ─────────────────────────────────────────── */
 function useReveal(threshold = 0.15) {
@@ -272,12 +273,20 @@ export default function LandingPage() {
             <span className="hidden sm:block w-px h-3 bg-[#2a2a2a]" />
             <span className="hidden sm:block text-[10px] text-[#5c5c60] tracking-widest">{timeStr}</span>
           </div>
-          <a
-            href="https://nestos-kappa.vercel.app"
-            className="text-[10px] tracking-widest uppercase font-bold border border-[#eaeaea] px-5 py-2 hover:bg-[#eaeaea] hover:text-[#050505] transition-colors"
-          >
-            Open App
-          </a>
+          <div className="flex items-center gap-6">
+            <Link
+              to="/login"
+              className="text-[10px] tracking-widest uppercase font-bold text-[#9a9a9e] hover:text-[#eaeaea] transition-colors"
+            >
+              [ LOGIN ]
+            </Link>
+            <Link
+              to="/register"
+              className="text-[10px] tracking-widest uppercase font-bold border border-[#eaeaea] px-5 py-2 hover:bg-[#eaeaea] hover:text-[#050505] transition-colors"
+            >
+              REGISTER
+            </Link>
+          </div>
         </nav>
 
         {/* ── HERO ──────────────────────────────────────────────── */}
@@ -307,12 +316,12 @@ export default function LandingPage() {
                   Everything else stays in a backlog, out of sight, until you decide to pull it in. No noise. No endless scroll. Just today.
                 </p>
                 <div className="flex items-center gap-4 mt-4">
-                  <a
-                    href="https://nestos-kappa.vercel.app"
+                  <Link
+                    to="/register"
                     className="bg-[#ff3b30] text-white px-6 py-3.5 text-xs tracking-widest uppercase font-bold hover:bg-white hover:text-[#050505] transition-colors"
                   >
                     Start for free
-                  </a>
+                  </Link>
                   <a
                     href="https://github.com/akshayvarma121/NESTOS"
                     target="_blank"
@@ -394,12 +403,12 @@ function FooterBlock() {
               Ready to<br />
               <span className="text-[#ff3b30]">focus?</span>
             </p>
-            <a
-              href="https://nestos-kappa.vercel.app"
+            <Link
+              to="/register"
               className="self-start bg-[#eaeaea] text-[#050505] px-6 py-3.5 text-xs tracking-widest uppercase font-bold hover:bg-[#ff3b30] hover:text-white transition-colors"
             >
-              Access NestOS
-            </a>
+              Start for free
+            </Link>
           </div>
 
           {/* Right */}

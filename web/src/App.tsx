@@ -29,7 +29,7 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
   const { session, loading } = useAuth();
 
   if (loading) return <div className="p-6">Loading...</div>;
-  if (!session) return <Navigate to="/login" replace />;
+  if (!session) return <Navigate to="/" replace />;
 
   return children;
 }
@@ -41,6 +41,12 @@ function PublicRoute({ children }: { children: ReactNode }) {
   if (session) return <Navigate to="/focus" replace />;
 
   return children;
+}
+
+function CatchAllRoute() {
+  const { session, loading } = useAuth();
+  if (loading) return null;
+  return session ? <Navigate to="/focus" replace /> : <Navigate to="/" replace />;
 }
 
 export default function App() {
@@ -135,6 +141,9 @@ export default function App() {
                     </ProtectedRoute>
                   }
                 />
+
+                {/* Catch-all Route for 404s */}
+                <Route path="*" element={<CatchAllRoute />} />
               </Routes>
             </BrowserRouter>
           </HelpProvider>
