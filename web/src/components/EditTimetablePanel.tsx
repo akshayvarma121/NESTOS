@@ -1,4 +1,6 @@
 import { useState, useEffect } from "react";
+import { useAuth } from "../contexts/AuthContext";
+import { toast } from "../lib/toast";
 import { api } from "../lib/api";
 import { X, Plus, Trash2, Edit2, Check } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
@@ -108,7 +110,10 @@ export default function EditTimetablePanel({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (selectedDays.length === 0) return alert("Select at least one day");
+    if (selectedDays.length === 0) {
+      toast("Select at least one day", "error");
+      return;
+    }
 
     setIsSubmitting(true);
     try {
@@ -220,7 +225,7 @@ export default function EditTimetablePanel({
       fetchData();
       onUpdate();
     } catch (e: any) {
-      alert(e.message);
+      toast(e.message, "error");
     } finally {
       setIsSubmitting(false);
     }

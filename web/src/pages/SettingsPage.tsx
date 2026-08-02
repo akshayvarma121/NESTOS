@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { supabase } from "../lib/supabase";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
+import { toast } from "../lib/toast";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -18,9 +19,9 @@ export default function SettingsPage() {
     try {
       await api.delete("/vault/reset");
       setResetConfirm("");
-      alert("Vault successfully reset.");
+      toast("Vault successfully reset.", "success");
     } catch (e: any) {
-      alert("Failed to reset vault: " + e.message);
+      toast("Failed to reset vault: " + e.message, "error");
     } finally {
       setResettingVault(false);
     }
@@ -32,10 +33,10 @@ export default function SettingsPage() {
     try {
       await api.delete("/account/clear-data");
       setClearDataConfirm("");
-      alert("All your data has been permanently deleted.");
-      window.location.href = "/";
+      toast("All your data has been permanently deleted.", "success");
+      setTimeout(() => window.location.href = "/", 2000);
     } catch (e: any) {
-      alert("Failed to clear data: " + e.message);
+      toast("Failed to clear data: " + e.message, "error");
     } finally {
       setClearingData(false);
     }
@@ -110,9 +111,9 @@ export default function SettingsPage() {
                     if (!input.value.trim()) return;
                     try {
                       await supabase.auth.updateUser({ data: { name: input.value.trim() } });
-                      alert("Name updated successfully! Refresh the page to see changes.");
+                      toast("Name updated successfully! Refresh the page to see changes.", "success");
                     } catch (e: any) {
-                      alert("Failed to update name: " + e.message);
+                      toast("Failed to update name: " + e.message, "error");
                     }
                   }}
                   className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-3 py-1.5 rounded-md text-xs hover:opacity-90 transition-opacity whitespace-nowrap brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"
@@ -148,9 +149,9 @@ export default function SettingsPage() {
                     if (!input.value) return;
                     try {
                       await supabase.auth.updateUser({ data: { country: input.value } });
-                      alert("Country updated successfully! Refresh the page to see changes.");
+                      toast("Country updated successfully! Refresh the page to see changes.", "success");
                     } catch (e: any) {
-                      alert("Failed to update country: " + e.message);
+                      toast("Failed to update country: " + e.message, "error");
                     }
                   }}
                   className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-3 py-1.5 rounded-md text-xs hover:opacity-90 transition-opacity whitespace-nowrap brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none"

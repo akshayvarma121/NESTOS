@@ -25,7 +25,8 @@ function urlBase64ToUint8Array(base64String: string) {
 
 export default function AppLayout() {
   useSwipeNavigation();
-  const [showToast, setShowToast] = useState(false);
+  const [showMilestoneToast, setShowMilestoneToast] = useState(false);
+  const [toastMsg, setToastMsg] = useState<{message: string, type: "info"|"success"|"error", id: number} | null>(null);
   
   // Global Modal States
   const [isTimetableOpen, setIsTimetableOpen] = useState(false);
@@ -47,14 +48,22 @@ export default function AppLayout() {
 
     // Milestone Listener
     const handleMilestone = () => {
-      setShowToast(true);
-      setTimeout(() => setShowToast(false), 5000);
+      setShowMilestoneToast(true);
+      setTimeout(() => setShowMilestoneToast(false), 5000);
     };
     window.addEventListener("milestone_reached", handleMilestone);
 
+    // Generic Toast Listener
+    const handleToast = (e: any) => {
+      setToastMsg({ ...e.detail, id: Date.now() });
+      setTimeout(() => setToastMsg(null), 4000);
+    };
+    window.addEventListener("show_toast", handleToast);
+
     // Vault Copy Listener
     const handleVaultCopy = (e: any) => {
-      alert(e.detail || "Copied to clipboard");
+      setToastMsg({ message: e.detail || "Copied to clipboard", type: "success", id: Date.now() });
+      setTimeout(() => setToastMsg(null), 4000);
     };
     window.addEventListener("vault_copy", handleVaultCopy);
 
@@ -86,6 +95,7 @@ export default function AppLayout() {
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
       window.removeEventListener("milestone_reached", handleMilestone);
+      window.removeEventListener("show_toast", handleToast);
       window.removeEventListener("vault_copy", handleVaultCopy);
       window.removeEventListener("open_timetable_creator", handleTimetableOpen);
       window.removeEventListener("open_opportunity_creator", handleOpportunityOpen);
@@ -108,12 +118,12 @@ export default function AppLayout() {
         });
 
         await api.post("/push/subscribe", subscription.toJSON());
-        setShowPushBanner(false);
       }
     } catch (e) {
       console.error("Push subscription failed", e);
     } finally {
       setSubscribing(false);
+      setShowPushBanner(false);
     }
   };
 
@@ -168,18 +178,35 @@ export default function AppLayout() {
       <PrivacyBanner />
 
       {/* Non-blocking Milestone Toast */}
-      {showToast && (
+      {showMilestoneToast && (
         <div className="fixed top-6 left-1/2 -translate-x-1/2 bg-[var(--text-primary)] text-[var(--bg-base)] px-4 py-3 brutal-border brutal-shadow-lg z-50 flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300">
           <span className="text-sm font-bold">
             New milestone captured — draft a post?
           </span>
           <a
             href="/captures"
-            onClick={() => setShowToast(false)}
+            onClick={() => setShowMilestoneToast(false)}
             className="text-xs bg-[var(--bg-base)] text-[var(--text-primary)] px-2 py-1 rounded hover:scale-[1.02] transition-transform"
           >
             View
           </a>
+        </div>
+      )}
+
+      {/* Generic Global Toast */}
+      {toastMsg && (
+        <div 
+          key={toastMsg.id}
+          className={`fixed top-6 left-1/2 -translate-x-1/2 px-4 py-3 brutal-border brutal-shadow-lg z-[100] flex items-center gap-3 animate-in slide-in-from-top-4 fade-in duration-300 ${
+            toastMsg.type === "error" ? "bg-[#ff6b6b] text-black" : 
+            toastMsg.type === "success" ? "bg-[#2ed573] text-black" : 
+            "bg-[var(--text-primary)] text-[var(--bg-base)]"
+          }`}
+        >
+          <span className="text-sm font-bold whitespace-pre-wrap">{toastMsg.message}</span>
+          <button onClick={() => setToastMsg(null)} className="ml-2 hover:opacity-70">
+            <X className="w-4 h-4"/>
+          </button>
         </div>
       )}
 

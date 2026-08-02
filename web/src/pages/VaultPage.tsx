@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { api } from "../lib/api";
+import { toast } from "../lib/toast";
 import {
   Lock,
   Plus,
@@ -142,7 +143,7 @@ export default function VaultPage() {
       fetchEntries();
     } catch (e: any) {
       console.error(e);
-      alert(e.message);
+      toast(e.message, "error");
     }
   };
 
@@ -167,7 +168,7 @@ export default function VaultPage() {
       }, 30000);
     } catch (e) {
       console.error(e);
-      alert("Failed to reveal entry. Session may have expired.");
+      toast("Failed to reveal entry. Session may have expired.", "error");
       setVaultToken(null);
     }
   };

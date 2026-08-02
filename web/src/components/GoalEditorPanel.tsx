@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { X, ArrowLeft, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, Info, Plus, Target, X, ArrowLeft, Trash2 } from "lucide-react";
+import { toast } from "../lib/toast";
 import { getLocalDateString } from "../lib/dateUtils";
 import { api } from "../lib/api";
 
@@ -115,7 +116,7 @@ export default function GoalEditorPanel({
       setStep(1);
       onClose();
     } catch (e: any) {
-      alert("Error saving goal: " + (e.message || "Unknown error"));
+      toast("Error saving goal: " + (e.message || "Unknown error"), "error");
     } finally {
       setLoading(false);
     }
