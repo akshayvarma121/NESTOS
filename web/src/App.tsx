@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ReactLenis } from "lenis/react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -30,6 +31,51 @@ function ProtectedRoute({ children }: { children: ReactNode }) {
 }
 
 export default function App() {
+  useEffect(() => {
+    const isStandalone =
+      window.matchMedia("(display-mode: standalone)").matches ||
+      (window.navigator as any).standalone;
+
+    if (isStandalone) {
+      const handleContextMenu = (e: MouseEvent) => {
+        // Allow context menu on inputs and textareas
+        if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+          return;
+        }
+        e.preventDefault();
+      };
+
+      const handleKeyDown = (e: KeyboardEvent) => {
+        // F12, Ctrl+Shift+I/J/C, Ctrl+U, Cmd+Option+I/J/C
+        if (
+          e.key === "F12" ||
+          (e.ctrlKey &&
+            e.shiftKey &&
+            (e.key.toLowerCase() === "i" ||
+              e.key.toLowerCase() === "j" ||
+              e.key.toLowerCase() === "c")) ||
+          (e.ctrlKey && e.key.toLowerCase() === "u") ||
+          (e.metaKey &&
+            e.altKey &&
+            (e.key.toLowerCase() === "i" ||
+              e.key.toLowerCase() === "j" ||
+              e.key.toLowerCase() === "c")) ||
+          (e.metaKey && e.key.toLowerCase() === "u")
+        ) {
+          e.preventDefault();
+        }
+      };
+
+      document.addEventListener("contextmenu", handleContextMenu);
+      document.addEventListener("keydown", handleKeyDown);
+
+      return () => {
+        document.removeEventListener("contextmenu", handleContextMenu);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, []);
+
   return (
     <ReactLenis root>
       <AuthProvider>
