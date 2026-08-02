@@ -163,14 +163,12 @@ export default function DesktopSidebar() {
       </div>
 
       {/* User Profile Footer */}
-      <div className="p-3 border-t-2 border-[var(--border-brutal)] bg-[var(--bg-surface)]">
+      <div className="p-4 mt-auto">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
-            `w-full flex items-center justify-between p-2 rounded-xl border-2 transition-all text-left group ${
-              isActive
-                ? "border-[var(--border-brutal)] bg-[var(--bg-surface-raised)] brutal-shadow-sm -translate-y-1"
-                : "border-transparent hover:border-[var(--border-brutal)] hover:bg-[var(--bg-surface-raised)] hover:brutal-shadow-sm hover:-translate-y-1"
+            `w-full flex items-center justify-between p-3 rounded-xl border-2 transition-all text-left group bg-[var(--bg-surface-raised)] border-[var(--border-brutal)] shadow-[4px_4px_0px_0px_var(--border-brutal)] hover:-translate-y-1 hover:-translate-x-1 hover:shadow-[6px_6px_0px_0px_var(--border-brutal)] ${
+              isActive ? "ring-2 ring-[var(--accent)]" : ""
             }`
           }
         >
@@ -186,14 +184,14 @@ export default function DesktopSidebar() {
                 <p className="text-sm font-bold text-[var(--text-primary)] truncate">
                   {name}
                 </p>
-                <p className="text-xs text-[var(--text-tertiary)] truncate">
+                <p className="text-[10px] font-mono text-[var(--text-tertiary)] truncate mt-0.5">
                   {email}
                 </p>
               </div>
             )}
           </div>
           {!isCollapsed && (
-            <Settings className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] transition-colors flex-shrink-0" />
+            <Settings className="w-4 h-4 text-[var(--text-tertiary)] group-hover:text-[var(--text-primary)] group-hover:rotate-90 transition-all duration-300 flex-shrink-0" />
           )}
         </NavLink>
       </div>
