@@ -13,23 +13,34 @@ router.post("/subscribe", async (req: AuthRequest, res) => {
     return res.status(400).json({ error: "Invalid subscription" });
   }
 
+  const userId = req.user!.id;
+  const p256dh = subscription.keys?.p256dh;
+  const auth = subscription.keys?.auth;
+
+  console.log("[PUSH] Subscribe from user:", userId, "| has keys:", !!(p256dh && auth));
+
   // Delete existing for this user/endpoint if exists
   await supabase
     .from("pos_push_subscriptions")
     .delete()
-    .eq("user_id", req.user!.id)
+    .eq("user_id", userId)
     .eq("endpoint", subscription.endpoint);
 
-  const { error } = await supabase.from("pos_push_subscriptions").insert([
+  const { error, data } = await supabase.from("pos_push_subscriptions").insert([
     {
-      user_id: req.user!.id,
+      user_id: userId,
       endpoint: subscription.endpoint,
-      keys_p256dh: subscription.keys.p256dh,
-      keys_auth: subscription.keys.auth,
+      keys_p256dh: p256dh,
+      keys_auth: auth,
     },
-  ]);
+  ]).select("id");
 
-  if (error) return res.status(500).json({ error: error.message });
+  if (error) {
+    console.error("[PUSH] Insert failed:", error.message);
+    return res.status(500).json({ error: error.message });
+  }
+
+  console.log("[PUSH] Saved subscription id:", data?.[0]?.id);
   res.status(201).json({ success: true });
 });
 
