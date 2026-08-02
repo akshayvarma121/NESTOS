@@ -3,6 +3,7 @@ import { api } from "../lib/api";
 import { Users, Link as LinkIcon, UserPlus, RefreshCw } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { supabase } from "../lib/supabase";
+import ContextualTooltip from "../components/ContextualTooltip";
 
 export default function PartnerPage() {
   const { user } = useAuth();
@@ -77,15 +78,17 @@ export default function PartnerPage() {
   return (
     <div className="p-6 md:p-8 max-w-4xl mx-auto pb-32">
       <div className="flex justify-between items-start mb-8">
-        <div>
-          <div className="flex items-center gap-3 mb-1">
-            <Users className="w-5 h-5 text-[var(--accent)]" />
-            <h1 className="text-2xl font-semibold">Partner Network</h1>
+        <ContextualTooltip featureId="partner_privacy" position="bottom">
+          <div>
+            <div className="flex items-center gap-3 mb-1">
+              <Users className="w-5 h-5 text-[var(--accent)]" />
+              <h1 className="text-2xl font-semibold">Partner Network</h1>
+            </div>
+            <p className="text-[var(--text-secondary)] text-sm">
+              Link up with friends using invite codes.
+            </p>
           </div>
-          <p className="text-[var(--text-secondary)] text-sm">
-            Link up with friends using invite codes.
-          </p>
-        </div>
+        </ContextualTooltip>
         <button
           onClick={handleLogout}
           className="text-xs bg-[var(--bg-surface-raised)] hover:bg-[var(--border-hairline)] px-3 py-1.5 rounded transition-colors"

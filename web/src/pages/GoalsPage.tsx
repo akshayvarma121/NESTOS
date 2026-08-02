@@ -4,6 +4,7 @@ import GoalEditorPanel from "../components/GoalEditorPanel";
 import BulkImportGoalsModal from "../components/BulkImportGoalsModal";
 import GoalJsonEditorModal from "../components/GoalJsonEditorModal";
 import ConfirmModal from "../components/ConfirmModal";
+import ContextualTooltip from "../components/ContextualTooltip";
 import {
   Target,
   Plus,
@@ -105,7 +106,7 @@ export default function GoalsPage() {
   );
 
   return (
-    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8">
+    <div className="p-6 md:p-8 max-w-4xl mx-auto space-y-8" data-tour="goal_engine">
       {/* Pull to refresh indicator */}
       {(pullProgress > 0 || isRefreshing) && (
         <div className="flex justify-center -mt-4 mb-4">
@@ -144,13 +145,15 @@ export default function GoalsPage() {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <button
-            onClick={() => setIsBulkOpen(true)}
-            className="brutal-btn bg-white text-black px-4 py-2 text-sm font-bold flex items-center gap-2"
-          >
-            <UploadCloud className="w-4 h-4" />
-            Bulk JSON
-          </button>
+          <ContextualTooltip featureId="json_import">
+            <button
+              onClick={() => setIsBulkOpen(true)}
+              className="brutal-btn bg-white text-black px-4 py-2 text-sm font-bold flex items-center gap-2"
+            >
+              <UploadCloud className="w-4 h-4" />
+              Bulk JSON
+            </button>
+          </ContextualTooltip>
           <button
             onClick={openNewGoal}
             className="brutal-btn bg-[#a8e6cf] text-black px-4 py-2 text-sm font-black flex items-center gap-2 uppercase"

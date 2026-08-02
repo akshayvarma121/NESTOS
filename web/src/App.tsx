@@ -19,6 +19,9 @@ import NotesPage from "./pages/NotesPage";
 import TimerPage from "./pages/TimerPage";
 import AnalyticsPage from "./pages/AnalyticsPage";
 import CalendarPage from "./pages/CalendarPage";
+import HelpPage from "./pages/HelpPage";
+import { HelpProvider } from "./contexts/HelpContext";
+import BrutalistTour from "./components/BrutalistTour";
 
 import type { ReactNode } from "react";
 
@@ -81,48 +84,53 @@ export default function App() {
     <ReactLenis root>
       <AuthProvider>
         <TimerProvider>
-          <BrowserRouter>
-            <FloatingTimerPill />
-            <Routes>
-            {/* Public Auth Routes */}
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
-            <Route path="/shared/:token" element={<SharedPartnerPage />} />
+          <HelpProvider>
+            <BrowserRouter>
+              <BrutalistTour />
+              <FloatingTimerPill />
+              <Routes>
 
-            {/* Protected App Routes */}
-            <Route
-              element={
-                <ProtectedRoute>
-                  <AppLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route path="focus" element={<FocusPage />} />
-              <Route path="calendar" element={<CalendarPage />} />
-              <Route path="routines-history" element={<AnalyticsPage />} />
-              <Route path="backlog" element={<BacklogPage />} />
-              <Route path="goals" element={<GoalsPage />} />
-              <Route path="opportunities" element={<OpportunitiesPage />} />
-              <Route path="vault" element={<VaultPage />} />
-              <Route path="notes" element={<NotesPage />} />
-              <Route path="partner" element={<PartnerPage />} />
-              <Route path="settings" element={<SettingsPage />} />
-            </Route>
+                {/* Public Auth Routes */}
+                <Route path="/" element={<LandingPage />} />
+                <Route path="/login" element={<LoginPage />} />
+                <Route path="/register" element={<RegisterPage />} />
+                <Route path="/shared/:token" element={<SharedPartnerPage />} />
 
-            {/* Independent Protected Route for Timer (No AppLayout) */}
-            <Route
-              path="/timer"
-              element={
-                <ProtectedRoute>
-                  <TimerPage />
-                </ProtectedRoute>
-              }
-            />
-          </Routes>
-        </BrowserRouter>
-      </TimerProvider>
-    </AuthProvider>
+                {/* Protected App Routes */}
+                <Route
+                  element={
+                    <ProtectedRoute>
+                      <AppLayout />
+                    </ProtectedRoute>
+                  }
+                >
+                  <Route path="focus" element={<FocusPage />} />
+                  <Route path="calendar" element={<CalendarPage />} />
+                  <Route path="routines-history" element={<AnalyticsPage />} />
+                  <Route path="backlog" element={<BacklogPage />} />
+                  <Route path="goals" element={<GoalsPage />} />
+                  <Route path="opportunities" element={<OpportunitiesPage />} />
+                  <Route path="vault" element={<VaultPage />} />
+                  <Route path="notes" element={<NotesPage />} />
+                  <Route path="partner" element={<PartnerPage />} />
+                  <Route path="settings" element={<SettingsPage />} />
+                  <Route path="help" element={<HelpPage />} />
+                </Route>
+
+                {/* Independent Protected Route for Timer (No AppLayout) */}
+                <Route
+                  path="/timer"
+                  element={
+                    <ProtectedRoute>
+                      <TimerPage />
+                    </ProtectedRoute>
+                  }
+                />
+              </Routes>
+            </BrowserRouter>
+          </HelpProvider>
+        </TimerProvider>
+      </AuthProvider>
     </ReactLenis>
   );
 }

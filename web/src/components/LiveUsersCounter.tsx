@@ -9,8 +9,18 @@ export default function LiveUsersCounter({ showText = true }: { showText?: boole
   useEffect(() => {
     if (!user) return;
 
+    const channelName = 'public:online-users';
+
+    // Cleanup any existing channel to prevent errors during React Strict Mode double-mounts
+    const activeChannels = supabase.getChannels();
+    for (const c of activeChannels) {
+      if (c.topic === channelName || c.topic === `realtime:${channelName}`) {
+        supabase.removeChannel(c);
+      }
+    }
+
     // Create a public room for all online users
-    const room = supabase.channel('public:online-users', {
+    const room = supabase.channel(channelName, {
       config: {
         presence: {
           key: user.id,

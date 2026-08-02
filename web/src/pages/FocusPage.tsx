@@ -394,7 +394,7 @@ export default function FocusPage() {
   const displayDate = new Date(year, month - 1, day);
 
   return (
-    <div className="p-4 md:p-8 max-w-[1600px] mx-auto relative pb-32">
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto relative pb-32" data-tour="focus_dashboard">
       {/* Header */}
       <div className="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>

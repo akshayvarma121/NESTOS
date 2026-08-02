@@ -13,6 +13,7 @@ import {
   Timer,
   PieChart,
   Lightbulb,
+  HelpCircle,
 } from "lucide-react";
 import SpeedDial from "../components/SpeedDial";
 
@@ -32,6 +33,7 @@ const moreTabs = [
   { name: "Partner", path: "/partner", icon: Users, badge: "BETA" },
   { name: "Vault", path: "/vault", icon: Lock },
   { name: "Settings", path: "/settings", icon: Settings },
+  { name: "Help", path: "/help", icon: HelpCircle },
 ];
 
 export default function MobileBottomTabs() {

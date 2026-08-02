@@ -5,6 +5,7 @@ import { api } from "../lib/api";
 import { X, Plus, Trash2, Edit2, Check } from "lucide-react";
 import ConfirmModal from "./ConfirmModal";
 import { formatTimeInput } from "../lib/dateUtils";
+import ContextualTooltip from "./ContextualTooltip";
 
 export function calculateDuration(timeLabel: string) {
   if (!timeLabel || !timeLabel.includes("-")) return null;
@@ -261,7 +262,9 @@ export default function EditTimetablePanel({
       <div className="fixed inset-y-0 right-0 w-full md:w-[450px] bg-[var(--bg-surface-raised)] border-l border-[var(--border-hairline)] z-50 flex flex-col shadow-2xl animate-in slide-in-from-right duration-200">
         <div className="flex items-center justify-between p-4 md:p-6 border-b border-[var(--border-hairline)]">
           <div>
-            <h2 className="text-lg font-semibold">Timetable Editor</h2>
+            <ContextualTooltip featureId="11pm_lock" position="bottom">
+              <h2 className="text-lg font-semibold">Timetable Editor</h2>
+            </ContextualTooltip>
             <p className="text-xs text-[var(--text-secondary)] mt-1">
               Configure your daily repeating routines
             </p>
@@ -282,13 +285,15 @@ export default function EditTimetablePanel({
                 {editingId ? "Edit Routine Block" : "Add Routine Block"}
               </h3>
               {!editingId && (
-                <button
-                  type="button"
-                  onClick={() => setIsJSONMode(!isJSONMode)}
-                  className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
-                >
-                  {isJSONMode ? "Manual Entry" : "Bulk Edit JSON"}
-                </button>
+                <ContextualTooltip featureId="timetable_import">
+                  <button
+                    type="button"
+                    onClick={() => setIsJSONMode(!isJSONMode)}
+                    className="text-xs text-[var(--text-secondary)] hover:text-[var(--accent)] underline"
+                  >
+                    {isJSONMode ? "Manual Entry" : "Bulk Edit JSON"}
+                  </button>
+                </ContextualTooltip>
               )}
             </div>
 
