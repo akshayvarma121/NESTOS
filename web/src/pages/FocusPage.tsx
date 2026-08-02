@@ -501,54 +501,6 @@ export default function FocusPage() {
                 onWeekChange={setCurrentCalendarDate}
               />
 
-              {/* SELECTED DATE EVENTS */}
-              <div className="space-y-4 pt-2">
-                <h3 className="text-sm font-black uppercase tracking-widest text-[var(--text-primary)] border-b-2 border-[var(--border-hairline)] pb-2 flex justify-between">
-                  <span>Events & Deadlines</span>
-                  <span className="text-[var(--text-secondary)]">
-                    {selectedDateStr}
-                  </span>
-                </h3>
-
-                <div className="space-y-2">
-                  {events
-                    .filter((e) => e.date === selectedDateStr)
-                    .map((event) => (
-                      <div
-                        key={event.id}
-                        className="flex items-center justify-between group text-sm font-bold text-[var(--text-primary)] p-2 hover:bg-[var(--bg-surface)] transition-colors rounded"
-                      >
-                        <span className="flex items-center gap-2">
-                          <div className="w-2 h-2 rounded-full bg-[#ff6b6b]" />
-                          {event.title}
-                        </span>
-                        <button
-                          onClick={async () => {
-                            try {
-                              await api.delete(`/calendar/events/${event.id}`);
-                              setEvents((prev) =>
-                                prev.filter((e) => e.id !== event.id),
-                              );
-                            } catch (err) {
-                              console.error("Failed to delete event", err);
-                            }
-                          }}
-                          className="opacity-0 group-hover:opacity-100 text-[#ff6b6b] text-xs uppercase font-black hover:underline transition-all"
-                        >
-                          Del
-                        </button>
-                      </div>
-                    ))}
-                  {events.filter((e) => e.date === selectedDateStr).length ===
-                    0 && (
-                    <p className="text-xs italic text-[var(--text-secondary)] py-2 text-center">
-                      No important dates scheduled.
-                    </p>
-                  )}
-                </div>
-
-              </div>
-
               {/* DAILY ROUTINE TIMETABLE */}
               <section className="space-y-4">
                 <h2 className="text-3xl font-black uppercase tracking-tighter text-[var(--text-primary)] mb-4 flex items-center justify-between">
@@ -973,6 +925,48 @@ export default function FocusPage() {
                     {renderSubjectGroup(todayGrouped)}
                   </div>
                 )}
+              </div>
+
+              {/* SELECTED DATE EVENTS & HOLIDAYS BOX */}
+              <div className="brutal-border brutal-shadow-sm bg-[var(--bg-surface-raised)] p-4 flex gap-6 items-center">
+                <div className="flex flex-col items-center justify-center border-r-2 border-[var(--border-brutal)] pr-6 min-w-[80px]">
+                  <span className="text-4xl font-black">{new Date(selectedDateStr).getDate()}</span>
+                  <span className="text-xs font-black uppercase tracking-widest text-[var(--text-secondary)]">
+                    {new Date(selectedDateStr).toLocaleString('default', { month: 'short' })}
+                  </span>
+                </div>
+                <div className="flex-1 flex flex-col gap-2">
+                  {holidays.filter(h => h.date === selectedDateStr).map((h, i) => (
+                    <div key={`hol-${i}`} className="flex items-center gap-2 text-sm font-bold text-[var(--text-primary)]">
+                      <div className="w-2 h-2 rounded-full bg-[#ffd32a]" />
+                      <span>{h.name}</span>
+                    </div>
+                  ))}
+                  {events.filter((e) => e.date === selectedDateStr).map((event) => (
+                    <div key={event.id} className="flex items-center justify-between group text-sm font-bold text-[var(--text-primary)]">
+                      <span className="flex items-center gap-2">
+                        <div className="w-2 h-2 rounded-full bg-[#ff6b6b]" />
+                        {event.title}
+                      </span>
+                      <button
+                        onClick={async () => {
+                          try {
+                            await api.delete(`/calendar/events/${event.id}`);
+                            setEvents((prev) => prev.filter((e) => e.id !== event.id));
+                          } catch (err) {
+                            console.error("Failed to delete event", err);
+                          }
+                        }}
+                        className="opacity-0 group-hover:opacity-100 text-[#ff6b6b] text-xs uppercase font-black hover:underline transition-all"
+                      >
+                        Del
+                      </button>
+                    </div>
+                  ))}
+                  {holidays.filter(h => h.date === selectedDateStr).length === 0 && events.filter(e => e.date === selectedDateStr).length === 0 && (
+                    <span className="text-xs font-bold text-[var(--text-tertiary)] uppercase tracking-wider">No events today</span>
+                  )}
+                </div>
               </div>
 
               {/* OVERDUE */}

@@ -132,9 +132,9 @@ export default function AppLayout() {
   };
 
   return (
-    <div className="flex h-[100dvh] w-full bg-[var(--bg-base)] overflow-hidden">
+    <div className="flex min-h-[100dvh] w-full bg-[var(--bg-base)]">
       {/* Desktop Sidebar (hidden on mobile) */}
-      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-6 transition-all duration-300 relative z-20">
+      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-6 sticky top-0 h-[100dvh] z-20">
         <DesktopSidebar />
       </div>
 
@@ -142,7 +142,7 @@ export default function AppLayout() {
       <div className="titlebar-drag-region" />
 
       {/* Main Content Area */}
-      <main className="flex-1 overflow-y-auto overflow-x-hidden pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6">
         <Outlet />
       </main>
 
