@@ -36,7 +36,7 @@ async function getSubscriptions(userId: string) {
   return pushSubscriptionsCache[userId] || [];
 }
 
-async function sendPushToUser(userId: string, payload: any) {
+export async function sendPushToUser(userId: string, payload: any) {
   const subs = await getSubscriptions(userId);
   if (!subs.length) return;
 
@@ -143,8 +143,8 @@ cron.schedule("* * * * *", async () => {
         // Notify if routine is exactly 15 minutes away
         if (routineStart === localFutureTimeStr) {
           await sendPushToUser(u.id, {
-            title: "Routine Starting Soon",
-            body: `"${r.title}" starts in 15 minutes (${routineStart})`,
+            title: "Heads up! 👀",
+            body: `Your routine "${r.title}" kicks off in 15 mins. Get ready.`,
             url: "/focus",
           });
           routinesToUpdate.push(r.id);
@@ -159,8 +159,8 @@ cron.schedule("* * * * *", async () => {
         const deadlineDate = new Date(d.deadline);
         if (deadlineDate > now && deadlineDate <= twentyFourHoursFromNow) {
           await sendPushToUser(u.id, {
-            title: "Deadline Approaching",
-            body: `"${d.title}" is due soon!`,
+            title: "Tick Tock ⏳",
+            body: `"${d.title}" is due soon. Don't drop the ball on this one.`,
             url: "/backlog",
           });
           deadlinesToUpdate.push(d.id);
@@ -172,8 +172,8 @@ cron.schedule("* * * * *", async () => {
         const deadlineDate = new Date(g.deadline);
         if (deadlineDate > now && deadlineDate <= twentyFourHoursFromNow) {
           await sendPushToUser(u.id, {
-            title: "Goal Deadline Approaching",
-            body: `"${g.title}" is due soon!`,
+            title: "Goal Deadline 🎯",
+            body: `Your goal "${g.title}" is due soon. Time to push through!`,
             url: "/goals",
           });
           goalsToUpdate.push(g.id);
@@ -208,10 +208,10 @@ cron.schedule("* * * * *", async () => {
           const pendingToday = activeTasks.filter(t => t.user_id === u.id && t.scheduled_date === localDateStr).length;
           
           const message = pendingToday > 0 
-            ? `You have ${pendingToday} pending tasks scheduled for today. Time to get to work!`
-            : `No tasks scheduled for today. Enjoy your day!`;
+            ? `Rise and grind! You've got ${pendingToday} missions lined up for today. Let's crush them. ☕`
+            : `Your schedule is completely clear today. Enjoy the freedom! 🕊️`;
           
-          await sendPushToUser(u.id, { title: "Morning Briefing", body: message, url: "/today" });
+          await sendPushToUser(u.id, { title: "Morning Check-in", body: message, url: "/today" });
         }
 
         for (const u of eveningUsers) {
@@ -220,11 +220,36 @@ cron.schedule("* * * * *", async () => {
           
           if (pendingToday > 0) {
             await sendPushToUser(u.id, { 
-              title: "Day Deadline Approaching", 
-              body: `You still have ${pendingToday} tasks left today. Finish them before the day closes!`, 
+              title: "Day's Almost Up 🌙", 
+              body: `You still have ${pendingToday} tasks hanging around. Wrap 'em up before midnight!`, 
               url: "/today" 
             });
           }
+        }
+      }
+    }
+
+    // --- WEEKLY BACKLOG REVIEW (Sundays at 12:00 PM) ---
+    for (const u of users) {
+      const tz = u.user_metadata?.timezone || "UTC";
+      const localTimeStr = getLocalTimeString(now, tz);
+      const dayName = getDayOfWeekName(now, tz);
+      
+      if (dayName === "Sunday" && localTimeStr === "12:00") {
+        const { data: backlogTasks } = await supabase
+          .from("pos_micro_tasks")
+          .select("id")
+          .eq("user_id", u.id)
+          .eq("status", "pending")
+          .is("scheduled_date", null);
+
+        const backlogCount = backlogTasks ? backlogTasks.length : 0;
+        if (backlogCount > 0) {
+          await sendPushToUser(u.id, {
+            title: "Backlog Check 📦",
+            body: `You've got ${backlogCount} tasks rotting in your backlog. Check your analytics and clean house.`,
+            url: "/analytics"
+          });
         }
       }
     }

@@ -13,6 +13,15 @@ export default function SettingsPage() {
   const [clearingData, setClearingData] = useState(false);
   const [themeTick, setThemeTick] = useState(0);
 
+  const triggerTestNotification = async (type: string) => {
+    try {
+      await api.post("/push/test-trigger", { type });
+      toast("Test notification dispatched!", "success");
+    } catch (e: any) {
+      toast("Failed to trigger test: " + e.message, "error");
+    }
+  };
+
   const handleVaultReset = async () => {
     if (resetConfirm !== "DELETE") return;
     setResettingVault(true);
@@ -188,6 +197,35 @@ export default function SettingsPage() {
             </button>
           </div>
         </section>
+
+        <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
+          <h2 className="text-lg font-medium mb-4">Notifications Setup</h2>
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
+              <div>
+                <h3 className="text-sm font-medium">Test Push Notifications</h3>
+                <p className="text-xs text-[var(--text-secondary)] mt-1">
+                  Trigger an immediate test push notification to verify your device is receiving them.
+                </p>
+              </div>
+              <div className="flex gap-2 flex-wrap">
+                <button
+                  onClick={() => triggerTestNotification("backlog")}
+                  className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-md text-xs hover:border-[var(--text-primary)] transition-colors"
+                >
+                  Test Backlog 📦
+                </button>
+                <button
+                  onClick={() => triggerTestNotification("morning")}
+                  className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] px-3 py-1.5 rounded-md text-xs hover:border-[var(--text-primary)] transition-colors"
+                >
+                  Test Morning ☕
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
         <section className="bg-[var(--bg-surface)] border border-red-900/30 rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4 text-red-500">Danger Zone</h2>
           <div className="space-y-4">

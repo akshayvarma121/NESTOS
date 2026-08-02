@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { supabase } from "../supabase.js";
+import { sendPushToUser } from "../cron/index.js";
 import { requireAuth, AuthRequest } from "../middleware/auth.js";
 
 const router = Router();
@@ -30,6 +31,33 @@ router.post("/subscribe", async (req: AuthRequest, res) => {
 
   if (error) return res.status(500).json({ error: error.message });
   res.status(201).json({ success: true });
+});
+
+router.post("/test-trigger", async (req: AuthRequest, res) => {
+  try {
+    const { type } = req.body;
+    let payload = { title: "Test", body: "This is a test notification.", url: "/" };
+
+    if (type === "backlog") {
+      const { data } = await supabase.from("pos_micro_tasks").select("id").eq("user_id", req.user!.id).eq("status", "pending").is("scheduled_date", null);
+      payload = {
+        title: "Backlog Check 📦",
+        body: `You've got ${data?.length || 0} tasks rotting in your backlog. Check your analytics and clean house.`,
+        url: "/analytics"
+      };
+    } else if (type === "routine") {
+      payload = { title: "Heads up! 👀", body: `Your routine "Deep Work" kicks off in 15 mins. Get ready.`, url: "/focus" };
+    } else if (type === "morning") {
+      payload = { title: "Morning Check-in", body: `Rise and grind! You've got 5 missions lined up for today. Let's crush them. ☕`, url: "/today" };
+    } else if (type === "evening") {
+      payload = { title: "Day's Almost Up 🌙", body: `You still have 3 tasks hanging around. Wrap 'em up before midnight!`, url: "/today" };
+    }
+
+    await sendPushToUser(req.user!.id, payload);
+    res.json({ success: true });
+  } catch (err: any) {
+    res.status(500).json({ error: err.message });
+  }
 });
 
 export default router;
