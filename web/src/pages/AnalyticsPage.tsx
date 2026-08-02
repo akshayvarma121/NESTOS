@@ -95,9 +95,9 @@ export default function AnalyticsPage() {
 
   // Calculate KPIs
   const totalRoutinesDone =
-    analytics?.routineTrends.reduce((sum, d) => sum + (d.done || 0), 0) || 0;
+    analytics?.routineTrends?.reduce((sum, d) => sum + (d.done || 0), 0) || 0;
   const totalRoutinesSkipped =
-    analytics?.routineTrends.reduce((sum, d) => sum + (d.skipped || 0), 0) || 0;
+    analytics?.routineTrends?.reduce((sum, d) => sum + (d.skipped || 0), 0) || 0;
   const adherenceRate =
     totalRoutinesDone + totalRoutinesSkipped > 0
       ? Math.round(
@@ -107,7 +107,7 @@ export default function AnalyticsPage() {
       : 0;
 
   const totalSlicesDone =
-    analytics?.sliceTrends.reduce((sum, d) => sum + (d.completed || 0), 0) || 0;
+    analytics?.sliceTrends?.reduce((sum, d) => sum + (d.completed || 0), 0) || 0;
 
   const totalFocusSessions = analytics?.focusSessions?.length || 0;
   const totalFocusSeconds =
@@ -304,7 +304,7 @@ export default function AnalyticsPage() {
                 </h2>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <BarChart data={analytics.routineTrends}>
+                    <BarChart data={analytics.routineTrends || []}>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         stroke="var(--border-hairline)"
@@ -371,7 +371,7 @@ export default function AnalyticsPage() {
                 </h2>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={analytics.sliceTrends}>
+                    <AreaChart data={analytics.sliceTrends || []}>
                       <CartesianGrid
                         strokeDasharray="3 3"
                         stroke="var(--border-hairline)"
