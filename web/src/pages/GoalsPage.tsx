@@ -148,7 +148,7 @@ export default function GoalsPage() {
           <ContextualTooltip featureId="json_import">
             <button
               onClick={() => setIsBulkOpen(true)}
-              className="brutal-btn bg-white text-black px-4 py-2 text-sm font-bold flex items-center gap-2"
+              className="brutal-btn bg-[var(--bg-surface-raised)] text-[var(--text-primary)] px-4 py-2 text-sm font-bold flex items-center gap-2"
             >
               <UploadCloud className="w-4 h-4" />
               Bulk JSON
@@ -156,7 +156,7 @@ export default function GoalsPage() {
           </ContextualTooltip>
           <button
             onClick={openNewGoal}
-            className="brutal-btn bg-[#a8e6cf] text-black px-4 py-2 text-sm font-black flex items-center gap-2 uppercase"
+            className="brutal-btn bg-[var(--accent)] text-[var(--bg-base)] px-4 py-2 text-sm font-black flex items-center gap-2 uppercase"
           >
             <Plus className="w-4 h-4" />
             New Goal
@@ -175,7 +175,7 @@ export default function GoalsPage() {
       ) : (
         Object.entries(grouped).map(([category, catGoals]) => (
           <div key={category} className="space-y-3">
-            <h2 className="text-sm font-black uppercase tracking-widest text-black/70 mb-2">
+            <h2 className="text-sm font-black uppercase tracking-widest text-[var(--text-secondary)] mb-2">
               {category}
             </h2>
             <div className="grid gap-6 md:grid-cols-2">
@@ -187,14 +187,14 @@ export default function GoalsPage() {
                 return (
                   <div
                     key={goal.id}
-                    className="p-5 bg-white brutal-border brutal-shadow-sm space-y-4 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow transition-transform duration-75"
+                    className="p-5 bg-[var(--bg-surface)] brutal-border brutal-shadow-sm space-y-4 hover:translate-x-[-2px] hover:translate-y-[-2px] hover:brutal-shadow transition-transform duration-75"
                   >
                     <div className="flex justify-between items-start gap-3">
                       <div>
-                        <h3 className="font-black text-lg text-black leading-tight">
+                        <h3 className="font-black text-lg text-[var(--text-primary)] leading-tight">
                           {goal.title}
                         </h3>
-                        <span className="font-bold text-xs text-black/60 uppercase tracking-wide">
+                        <span className="font-bold text-xs text-[var(--text-tertiary)] uppercase tracking-wide">
                           {goal.completed_units}/{goal.total_units}{" "}
                           {goal.unit_label}
                         </span>
@@ -202,14 +202,14 @@ export default function GoalsPage() {
                       <div className="flex gap-1 items-center">
                         <button
                           onClick={() => setJsonEditingGoal(goal)}
-                          className="p-2 text-black hover:bg-[#ffeb3b] brutal-border border-transparent hover:border-black transition-colors flex-shrink-0"
+                          className="p-2 text-[var(--text-primary)] hover:bg-[#ffeb3b] hover:text-black brutal-border border-transparent hover:border-[var(--border-brutal)] transition-colors flex-shrink-0"
                           title="Edit JSON"
                         >
                           <Code className="w-4 h-4" />
                         </button>
                         <button
                           onClick={() => openEditGoal(goal)}
-                          className="p-2 text-black hover:bg-[#a8e6cf] brutal-border border-transparent hover:border-black transition-colors flex-shrink-0"
+                          className="p-2 text-[var(--text-primary)] hover:bg-[#a8e6cf] hover:text-black brutal-border border-transparent hover:border-[var(--border-brutal)] transition-colors flex-shrink-0"
                           title="Edit Goal"
                         >
                           <svg
@@ -229,7 +229,7 @@ export default function GoalsPage() {
                         </button>
                         <button
                           onClick={() => handleDeleteGoal(goal.id)}
-                          className="p-2 text-black hover:bg-[#ff6b6b] brutal-border border-transparent hover:border-black transition-colors flex-shrink-0"
+                          className="p-2 text-[var(--text-primary)] hover:bg-[#ff6b6b] hover:text-black brutal-border border-transparent hover:border-[var(--border-brutal)] transition-colors flex-shrink-0"
                           title="Delete Goal"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -238,14 +238,14 @@ export default function GoalsPage() {
                     </div>
 
                     {/* Thick Progress Bar */}
-                    <div className="h-4 w-full bg-[#fdfbf7] brutal-border overflow-hidden">
+                    <div className="h-4 w-full bg-[var(--bg-base)] brutal-border overflow-hidden">
                       <div
-                        className={`h-full ${categoryColors[category] || categoryColors.other} border-r-2 border-black`}
+                        className={`h-full ${categoryColors[category] || categoryColors.other} border-r-2 border-[var(--border-brutal)]`}
                         style={{ width: `${percent}%` }}
                       />
                     </div>
 
-                    <div className="text-xs font-bold text-black flex justify-between uppercase">
+                    <div className="text-xs font-bold text-[var(--text-primary)] flex justify-between uppercase">
                       <span>
                         Due {new Date(goal.deadline).toLocaleDateString()}
                       </span>
