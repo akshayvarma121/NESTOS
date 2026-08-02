@@ -1,8 +1,8 @@
 import { useEffect, useRef } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 
-const SWIPE_THRESHOLD = 50; // minimum pixels moved to register a swipe
-const VERTICAL_THRESHOLD = 30; // maximum vertical deviation allowed
+const SWIPE_THRESHOLD = 90; // minimum pixels moved to register a swipe
+const VERTICAL_THRESHOLD = 50; // maximum vertical deviation allowed
 
 // Define the order of swipeable tabs
 const SWIPE_ROUTES = ["/focus", "/calendar", "/backlog"];

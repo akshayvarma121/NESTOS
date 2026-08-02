@@ -214,11 +214,10 @@ export default function CalendarPage() {
           ))}
         </div>
 
-        {/* Calendar Grid */}
         <div
           className="grid grid-cols-7 bg-[var(--border-brutal)] gap-[2px]"
           style={{
-            gridTemplateRows: `repeat(${totalSlots / 7}, minmax(140px, 1fr))`,
+            gridTemplateRows: `repeat(${totalSlots / 7}, minmax(clamp(70px, 12vh, 140px), 1fr))`,
           }}
         >
           {loading ? (
@@ -253,11 +252,11 @@ export default function CalendarPage() {
                 <div
                   key={i}
                   onClick={() => setSelectedDate(dateStr)}
-                  className={`relative p-2 cursor-pointer transition-colors ${bgClass} ${isSelected ? "ring-4 ring-inset ring-[var(--text-primary)] z-10 bg-[var(--bg-surface)]" : ""}`}
+                  className={`relative p-1 md:p-2 cursor-pointer transition-colors flex flex-col ${bgClass} ${isSelected ? "ring-4 ring-inset ring-[var(--text-primary)] z-10 bg-[var(--bg-surface)]" : ""}`}
                 >
-                  <div className="flex justify-between items-start mb-2">
+                  <div className="flex justify-between items-start mb-1 md:mb-2 shrink-0">
                     <span
-                      className={`text-lg font-black ${isToday ? "bg-[var(--text-primary)] text-[var(--bg-base)] w-8 h-8 flex items-center justify-center brutal-border" : "text-[var(--text-primary)]"}`}
+                      className={`text-sm md:text-lg font-black ${isToday ? "bg-[var(--text-primary)] text-[var(--bg-base)] w-6 h-6 md:w-8 md:h-8 flex items-center justify-center brutal-border" : "text-[var(--text-primary)]"}`}
                     >
                       {d}
                     </span>
@@ -268,7 +267,7 @@ export default function CalendarPage() {
                     )}
                   </div>
 
-                  <div className="space-y-1 overflow-hidden h-[85px]">
+                  <div className="space-y-1 overflow-hidden flex-1">
                     {/* Holidays */}
                     {dayHolidays.map((h, idx) => (
                       <div
