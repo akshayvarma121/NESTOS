@@ -18,6 +18,7 @@ import {
   PanelLeftOpen,
   ChevronRight,
 } from "lucide-react";
+import LiveUsersCounter from "../components/LiveUsersCounter";
 
 const navGroups = [
   {
@@ -141,6 +142,11 @@ export default function DesktopSidebar() {
           </div>
         ))}
       </nav>
+
+      {/* Live Users Counter */}
+      <div className={`px-3 pb-3 ${isCollapsed ? "flex justify-center" : ""}`}>
+        <LiveUsersCounter showText={!isCollapsed} />
+      </div>
 
       {/* User Profile Footer */}
       <div className="p-3 border-t-2 border-[var(--border-brutal)] bg-[var(--bg-surface)]">

@@ -43,7 +43,7 @@ router.get("/", async (req: AuthRequest, res) => {
         .not("scheduled_date", "is", null),
       supabase
         .from("pos_macro_goals")
-        .select("id, title, deadline, progress")
+        .select("id, title, deadline")
         .in("user_id", req.sharedSpaceIds!)
         .not("deadline", "is", null),
       supabase
@@ -88,7 +88,7 @@ router.get("/holidays", async (req: AuthRequest, res) => {
       const data = await ical.async.fromURL(url);
       
       for (const k in data) {
-        const ev = data[k];
+        const ev = data[k] as any;
         if (ev.type === "VEVENT" && ev.start) {
           const d = ev.start as Date;
           if (d.getFullYear() === yearToFetch) {

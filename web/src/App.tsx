@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { ReactLenis } from "lenis/react";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 import { LoginPage, RegisterPage } from "./pages/AuthPages";
+import LandingPage from "./pages/LandingPage";
 import { TimerProvider } from "./contexts/TimerContext";
 import FloatingTimerPill from "./components/FloatingTimerPill";
 import AppLayout from "./layouts/AppLayout";
@@ -84,20 +85,19 @@ export default function App() {
             <FloatingTimerPill />
             <Routes>
             {/* Public Auth Routes */}
+            <Route path="/" element={<LandingPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/shared/:token" element={<SharedPartnerPage />} />
 
             {/* Protected App Routes */}
             <Route
-              path="/"
               element={
                 <ProtectedRoute>
                   <AppLayout />
                 </ProtectedRoute>
               }
             >
-              <Route index element={<Navigate to="/focus" replace />} />
               <Route path="focus" element={<FocusPage />} />
               <Route path="calendar" element={<CalendarPage />} />
               <Route path="routines-history" element={<AnalyticsPage />} />

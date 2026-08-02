@@ -11,6 +11,7 @@ import { useHotkeys } from "../lib/useHotkeys";
 import { useSwipeNavigation } from "../lib/useSwipe";
 import { useAuth } from "../contexts/AuthContext";
 import { UserAvatar } from "../components/AvatarPicker";
+import LiveUsersCounter from "../components/LiveUsersCounter";
 
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
@@ -165,14 +166,17 @@ export default function AppLayout() {
           </div>
           <span className="text-sm font-black tracking-widest uppercase">Nest</span>
         </div>
-        <button onClick={() => navigate("/settings")} className="flex items-center">
-          <UserAvatar
-            avatarStyle={user?.user_metadata?.avatarStyle}
-            avatarSeed={user?.user_metadata?.avatarSeed}
-            initials={initials}
-            size="sm"
-          />
-        </button>
+        <div className="flex items-center gap-4">
+          <LiveUsersCounter showText={false} />
+          <button onClick={() => navigate("/settings")} className="flex items-center">
+            <UserAvatar
+              avatarStyle={user?.user_metadata?.avatarStyle}
+              avatarSeed={user?.user_metadata?.avatarSeed}
+              initials={initials}
+              size="sm"
+            />
+          </button>
+        </div>
       </div>
 
       {/* Main Content Area */}
