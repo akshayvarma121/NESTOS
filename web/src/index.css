@@ -75,7 +75,7 @@
     font-size: 14px;
     line-height: 1.4;
     padding-top: env(titlebar-area-height, 0);
-    overflow-x: hidden; /* Prevent double scrollbars and horizontal scroll */
+    overflow-x: clip; /* Prevent double scrollbars and allow position: sticky */
     overscroll-behavior-y: auto; /* Allow native pull-to-refresh */
     overscroll-behavior-x: none; /* Prevent browser swipe back/forward */
     width: 100%;
