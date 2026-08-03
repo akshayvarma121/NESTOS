@@ -78,12 +78,12 @@ export default function DesktopSidebar() {
 
   return (
     <div
-      className={`flex flex-col h-full transition-all duration-300 ${
+      className={`flex flex-col h-full overflow-y-auto overflow-x-hidden transition-all duration-300 ${
         isCollapsed ? "w-[72px]" : "w-[260px]"
       }`}
     >
       <div
-        className={`flex items-center pt-2 pb-6 px-3 ${
+        className={`flex items-center pt-2 pb-6 px-3 sticky top-0 bg-[var(--bg-surface)] z-10 ${
           isCollapsed ? "justify-center" : "justify-between"
         }`}
       >
@@ -112,7 +112,7 @@ export default function DesktopSidebar() {
         </button>
       </div>
 
-      <nav className="flex-1 overflow-y-auto overflow-x-hidden px-3 pb-4">
+      <nav className="flex-1 px-3 pb-4">
         {navGroups.map((group, groupIdx) => (
           <div key={group.label} className="mb-6 last:mb-0">
             {isCollapsed ? (
@@ -163,7 +163,7 @@ export default function DesktopSidebar() {
       </div>
 
       {/* User Profile Footer */}
-      <div className="p-4 mt-auto">
+      <div className="p-4 mt-auto sticky bottom-0 bg-[var(--bg-surface)] z-10">
         <NavLink
           to="/settings"
           className={({ isActive }) =>
