@@ -151,7 +151,7 @@ export default function AppLayout() {
   return (
     <div className="flex min-h-[100dvh] w-full bg-[var(--bg-base)]">
       {/* Desktop Sidebar (hidden on mobile) */}
-      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-6 sticky top-0 self-start h-[100dvh] z-20">
+      <div className="hidden lg:flex flex-shrink-0 border-r-4 border-black bg-[var(--bg-surface)] pt-[calc(1.5rem+env(titlebar-area-height,0px))] sticky top-0 self-start h-[100dvh] z-20">
         <DesktopSidebar />
       </div>
 
@@ -159,7 +159,7 @@ export default function AppLayout() {
       <div className="titlebar-drag-region" />
 
       {/* Mobile Top Header (hidden on desktop) */}
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-12 z-30 bg-[var(--bg-surface-raised)] border-b-2 border-black flex items-center justify-between px-4">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-[calc(3rem+env(titlebar-area-height,0px))] pt-[env(titlebar-area-height,0px)] z-30 bg-[var(--bg-surface-raised)] border-b-2 border-black flex items-center justify-between px-4">
         <div className="flex items-center gap-2">
           <div className="w-6 h-6 bg-[#ffeb3b] border-2 border-black flex items-center justify-center">
             <span className="font-black text-black text-xs leading-none">N</span>
@@ -180,7 +180,7 @@ export default function AppLayout() {
       </div>
 
       {/* Main Content Area */}
-      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-6 lg:pt-6 pt-[60px] overflow-x-hidden min-w-0">
+      <main className="flex-1 pb-[calc(env(safe-area-inset-bottom)+60px)] lg:pb-0 relative pt-[calc(60px+env(titlebar-area-height,0px))] lg:pt-[calc(1.5rem+env(titlebar-area-height,0px))] overflow-x-hidden min-w-0">
         <Outlet />
       </main>
 
