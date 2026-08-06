@@ -92,7 +92,7 @@ export function ReminderProvider({ children }: { children: ReactNode }) {
           }
 
           // Copy styles
-          [...document.styleSheets].forEach((styleSheet) => {
+          Array.from(document.styleSheets).forEach((styleSheet) => {
             try {
               if (styleSheet.href) {
                 const link = document.createElement('link');
@@ -101,7 +101,7 @@ export function ReminderProvider({ children }: { children: ReactNode }) {
                 pip.document.head.appendChild(link);
               } else if (styleSheet.cssRules) {
                 const style = document.createElement('style');
-                [...styleSheet.cssRules].forEach((rule) => {
+                Array.from(styleSheet.cssRules).forEach((rule) => {
                   style.appendChild(document.createTextNode(rule.cssText));
                 });
                 pip.document.head.appendChild(style);
