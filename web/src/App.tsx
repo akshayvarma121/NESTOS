@@ -22,6 +22,8 @@ import CalendarPage from "./pages/CalendarPage";
 import HelpPage from "./pages/HelpPage";
 import { HelpProvider } from "./contexts/HelpContext";
 import BrutalistTour from "./components/BrutalistTour";
+import BuddyPage from "./pages/BuddyPage";
+import { ReminderProvider } from "./contexts/ReminderContext";
 
 import type { ReactNode } from "react";
 
@@ -100,7 +102,8 @@ export default function App() {
       <AuthProvider>
         <TimerProvider>
           <HelpProvider>
-            <BrowserRouter>
+            <ReminderProvider>
+              <BrowserRouter>
               <BrutalistTour />
               <FloatingTimerPill />
               <Routes>
@@ -142,10 +145,14 @@ export default function App() {
                   }
                 />
 
+                {/* Independent Route for Buddy Window */}
+                <Route path="/buddy" element={<BuddyPage />} />
+
                 {/* Catch-all Route for 404s */}
                 <Route path="*" element={<CatchAllRoute />} />
               </Routes>
-            </BrowserRouter>
+              </BrowserRouter>
+            </ReminderProvider>
           </HelpProvider>
         </TimerProvider>
       </AuthProvider>

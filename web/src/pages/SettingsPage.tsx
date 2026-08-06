@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { api } from "../lib/api";
 import { supabase } from "../lib/supabase";
 import { LogOut } from "lucide-react";
 import { useAuth } from "../contexts/AuthContext";
 import { toast } from "../lib/toast";
 import { AvatarPicker, UserAvatar } from "../components/AvatarPicker";
+import { ReminderSettingsSection } from "../components/ReminderSettingsSection";
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -16,6 +17,35 @@ export default function SettingsPage() {
   const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   const [notifStatus, setNotifStatus] = useState<"unknown"|"granted"|"denied"|"default">("unknown");
   const [subscribing, setSubscribing] = useState(false);
+  const [autostartEnabled, setAutostartEnabled] = useState(false);
+
+  const isTauri = typeof window !== "undefined" && "__TAURI_INTERNALS__" in window;
+
+  useEffect(() => {
+    if (isTauri) {
+      import('@tauri-apps/plugin-autostart').then((mod) => {
+        mod.isEnabled().then(setAutostartEnabled).catch(console.error);
+      });
+    }
+  }, [isTauri]);
+
+  const toggleAutostart = async () => {
+    if (!isTauri) return;
+    try {
+      const mod = await import('@tauri-apps/plugin-autostart');
+      if (autostartEnabled) {
+        await mod.disable();
+        setAutostartEnabled(false);
+        toast("Autostart disabled.", "success");
+      } else {
+        await mod.enable();
+        setAutostartEnabled(true);
+        toast("Autostart enabled.", "success");
+      }
+    } catch (e: any) {
+      toast("Failed to toggle autostart: " + e.message, "error");
+    }
+  };
 
   // Check notification permission on mount
   useState(() => {
@@ -277,6 +307,30 @@ export default function SettingsPage() {
             </button>
           </div>
         </section>
+
+        {isTauri && (
+          <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
+            <h2 className="text-lg font-medium mb-4">Desktop Integration</h2>
+            <div className="space-y-4">
+              <div className="flex flex-col md:flex-row md:items-center justify-between p-4 bg-[var(--bg-base)] border border-[var(--border-hairline)] rounded-lg gap-4">
+                <div>
+                  <h3 className="text-sm font-medium">Launch on Startup</h3>
+                  <p className="text-xs text-[var(--text-secondary)] mt-1">
+                    Automatically start NestOS when you log into your computer.
+                  </p>
+                </div>
+                <button
+                  onClick={toggleAutostart}
+                  className="bg-[var(--text-primary)] text-[var(--bg-base)] font-bold px-4 py-2 text-xs uppercase tracking-wider brutal-border brutal-shadow-sm hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-none transition-all whitespace-nowrap"
+                >
+                  {autostartEnabled ? "Disable" : "Enable"}
+                </button>
+              </div>
+            </div>
+          </section>
+        )}
+
+        <ReminderSettingsSection />
 
         <section className="bg-[var(--bg-surface)] border border-[var(--border-hairline)] rounded-xl p-6">
           <h2 className="text-lg font-medium mb-4">Notifications Setup</h2>

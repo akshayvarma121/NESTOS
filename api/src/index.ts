@@ -17,7 +17,7 @@ import notesRouter from "./routes/notes.js";
 import accountRouter from "./routes/account.js";
 import analyticsRouter from "./routes/analytics.js";
 import timerRouter from "./routes/timer.js";
-
+import remindersRouter from "./routes/reminders.js";
 import "./cron/index.js"; // Start cron jobs
 
 dotenv.config();
@@ -44,7 +44,7 @@ app.use("/api/calendar", calendarRouter);
 app.use("/api/notes", notesRouter);
 app.use("/api/account", accountRouter);
 app.use("/api/timer", timerRouter);
-
+app.use("/api/reminders", remindersRouter);
 app.get("/health", (req, res) => {
   res.status(200).json({ status: "ok", timestamp: new Date().toISOString() });
 });
